@@ -6,3 +6,4 @@ data/
 .python-version
 qdrant_data/
 DS_Store
+outputs/
