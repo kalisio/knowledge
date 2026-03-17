@@ -2,7 +2,7 @@
 Ask a question with retrieval from Qdrant and generation from Ollama.
 
 Usage:
-    uv run python scripts/ask_ollama_rag.py
+    conda activate knowledge && python scripts/ask_ollama_rag.py
 """
 
 import requests

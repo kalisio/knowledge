@@ -1,9 +1,7 @@
-.venv/
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
 data/
-.python-version
 qdrant_data/
 DS_Store
 outputs/

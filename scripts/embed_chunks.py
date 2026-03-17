@@ -2,7 +2,7 @@
 Generate embeddings for chunk records written by chunk_md.py.
 
 Usage:
-    uv run python scripts/embed_chunks.py
+    conda activate knowledge && python scripts/embed_chunks.py
 """
 
 import json

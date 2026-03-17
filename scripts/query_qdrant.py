@@ -2,7 +2,7 @@
 Query markdown chunks stored in Qdrant.
 
 Usage:
-    uv run python scripts/query_qdrant.py
+    conda activate knowledge && python scripts/query_qdrant.py
 """
 
 from qdrant_client import QdrantClient

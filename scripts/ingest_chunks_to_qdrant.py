@@ -2,7 +2,7 @@
 Ingest embedded markdown chunks into Qdrant.
 
 Usage:
-    uv run python scripts/ingest_chunks_to_qdrant.py
+    conda activate knowledge && python scripts/ingest_chunks_to_qdrant.py
 """
 
 import json

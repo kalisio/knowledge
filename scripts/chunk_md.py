@@ -2,7 +2,7 @@
 Chunker for Markdown files.
 
 Usage:
-    uv run python scripts/chunk_md.py
+    conda activate knowledge && python scripts/chunk_md.py
 """
 
 from pathlib import Path

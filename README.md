@@ -12,17 +12,18 @@ This repository currently provides a simple local pipeline:
 
 ## Prerequisites
 
-- Python 3.11
-- `uv`
+- Miniconda or Anaconda
 - Docker and Docker Compose
 - Optional: Ollama, either local or on a machine reachable on the LAN
 
-## Install `uv`
+## Install Conda
 
-Install `uv` with the official installer:
+Install Miniconda with the official installer:
 
 ```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda_installer.sh
+bash /tmp/miniconda_installer.sh -b -p ~/miniconda3
+~/miniconda3/bin/conda init bash
 ```
 
 Reload your shell:
@@ -34,30 +35,23 @@ source ~/.bashrc
 Check installation:
 
 ```bash
-uv --version
+conda --version
 ```
 
 ## Install Project Dependencies
 
-The project is pinned to Python 3.11 through `pyproject.toml` and `.python-version`.
+The project uses Python 3.11, managed through `environment.yml`.
 
-Create the virtual environment:
+Create the conda environment and install all dependencies:
 
 ```bash
-uv venv --python 3.11
+conda env create -f environment.yml
 ```
 
-Activate it:
+Activate the environment:
 
 ```bash
-source .venv/bin/activate
-```
-
-Install dependencies from the project configuration:
-
-```bash
-uv lock
-uv sync
+conda activate knowledge
 ```
 
 ## Qdrant
@@ -102,7 +96,7 @@ All commands below should be run from the project root.
 ### 1. Chunk Markdown files
 
 ```bash
-uv run python scripts/chunk_md.py
+python scripts/chunk_md.py
 ```
 
 Output:
@@ -114,7 +108,7 @@ outputs/md_chunks.jsonl
 ### 2. Generate embeddings
 
 ```bash
-uv run python scripts/embed_chunks.py
+python scripts/embed_chunks.py
 ```
 
 Output:
@@ -126,19 +120,19 @@ outputs/md_chunks_with_embeddings.jsonl
 ### 3. Ingest into Qdrant
 
 ```bash
-uv run python scripts/ingest_chunks_to_qdrant.py
+python scripts/ingest_chunks_to_qdrant.py
 ```
 
 ### 4. Query Qdrant directly
 
 ```bash
-uv run python scripts/query_qdrant.py
+python scripts/query_qdrant.py
 ```
 
 ### 5. Ask through Ollama with retrieved context
 
 ```bash
-uv run python scripts/ask_ollama_rag.py
+python scripts/ask_ollama_rag.py
 ```
 
 ## Ollama Configuration
@@ -208,6 +202,6 @@ In practice, the retrieval side remains:
 
 ## Notes
 
-- Use `uv run python ...` as the default way to execute scripts.
+- Activate the conda environment with `conda activate knowledge` before running scripts.
 - Generated files under `outputs/` are local artifacts and should not be treated as source files.
 - `qdrant_data/` is local runtime data and should not be committed.
