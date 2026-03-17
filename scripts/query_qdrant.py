@@ -11,7 +11,7 @@ from sentence_transformers import SentenceTransformer
 
 QDRANT_URL = "http://localhost:6333"
 COLLECTION_NAME = "md_chunks_demo"
-MODEL_NAME = "all-MiniLM-L6-v2"
+MODEL_NAME = "nomic-ai/nomic-embed-text-v1.5"
 LIMIT = 5
 
 
@@ -45,7 +45,7 @@ def print_results(question: str, client: QdrantClient, model: SentenceTransforme
 
 def main() -> None:
     client = QdrantClient(url=QDRANT_URL)
-    model = SentenceTransformer(MODEL_NAME)
+    model = SentenceTransformer(MODEL_NAME, trust_remote_code=True)
 
     print(f"Connected to {COLLECTION_NAME} at {QDRANT_URL}")
     print("Type a question. Type 'exit' or 'quit' to stop.")

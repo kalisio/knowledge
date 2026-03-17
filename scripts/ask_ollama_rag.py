@@ -13,7 +13,7 @@ from sentence_transformers import SentenceTransformer
 
 QDRANT_URL = "http://localhost:6333"
 COLLECTION_NAME = "md_chunks_demo"
-EMBEDDING_MODEL = "all-MiniLM-L6-v2"
+EMBEDDING_MODEL = "nomic-ai/nomic-embed-text-v1.5"
 OLLAMA_URL = "http://192.168.1.109:11434/api/generate"
 OLLAMA_MODEL = "qwen2.5:7b"
 LIMIT = 5
@@ -88,7 +88,7 @@ def print_sources(results) -> None:
 
 def main() -> None:
     client = QdrantClient(url=QDRANT_URL)
-    model = SentenceTransformer(EMBEDDING_MODEL)
+    model = SentenceTransformer(EMBEDDING_MODEL, trust_remote_code=True)
 
     print(f"Qdrant: {QDRANT_URL} / collection={COLLECTION_NAME}")
     print(f"Ollama: {OLLAMA_URL} / model={OLLAMA_MODEL}")

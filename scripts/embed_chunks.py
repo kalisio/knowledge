@@ -14,7 +14,7 @@ from sentence_transformers import SentenceTransformer
 ROOT_DIR = Path(__file__).resolve().parent.parent
 INPUT_PATH = ROOT_DIR / "outputs" / "md_chunks.jsonl"
 OUTPUT_PATH = ROOT_DIR / "outputs" / "md_chunks_with_embeddings.jsonl"
-MODEL_NAME = "all-MiniLM-L6-v2"
+MODEL_NAME = "nomic-ai/nomic-embed-text-v1.5"
 
 
 def load_chunks(path: Path) -> list[dict]:
@@ -30,7 +30,7 @@ def load_chunks(path: Path) -> list[dict]:
 
 def generate_embeddings(chunks: list[dict]):
     print(f"Loading model: {MODEL_NAME}")
-    model = SentenceTransformer(MODEL_NAME)
+    model = SentenceTransformer(MODEL_NAME, trust_remote_code=True)
     texts = [chunk["text"] for chunk in chunks]
     print(f"Generating embeddings for {len(texts)} chunks")
     return model.encode(texts, show_progress_bar=True, batch_size=32)

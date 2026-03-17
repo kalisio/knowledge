@@ -5,6 +5,7 @@ description = "RAG experiments and knowledge retrieval tooling for local develop
 readme = "README.md"
 requires-python = ">=3.11,<3.12"
 dependencies = [
+    "einops>=0.8.0",
     "qdrant-client>=1.17.1",
     "requests>=2.32.5",
     "sentence-transformers>=5.3.0",
