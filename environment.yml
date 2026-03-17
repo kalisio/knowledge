@@ -6,7 +6,10 @@ dependencies:
   - python=3.11
   - pip
   - pip:
+      - anthropic>=0.52.0
       - einops>=0.8.0
+      - langchain-text-splitters>=1.1.0
+      - python-dotenv>=1.1.0
       - qdrant-client>=1.17.1
       - requests>=2.32.5
       - sentence-transformers>=5.3.0
