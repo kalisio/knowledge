@@ -150,18 +150,15 @@ class TokenLedger:
         n_sessions = len(self.sessions)
         lines = [
             "",
-            "╔═══════════════════════════════════════════════════╗",
-            "║       All-Time Token Usage (persistent ledger)    ║",
-            "╠═══════════════════════════════════════════════════╣",
-           f"║  Sessions:      {n_sessions:>10}                  ║",
-           f"║  Total calls:   {c['total_calls']:>10,}           ║",
-           f"║  Input tokens:  {c['total_input_tokens']:>10,}    ║",
-           f"║  Output tokens: {c['total_output_tokens']:>10,}   ║",
-           f"║  Total tokens:  {c['total_tokens']:>10,}          ║",
-           f"║  Total cost:     ${c['total_cost_usd']:>9.4f}     ║",
-            "╠═══════════════════════════════════════════════════╣",
-           f"║  Ledger file: {str(self.path):<37}                ║",
-            "╚═══════════════════════════════════════════════════╝",
+            "All-Time Token Usage (persistent ledger)",
+            "-" * 42,
+            f"  Sessions:        {n_sessions:>10}",
+            f"  Total calls:     {c['total_calls']:>10,}",
+            f"  Input tokens:    {c['total_input_tokens']:>10,}",
+            f"  Output tokens:   {c['total_output_tokens']:>10,}",
+            f"  Total tokens:    {c['total_tokens']:>10,}",
+            f"  Total cost:      ${c['total_cost_usd']:>9.4f}",
+            f"  Ledger file:     {self.path}",
         ]
         text = "\n".join(lines)
         print(text)
@@ -260,16 +257,14 @@ class TrackedClient:
         """Print session-level stats (this run only)."""
         lines = [
             "",
-            "╔═══════════════════════════════════════════════════╗",
-            "║       Session Token Usage (this run)              ║",
-            "╠═══════════════════════════════════════════════════╣",
-            f"║  Source:        {self.source or '(unnamed)':>10}                      ║",
-            f"║  Calls:         {len(self.calls):>10,}                      ║",
-            f"║  Input tokens:  {self.total_input_tokens:>10,}                      ║",
-            f"║  Output tokens: {self.total_output_tokens:>10,}                      ║",
-            f"║  Total tokens:  {self.total_tokens:>10,}                      ║",
-            f"║  Total cost:     ${self.total_cost_usd:>9.4f}                      ║",
-            "╚═══════════════════════════════════════════════════╝",
+            "Session Token Usage (this run)",
+            "-" * 34,
+            f"  Source:           {self.source or '(unnamed)':>10}",
+            f"  Calls:           {len(self.calls):>10,}",
+            f"  Input tokens:    {self.total_input_tokens:>10,}",
+            f"  Output tokens:   {self.total_output_tokens:>10,}",
+            f"  Total tokens:    {self.total_tokens:>10,}",
+            f"  Total cost:      ${self.total_cost_usd:>9.4f}",
         ]
         text = "\n".join(lines)
         print(text)

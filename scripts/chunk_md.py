@@ -166,8 +166,6 @@ def process_all_markdown_files():
     print(f"Output file: {OUTPUT_PATH}")
 
 if __name__ == "__main__":
-    read_one_md_file()
-    find_all_md_files()
     split_md_file_by_two_dieses()
     preview_chunks_with_metadata()
     process_all_markdown_files()

@@ -21,7 +21,7 @@ def load_chunks(path: Path) -> list[dict]:
     chunks: list[dict] = []
     with path.open("r", encoding="utf-8") as input_file:
         for line in input_file:
-            line = line.strip()
+            line = line.strip() # Remove leading/trailing whitespace
             if not line:
                 continue
             chunks.append(json.loads(line))
