@@ -129,42 +129,44 @@ python scripts/ingest_chunks_to_qdrant.py
 python scripts/query_qdrant.py
 ```
 
-### 5. Ask through Ollama with retrieved context
+### 5. Ask an LLM with retrieved context
 
 ```bash
-python scripts/ask_ollama_rag.py
+python scripts/ask_llm_rag.py
 ```
 
-## Ollama Configuration
+## LLM Configuration
 
-The current RAG script calls an Ollama HTTP endpoint.
+The RAG script supports two LLM backends: **Ollama** (default) and **Anthropic Claude**.
 
-### Local Ollama on the same machine
+Configuration is done through the `.env` file at the project root:
 
-If Ollama runs on the same machine as this repository, use:
+```env
+# LLM provider: "ollama" (default) or "anthropic"
+LLM_PROVIDER=ollama
+OLLAMA_BASE_URL=http://192.168.1.109:11434
+OLLAMA_MODEL=qwen2.5:7b
 
-```text
-http://localhost:11434/api/generate
+# Only needed when LLM_PROVIDER=anthropic
+ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-In `scripts/ask_ollama_rag.py`, set:
+### Ollama (default)
 
-```python
-OLLAMA_URL = "http://localhost:11434/api/generate"
+#### Ollama on the same machine
+
+Set in `.env`:
+
+```env
+OLLAMA_BASE_URL=http://localhost:11434
 ```
 
-### Ollama on another machine in the local network
+#### Ollama on another machine in the local network
 
-If Ollama runs on another machine, use that machine IP address:
+Set in `.env`:
 
-```text
-http://<LAN_IP>:11434/api/generate
-```
-
-Example:
-
-```python
-OLLAMA_URL = "http://192.168.1.109:11434/api/generate"
+```env
+OLLAMA_BASE_URL=http://<LAN_IP>:11434
 ```
 
 On the Ollama host machine, the server must listen on the LAN interface instead of only `127.0.0.1`.
@@ -183,22 +185,16 @@ You can test connectivity from this machine with:
 curl http://<LAN_IP>:11434/api/tags
 ```
 
-### Using an API instead of Ollama
+### Anthropic Claude
 
-This repository does not yet provide a generic external LLM client.
+Set in `.env`:
 
-If you want to use an API provider instead of Ollama, the minimal changes are:
+```env
+LLM_PROVIDER=anthropic
+ANTHROPIC_API_KEY=sk-ant-...
+```
 
-1. replace the `ask_ollama()` function in `scripts/ask_ollama_rag.py`
-2. point it to the provider HTTP endpoint
-3. pass the provider authentication token
-4. keep the retrieval step unchanged
-
-In practice, the retrieval side remains:
-
-- query Qdrant
-- build a context block
-- send the prompt and context to the chosen LLM API
+Token usage and cost are tracked automatically in `outputs/token_ledger.json` when using Claude. Ollama calls are not tracked (free local model).
 
 ## Notes
 

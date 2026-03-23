@@ -1,7 +1,7 @@
 """
-Token usage tracker for Anthropic Claude API calls.
+Token usage tracker for LLM API calls (Anthropic Claude & Ollama).
 
-Provides two layers of tracking:
+Provides two layers of tracking (Anthropic only — Ollama is free):
 
 1. **Session tracking** — `TrackedClient` records every call in the current
    Python session and can print a session summary.
@@ -15,22 +15,32 @@ Usage:
 
     from token_tracker import TrackedClient
 
-    client = TrackedClient()           # auto-loads the persistent ledger
-    answer = client.ask(prompt)        # recorded in session + ledger
+    # Default: uses Ollama (set by LLM_PROVIDER env var)
+    client = TrackedClient()
+    answer = client.ask(prompt)
 
-    client.summary()                   # session stats
-    client.ledger_summary()            # all-time stats (across all runs)
+    # Explicit Anthropic usage (with token tracking)
+    client = TrackedClient(provider="anthropic")
+    answer = client.ask(prompt)
+    client.summary()
+    client.ledger_summary()
 """
 
 import json
+import os
 import time
 from dataclasses import dataclass
 from pathlib import Path
 
-import anthropic
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# ── Provider defaults ──
+DEFAULT_PROVIDER = os.getenv("LLM_PROVIDER", "ollama")
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://192.168.1.109:11434")
+DEFAULT_OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:7b")
 
 # ── Pricing (USD per million tokens, as of 2025-05) ──
 MODEL_PRICING = {
@@ -40,7 +50,7 @@ MODEL_PRICING = {
     "claude-haiku-4-5-20251001": {"input": 0.80,  "output": 4.0},
 }
 
-DEFAULT_MODEL = "claude-sonnet-4-20250514"
+DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-4-20250514"
 
 # Persistent ledger lives in outputs/ (which is .gitignored)
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -177,24 +187,32 @@ def get_ledger(path: str | Path = DEFAULT_LEDGER_PATH) -> TokenLedger:
 
 
 class TrackedClient:
-    """Thin wrapper around anthropic.Anthropic that records token usage.
+    """LLM client that supports both Anthropic Claude and Ollama backends.
 
-    - Tracks per-session usage (this Python process).
-    - Automatically appends to a persistent ledger on `save()`.
+    - provider="anthropic": tracks per-session token usage + persistent ledger.
+    - provider="ollama": no token tracking (free local model).
     """
 
     def __init__(
         self,
-        model: str = DEFAULT_MODEL,
+        model: str | None = None,
         source: str = "",
+        provider: str | None = None,
         ledger_path: str | Path = DEFAULT_LEDGER_PATH,
         **client_kwargs,
     ):
-        self._client = anthropic.Anthropic(**client_kwargs)
-        self.model = model
+        self.provider = provider or DEFAULT_PROVIDER
         self.source = source
         self.ledger_path = Path(ledger_path)
         self.calls: list[CallRecord] = []
+
+        if self.provider == "anthropic":
+            import anthropic
+            self.model = model or DEFAULT_ANTHROPIC_MODEL
+            self._client = anthropic.Anthropic(**client_kwargs)
+        else:
+            self.model = model or DEFAULT_OLLAMA_MODEL
+            self._ollama_url = OLLAMA_BASE_URL
 
     # ── Core call method ──
     def ask(
@@ -207,6 +225,14 @@ class TrackedClient:
     ) -> str:
         """Send a single-turn message and return the text response."""
         model = model or self.model
+        if self.provider == "ollama":
+            return self._ask_ollama(prompt, system=system, model=model, max_tokens=max_tokens)
+        return self._ask_anthropic(prompt, system=system, model=model, max_tokens=max_tokens)
+
+    # ── Anthropic backend ──
+    def _ask_anthropic(
+        self, prompt: str, *, system: str | None, model: str, max_tokens: int,
+    ) -> str:
         kwargs: dict = {
             "model": model,
             "max_tokens": max_tokens,
@@ -235,6 +261,32 @@ class TrackedClient:
 
         return message.content[0].text.strip()
 
+    # ── Ollama backend ──
+    def _ask_ollama(
+        self, prompt: str, *, system: str | None, model: str, max_tokens: int,
+    ) -> str:
+        messages = []
+        if system:
+            messages.append({"role": "system", "content": system})
+        messages.append({"role": "user", "content": prompt})
+
+        payload = {
+            "model": model,
+            "messages": messages,
+            "stream": False,
+            "options": {"num_predict": max_tokens},
+        }
+
+        resp = requests.post(
+            f"{self._ollama_url}/api/chat",
+            json=payload,
+            timeout=300,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+
+        return data["message"]["content"].strip()
+
     # ── Session aggregate properties ──
     @property
     def total_input_tokens(self) -> int:
@@ -255,6 +307,9 @@ class TrackedClient:
     # ── Session summary ──
     def summary(self) -> str:
         """Print session-level stats (this run only)."""
+        if self.provider == "ollama":
+            print(f"\nSession: {self.source or '(unnamed)'} — provider=ollama (no token tracking)")
+            return ""
         lines = [
             "",
             "Session Token Usage (this run)",
@@ -272,10 +327,10 @@ class TrackedClient:
 
     # ── Persist: session → ledger ──
     def save(self, session_path: str | Path | None = None) -> None:
-        """Append this session to the persistent ledger.
+        """Append this session to the persistent ledger (Anthropic only)."""
+        if self.provider == "ollama":
+            return
 
-        Optionally also write a standalone session file to *session_path*.
-        """
         # 1. Append to global ledger
         ledger = get_ledger(self.ledger_path)
         ledger.record_session(self.source, self.calls)
@@ -313,6 +368,8 @@ class TrackedClient:
 
     def ledger_summary(self) -> str:
         """Print all-time cumulative stats from the persistent ledger."""
+        if self.provider == "ollama":
+            return ""
         return get_ledger(self.ledger_path).summary()
 
     # ── Internal ──

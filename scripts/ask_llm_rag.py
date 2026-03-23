@@ -1,8 +1,8 @@
 """
-Ask a question with retrieval from Qdrant and generation from Claude API.
+Ask a question with retrieval from Qdrant and generation from LLM (Ollama or Claude).
 
 Usage:
-    conda activate knowledge && python scripts/ask_claude_rag.py
+    conda activate knowledge && python scripts/ask_llm_rag.py
 """
 
 import sys
@@ -21,7 +21,6 @@ load_dotenv()
 QDRANT_URL = "http://localhost:6333"
 COLLECTION_NAME = "md_chunks_demo"
 EMBEDDING_MODEL = "nomic-ai/nomic-embed-text-v1.5"
-CLAUDE_MODEL = "claude-sonnet-4-20250514"
 LIMIT = 5
 
 
@@ -76,10 +75,10 @@ def print_sources(results) -> None:
 def main() -> None:
     qdrant_client = QdrantClient(url=QDRANT_URL)
     embed_model = SentenceTransformer(EMBEDDING_MODEL, trust_remote_code=True)
-    claude = TrackedClient(model=CLAUDE_MODEL, source="ask_claude_rag")
+    llm = TrackedClient(source="ask_llm_rag")
 
     print(f"Qdrant: {QDRANT_URL} / collection={COLLECTION_NAME}")
-    print(f"LLM: Claude API / model={CLAUDE_MODEL}")
+    print(f"LLM: {llm.provider} / model={llm.model}")
     print("Type a question. Type 'exit' or 'quit' to stop.")
 
     while True:
@@ -103,9 +102,9 @@ def main() -> None:
         print_sources(results)
 
         try:
-            answer = claude.ask(user_prompt, system=SYSTEM_PROMPT)
+            answer = llm.ask(user_prompt, system=SYSTEM_PROMPT)
         except Exception as error:
-            print(f"Claude API request failed: {error}")
+            print(f"LLM request failed: {error}")
             print()
             continue
 
@@ -113,9 +112,9 @@ def main() -> None:
         print(answer)
         print()
 
-    claude.summary()
-    claude.save()
-    claude.ledger_summary()
+    llm.summary()
+    llm.save()
+    llm.ledger_summary()
 
 
 if __name__ == "__main__":
