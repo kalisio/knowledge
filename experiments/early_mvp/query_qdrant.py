@@ -5,8 +5,14 @@ Usage:
     conda activate knowledge && python scripts/query_qdrant.py
 """
 
+import sys
+from pathlib import Path
+
 from qdrant_client import QdrantClient
 from sentence_transformers import SentenceTransformer
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+from embedding_utils import load_embedding_model
 
 
 QDRANT_URL = "http://localhost:6333"
@@ -45,7 +51,7 @@ def print_results(question: str, client: QdrantClient, model: SentenceTransforme
 
 def main() -> None:
     client = QdrantClient(url=QDRANT_URL)
-    model = SentenceTransformer(MODEL_NAME, trust_remote_code=True)
+    model = load_embedding_model(MODEL_NAME)
 
     print(f"Connected to {COLLECTION_NAME} at {QDRANT_URL}")
     print("Type a question. Type 'exit' or 'quit' to stop.")

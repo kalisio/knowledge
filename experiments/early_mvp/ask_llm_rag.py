@@ -12,9 +12,11 @@ from dotenv import load_dotenv
 from qdrant_client import QdrantClient
 from sentence_transformers import SentenceTransformer
 
-# Allow imports from scripts/
+# Allow imports from scripts/ and src/
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from token_tracker import TrackedClient
+from embedding_utils import load_embedding_model
 
 load_dotenv()
 
@@ -74,7 +76,7 @@ def print_sources(results) -> None:
 
 def main() -> None:
     qdrant_client = QdrantClient(url=QDRANT_URL)
-    embed_model = SentenceTransformer(EMBEDDING_MODEL, trust_remote_code=True)
+    embed_model = load_embedding_model(EMBEDDING_MODEL)
     llm = TrackedClient(source="ask_llm_rag")
 
     print(f"Qdrant: {QDRANT_URL} / collection={COLLECTION_NAME}")

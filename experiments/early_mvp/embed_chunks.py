@@ -6,12 +6,14 @@ Usage:
 """
 
 import json
+import sys
 from pathlib import Path
-
-from sentence_transformers import SentenceTransformer
 
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT_DIR / "src"))
+from embedding_utils import embed_batch_size, load_embedding_model
+
 INPUT_PATH = ROOT_DIR / "outputs" / "md_chunks.jsonl"
 OUTPUT_PATH = ROOT_DIR / "outputs" / "md_chunks_with_embeddings.jsonl"
 MODEL_NAME = "nomic-ai/nomic-embed-text-v1.5"
@@ -30,10 +32,11 @@ def load_chunks(path: Path) -> list[dict]:
 
 def generate_embeddings(chunks: list[dict]):
     print(f"Loading model: {MODEL_NAME}")
-    model = SentenceTransformer(MODEL_NAME, trust_remote_code=True)
+    model = load_embedding_model(MODEL_NAME)
+    batch_size = embed_batch_size()
     texts = [chunk["text"] for chunk in chunks]
-    print(f"Generating embeddings for {len(texts)} chunks")
-    return model.encode(texts, show_progress_bar=True, batch_size=32)
+    print(f"Generating embeddings for {len(texts)} chunks (batch_size={batch_size})")
+    return model.encode(texts, show_progress_bar=True, batch_size=batch_size)
 
 
 def build_record(chunk: dict, vector, record_id: str) -> dict:
