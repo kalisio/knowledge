@@ -13,3 +13,8 @@ dependencies = [
     "requests>=2.32.5",
     "sentence-transformers>=5.3.0",
 ]
+
+[tool.pytest.ini_options]
+markers = [
+    "golden: end-to-end retrieval tests requiring the embedding model and KDK docs",
+]
