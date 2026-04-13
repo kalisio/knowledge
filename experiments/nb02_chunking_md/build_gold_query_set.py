@@ -28,7 +28,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "scripts"))
 
@@ -94,20 +94,30 @@ def extract_symbols(text: str) -> list[str]:
     return order
 
 
+def clean_markdown_text(text: str) -> str:
+    """Remove markdown artifacts like backticks, bold, italic, and links."""
+    # Remove links [text](url) -> text
+    text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", text)
+    # Remove backticks
+    text = text.replace("`", "")
+    # Remove bold/italic markers
+    text = text.replace("**", "").replace("*", "")
+    return text.strip()
+
 def extract_title(text: str, fallback: str) -> str:
     m = H1.search(text)
     if m:
-        return m.group(1).strip()
+        return clean_markdown_text(m.group(1))
     m = H2.search(text)
     if m:
-        return m.group(1).strip()
+        return clean_markdown_text(m.group(1))
     return fallback
 
 
 def extract_sections(text: str, exclude_title: str) -> list[str]:
     """Return section headings (h2 + h3) other than the title, in order."""
-    headings = [h.strip() for h in H2.findall(text)]
-    headings += [h.strip() for h in H3.findall(text)]
+    headings = [clean_markdown_text(h) for h in H2.findall(text)]
+    headings += [clean_markdown_text(h) for h in H3.findall(text)]
     out = []
     seen = set()
     for h in headings:
@@ -189,7 +199,7 @@ def main() -> int:
             "Each query is mined from a markdown file and its gold source(s) "
             "point back to the file(s) it was extracted from."
         ),
-        "source": "scripts/build_gold_query_set.py",
+        "source": "experiments/nb02_chunking_md/build_gold_query_set.py",
         "counts": dict(by_type),
         "total": len(queries),
         "queries": queries,
