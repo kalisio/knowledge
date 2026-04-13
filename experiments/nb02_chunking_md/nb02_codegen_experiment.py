@@ -40,7 +40,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from qdrant_client import QdrantClient
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "scripts"))
 
