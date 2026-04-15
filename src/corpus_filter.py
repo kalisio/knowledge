@@ -11,8 +11,8 @@ overridden or extended at call time.
 Usage:
     from src.corpus_filter import scan_corpus, FilterConfig
 
-    # Use defaults
-    result = scan_corpus("path/to/repo")
+    # Use defaults (auto-scan ROOT/data)
+    result = scan_corpus()
     print(result.summary())
 
     # Custom config
@@ -22,6 +22,10 @@ Usage:
         max_file_size=200_000,
     )
     result = scan_corpus("path/to/repo", config=cfg)
+
+    # Filter included files by extension
+    js_files = result.included_with_extensions({".js"})
+    vue_files = result.included_with_extensions({".vue"})
 """
 
 from __future__ import annotations
@@ -30,6 +34,8 @@ import os
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
+
+DEFAULT_SCAN_ROOT = Path(__file__).resolve().parents[1] / "data"
 
 
 # ────────────────────────────────────────────────────────────
@@ -55,7 +61,10 @@ class FilterConfig:
     ])
 
     # Files larger than this (bytes) are excluded. 0 = no limit.
-    max_file_size: int = 0
+    max_file_size: int = 100_000
+
+    # Lines longer than this (chars) flag the file as minified/data. 0 = no check.
+    max_line_length: int = 10_000
 
     # Only include these extensions (whitelist). Empty = no restriction.
     included_extensions: set[str] = field(default_factory=set)
@@ -185,6 +194,10 @@ class ScanResult:
             groups.setdefault(r.zone, []).append(r)
         return groups
 
+    def included_with_extensions(self, exts: set[str]) -> list[FileRecord]:
+        """Return included files whose extension is in *exts*."""
+        return [r for r in self.included if r.extension in exts]
+
     def excluded_by_reason(self) -> dict[str, list[FileRecord]]:
         groups: dict[str, list[FileRecord]] = {}
         for r in self.excluded:
@@ -224,9 +237,12 @@ class ScanResult:
 # Core logic
 # ────────────────────────────────────────────────────────────
 
-def scan_corpus(root: str | Path, config: FilterConfig | None = None) -> ScanResult:
-    """Walk *root* and classify every file as included or excluded."""
-    root = Path(root).resolve()
+def scan_corpus(root: str | Path | None = None, config: FilterConfig | None = None) -> ScanResult:
+    """Walk *root* and classify every file as included or excluded.
+
+    If *root* is omitted, defaults to the repository's ``data/`` directory.
+    """
+    root = Path(root).resolve() if root is not None else DEFAULT_SCAN_ROOT.resolve()
     cfg = config or FilterConfig()
     result = ScanResult(root_dir=root, config=cfg)
 
@@ -284,7 +300,18 @@ def _check_exclusion(rec: FileRecord, cfg: FilterConfig) -> str:
     if cfg.max_file_size and rec.size > cfg.max_file_size:
         return "file_too_large"
 
-    # 6. Extension whitelist (if set)
+    # 6. Long-line heuristic (minified bundles or embedded data literals).
+    #    Only worth checking files large enough to plausibly contain such a line.
+    if cfg.max_line_length and rec.size > cfg.max_line_length:
+        try:
+            with open(rec.path, errors="ignore") as fh:
+                for line in fh:
+                    if len(line) > cfg.max_line_length:
+                        return "long_line_minified_or_data"
+        except OSError:
+            pass
+
+    # 7. Extension whitelist (if set)
     if cfg.included_extensions and rec.extension not in cfg.included_extensions:
         return "extension_not_in_whitelist"
 
