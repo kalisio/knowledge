@@ -143,6 +143,17 @@ def score_chunks(chunks: list[str], target_size: int, *, strip_first_line: bool 
     }
 
 
+def chunk_file(rel_path: str, strategy: str, data_root: Path = DATA) -> list[_Chunk]:
+    """Split a single .js file. Used by the notebook's qualitative preview."""
+    text = (data_root / rel_path).read_text(errors="ignore")
+    if strategy in _BREADCRUMB_STRATEGIES:
+        include_sym = strategy == "D_js_plus_breadcrumb"
+        return [_Chunk(text=p, source=rel_path)
+                for p in _split_with_breadcrumb(text, rel_path, include_symbol=include_sym)]
+    factory, _ = STRATEGIES[strategy]
+    return [_Chunk(text=p, source=rel_path) for p in factory().split_text(text)]
+
+
 def chunk_corpus(files, strategy: str) -> list[_Chunk]:
     """Split every file under *files* with the named strategy. Returns
     (text, source) tuples so retrieval eval can group chunks by file."""

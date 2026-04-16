@@ -119,7 +119,7 @@ def _assert_chunk_basics(chunks: list[dict], expected_strategy: str, source: str
 class TestChunkRCT:
     def test_structure(self):
         chunks = chunk_rct(SAMPLE_MD, "widget.md")
-        _assert_chunk_basics(chunks, "A", "widget.md")
+        _assert_chunk_basics(chunks, "A_rct", "widget.md")
 
     def test_respects_chunk_size(self):
         chunks = chunk_rct(SAMPLE_MD, "w.md", chunk_size=200, chunk_overlap=20)
@@ -132,7 +132,7 @@ class TestChunkRCT:
 class TestChunkMhsRct:
     def test_structure(self):
         chunks = chunk_mhs_rct(SAMPLE_MD, "widget.md")
-        _assert_chunk_basics(chunks, "B", "widget.md")
+        _assert_chunk_basics(chunks, "B_mhs_rct", "widget.md")
 
     def test_preserves_header_metadata(self):
         chunks = chunk_mhs_rct(SAMPLE_MD, "widget.md")
@@ -143,7 +143,7 @@ class TestChunkMhsRct:
 class TestChunkAstMerge:
     def test_structure(self):
         chunks = chunk_ast_merge(SAMPLE_MD, "widget.md")
-        _assert_chunk_basics(chunks, "C", "widget.md")
+        _assert_chunk_basics(chunks, "C_ast_merge", "widget.md")
 
     def test_code_integrity(self):
         """AST merge must never split a code block."""
@@ -158,7 +158,7 @@ class TestChunkAstMerge:
 class TestChunkAstBreadcrumb:
     def test_structure(self):
         chunks = chunk_ast_breadcrumb(SAMPLE_MD, "widget.md")
-        _assert_chunk_basics(chunks, "D", "widget.md")
+        _assert_chunk_basics(chunks, "D_ast_breadcrumb", "widget.md")
 
     def test_breadcrumb_prefix(self):
         chunks = chunk_ast_breadcrumb(SAMPLE_MD, "widget.md")
@@ -182,13 +182,12 @@ class TestChunkAstBreadcrumb:
 class TestChunkMarkdown:
     def test_defaults_to_winner(self):
         chunks = chunk_markdown(SAMPLE_MD, "w.md")
-        assert all(c["metadata"]["strategy"] == "D" for c in chunks)
+        assert all(c["metadata"]["strategy"] == "D_ast_breadcrumb" for c in chunks)
 
     def test_explicit_strategy(self):
-        for name, expected in [("A_rct", "A"), ("B_mhs_rct", "B"),
-                               ("C_ast_merge", "C"), ("D_ast_breadcrumb", "D")]:
+        for name in ("A_rct", "B_mhs_rct", "C_ast_merge", "D_ast_breadcrumb"):
             chunks = chunk_markdown(SAMPLE_MD, "w.md", strategy=name)
-            assert all(c["metadata"]["strategy"] == expected for c in chunks)
+            assert all(c["metadata"]["strategy"] == name for c in chunks)
 
     def test_unknown_strategy_raises(self):
         with pytest.raises(ValueError, match="Unknown strategy"):

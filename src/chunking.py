@@ -1,27 +1,39 @@
 """Production chunking for the Kalisio code-generation RAG.
 
-This module exposes the winner strategy selected in nb02
-(AST-Merge + Breadcrumb) plus the supporting helpers that were originally
-defined inside the notebook. Extracting them here means:
+Exposes three public entry points, one per file type:
 
-- The notebook stays the authoritative benchmark but reuses these helpers
-  via import, so there is only one source of truth.
-- The parameter sweep in Part 6 and the code-generation experiment in
-  Part 7 can run as plain scripts without executing the whole notebook.
-- Downstream pipelines (nb03 multi-type chunking, and future indexing
-  jobs) import `chunk_markdown` directly.
+- ``chunk_markdown()`` — nb02 winner (AST-Merge + Breadcrumb)
+- ``chunk_js()``       — nb03 winner (Recursive JS + breadcrumb)
+- ``chunk_vue()``      — nb03 winner (SFC dispatcher + breadcrumb)
 
-The winner selection itself is still made by nb02's Part 5 on reproducible
-metrics — this module just packages the chosen implementation.
+Plus ``chunk_files()`` which dispatches by extension.
+
+Every function returns ``list[dict]`` with keys ``text`` and ``metadata``.
+``text`` includes a breadcrumb prefix (for embedding); ``metadata`` carries
+the same info as structured fields (for retriever / reranker / UI).
+
+Metadata schema (all file types)::
+
+    Required:
+        source       — rel_path of the original file
+        strategy     — strategy tag, e.g. "D_js_breadcrumb"
+        chunk_index  — 0-based position within the file
+        breadcrumb   — structured dict:
+                         {"path": str, "symbol": str, "block": str}
+    Optional:
+        block_type   — Vue only: "template" / "script" / "style"
+        doc_title    — Markdown only: first h1 title
 """
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Iterable
 
 from langchain_text_splitters import (
     ExperimentalMarkdownSyntaxTextSplitter,
+    Language,
     MarkdownHeaderTextSplitter,
     RecursiveCharacterTextSplitter,
 )
@@ -114,7 +126,7 @@ def chunk_rct(
     return [
         {
             "text": d.page_content,
-            "metadata": {**d.metadata, "strategy": "A", "chunk_index": i},
+            "metadata": {**d.metadata, "strategy": "A_rct", "chunk_index": i},
         }
         for i, d in enumerate(docs)
     ]
@@ -143,7 +155,7 @@ def chunk_mhs_rct(
             md = dict(sub.metadata)
             md["source"] = source
             md["doc_title"] = title
-            md["strategy"] = "B"
+            md["strategy"] = "B_mhs_rct"
             md["chunk_index"] = i
             chunks.append({"text": sub.page_content, "metadata": md})
             i += 1
@@ -164,7 +176,7 @@ def chunk_ast_merge(
     for i, chunk in enumerate(merged):
         chunk["metadata"]["source"] = source
         chunk["metadata"]["doc_title"] = title
-        chunk["metadata"]["strategy"] = "C"
+        chunk["metadata"]["strategy"] = "C_ast_merge"
         chunk["metadata"]["chunk_index"] = i
     return merged
 
@@ -197,67 +209,216 @@ def chunk_ast_breadcrumb(
         chunk["text"] = prefix + chunk["text"]
         chunk["metadata"]["source"] = source
         chunk["metadata"]["doc_title"] = title
-        chunk["metadata"]["strategy"] = "D"
+        chunk["metadata"]["strategy"] = "D_ast_breadcrumb"
         chunk["metadata"]["breadcrumb"] = breadcrumb
         chunk["metadata"]["chunk_index"] = i
     return merged
 
 
+# ── JS chunking (nb03 winner: D — Recursive JS + breadcrumb) ────────────────
+
+JS_CHUNK_SIZE = 800
+JS_CHUNK_OVERLAP = 120
+
+_TOP_LEVEL_SYMBOL_RE = re.compile(
+    r"^\s*(?:export\s+(?:default\s+)?)?"
+    r"(?:async\s+)?"
+    r"(?:function|class|const|let|var)\s+([A-Za-z_$][\w$]*)",
+    re.MULTILINE,
+)
+
+
+def _nearest_js_symbol(text: str, offset: int) -> str:
+    last = ""
+    for m in _TOP_LEVEL_SYMBOL_RE.finditer(text):
+        if m.start() > offset:
+            break
+        last = m.group(1)
+    return last
+
+
+def chunk_js(
+    text: str,
+    source: str,
+    *,
+    chunk_size: int = JS_CHUNK_SIZE,
+    chunk_overlap: int = JS_CHUNK_OVERLAP,
+) -> list[dict]:
+    """Chunk one JS file using the nb03 winner strategy (D — breadcrumb)."""
+    splitter = RecursiveCharacterTextSplitter.from_language(
+        language=Language.JS, chunk_size=chunk_size, chunk_overlap=chunk_overlap
+    )
+    pieces = splitter.split_text(text)
+    out: list[dict] = []
+    cursor = 0
+    for i, piece in enumerate(pieces):
+        pos = text.find(piece[:32], cursor) if piece else -1
+        if pos < 0:
+            pos = cursor
+        symbol = _nearest_js_symbol(text, pos)
+        header = f"// {source}" + (f" :: {symbol}" if symbol else "")
+        breadcrumb = {"path": source, "symbol": symbol, "block": ""}
+        out.append({
+            "text": header + "\n" + piece,
+            "metadata": {
+                "source": source,
+                "strategy": "D_js_breadcrumb",
+                "chunk_index": i,
+                "breadcrumb": breadcrumb,
+            },
+        })
+        cursor = pos + len(piece)
+    return out
+
+
+# ── Vue SFC chunking (nb03 winner: D — SFC dispatcher + breadcrumb) ─────────
+
+_SFC_BLOCK_RE = re.compile(
+    r"<(template|script|style)\b([^>]*)>(.*?)</\1>",
+    re.IGNORECASE | re.DOTALL,
+)
+_LANG_ATTR_RE = re.compile(r"""lang\s*=\s*["']([^"']+)["']""", re.IGNORECASE)
+
+
+def _vue_split_template(body: str, attrs: str, chunk_size: int, chunk_overlap: int) -> list[str]:
+    lang_m = _LANG_ATTR_RE.search(attrs)
+    lang = lang_m.group(1).lower() if lang_m else "html"
+    if lang in {"", "html"}:
+        splitter = RecursiveCharacterTextSplitter.from_language(
+            language=Language.HTML, chunk_size=chunk_size, chunk_overlap=chunk_overlap
+        )
+    else:
+        splitter = RecursiveCharacterTextSplitter(
+            chunk_size=chunk_size, chunk_overlap=chunk_overlap
+        )
+    return splitter.split_text(body)
+
+
+def _vue_split_style(body: str, chunk_size: int, chunk_overlap: int) -> list[str]:
+    if len(body) <= chunk_size * 2:
+        return [body]
+    return RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size, chunk_overlap=chunk_overlap
+    ).split_text(body)
+
+
+def chunk_vue(
+    text: str,
+    source: str,
+    *,
+    chunk_size: int = JS_CHUNK_SIZE,
+    chunk_overlap: int = JS_CHUNK_OVERLAP,
+) -> list[dict]:
+    """Chunk one Vue SFC using the nb03 winner strategy (D — breadcrumb)."""
+    out: list[dict] = []
+    idx = 0
+    for m in _SFC_BLOCK_RE.finditer(text):
+        kind = m.group(1).lower()
+        attrs = m.group(2)
+        body = m.group(3).strip()
+        if not body:
+            continue
+
+        if kind == "script":
+            splitter = RecursiveCharacterTextSplitter.from_language(
+                language=Language.JS, chunk_size=chunk_size, chunk_overlap=chunk_overlap
+            )
+            pieces = splitter.split_text(body)
+        elif kind == "template":
+            pieces = _vue_split_template(body, attrs, chunk_size, chunk_overlap)
+        else:
+            pieces = _vue_split_style(body, chunk_size, chunk_overlap)
+
+        for piece in pieces:
+            if kind == "script":
+                header = f"// {source} [{kind}]"
+            else:
+                header = f"<!-- {source} [{kind}] -->"
+            breadcrumb = {"path": source, "symbol": "", "block": kind}
+            out.append({
+                "text": header + "\n" + piece,
+                "metadata": {
+                    "source": source,
+                    "strategy": "D_vue_breadcrumb",
+                    "chunk_index": idx,
+                    "breadcrumb": breadcrumb,
+                    "block_type": kind,
+                },
+            })
+            idx += 1
+    return out
+
+
 # ── Public API ───────────────────────────────────────────────────────────────
 
-STRATEGIES = {
+MD_STRATEGIES = {
     "A_rct": chunk_rct,
     "B_mhs_rct": chunk_mhs_rct,
     "C_ast_merge": chunk_ast_merge,
     "D_ast_breadcrumb": chunk_ast_breadcrumb,
 }
 
-# nb02 winner. Change this only after re-running the deterministic benchmark.
-WINNER_STRATEGY = "D_ast_breadcrumb"
+STRATEGIES = MD_STRATEGIES
+
+MD_WINNER = "D_ast_breadcrumb"
+JS_WINNER = "D_js_breadcrumb"
+VUE_WINNER = "D_vue_breadcrumb"
+
+# Legacy alias
+WINNER_STRATEGY = MD_WINNER
 
 
 def chunk_markdown(
     text: str,
     source: str,
     *,
-    strategy: str = WINNER_STRATEGY,
+    strategy: str = MD_WINNER,
     chunk_size: int = DEFAULT_CHUNK_SIZE,
     chunk_overlap: int = DEFAULT_CHUNK_OVERLAP,
 ) -> list[dict]:
-    """Chunk one markdown document using the selected strategy.
-
-    Each returned item is a dict with `text` and `metadata` keys, ready to be
-    embedded and upserted into a vector store.
-    """
-    if strategy not in STRATEGIES:
+    """Chunk one markdown document using the selected strategy."""
+    if strategy not in MD_STRATEGIES:
         raise ValueError(
-            f"Unknown strategy {strategy!r}. Choose from {list(STRATEGIES)}"
+            f"Unknown strategy {strategy!r}. Choose from {list(MD_STRATEGIES)}"
         )
-    func = STRATEGIES[strategy]
+    func = MD_STRATEGIES[strategy]
     if strategy in ("A_rct", "B_mhs_rct"):
         return func(text, source, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
     return func(text, source, chunk_size=chunk_size)
 
 
+_EXT_DISPATCH = {
+    ".md": "markdown",
+    ".js": "js",
+    ".mjs": "js",
+    ".vue": "vue",
+}
+
+
 def chunk_files(
     files: Iterable,
     *,
-    strategy: str = WINNER_STRATEGY,
+    md_strategy: str = MD_WINNER,
     chunk_size: int = DEFAULT_CHUNK_SIZE,
     chunk_overlap: int = DEFAULT_CHUNK_OVERLAP,
 ) -> list[dict]:
-    """Chunk a batch of corpus_filter records. Accepts any iterable of objects
-    exposing `.path` and `.rel_path`."""
+    """Chunk a batch of corpus_filter records, dispatching by file extension.
+
+    Accepts any iterable of objects exposing ``.path`` and ``.rel_path``.
+    """
     out: list[dict] = []
     for rec in files:
-        text = rec.path.read_text(encoding="utf-8")
-        out.extend(
-            chunk_markdown(
-                text,
-                source=str(rec.rel_path),
-                strategy=strategy,
-                chunk_size=chunk_size,
-                chunk_overlap=chunk_overlap,
-            )
-        )
+        text = rec.path.read_text(encoding="utf-8", errors="ignore")
+        src = str(rec.rel_path)
+        ext = rec.path.suffix.lower()
+        kind = _EXT_DISPATCH.get(ext)
+        if kind == "markdown":
+            out.extend(chunk_markdown(
+                text, src, strategy=md_strategy,
+                chunk_size=chunk_size, chunk_overlap=chunk_overlap,
+            ))
+        elif kind == "js":
+            out.extend(chunk_js(text, src))
+        elif kind == "vue":
+            out.extend(chunk_vue(text, src))
     return out

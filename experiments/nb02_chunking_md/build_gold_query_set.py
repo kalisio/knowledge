@@ -1,11 +1,18 @@
 """Build an auto-generated query set with gold source files for nb02 evaluation.
 
-Why this exists: `outputs/test_questions.json` has empty `relevant_sources`
-for all 46 questions, so it can't be used as ground truth for deterministic
-retrieval metrics. This script mines `data/kdk/docs/*.md` to emit queries of
-three shapes, each with a gold source file attached:
+Why this exists: `outputs/test_questions.json` holds 46 FAQ-style human
+questions ("How do I configure X?"). The downstream consumer here is an AI
+coder agent that queries the retriever with identifiers and task phrases,
+not natural-language questions — so those 46 don't fit the use case
+regardless of labeling. (They also have empty `relevant_sources`, which
+would block deterministic hit@K / MRR metrics anyway.)
 
-  - symbol  : an API identifier (e.g. "setupGlobe", "addLayer")
+This script mines `data/kdk/docs/*.md` to emit code-agent-shaped queries of
+three kinds, each with a gold source file attached:
+
+  - symbol  : a code identifier mined from doc text or fenced blocks
+              (e.g. "setupGlobe", "addLayer" — typically API names in the
+              KDK doc style, but the regex doesn't enforce that)
   - section : a section heading text (e.g. "Scene post processing")
   - title   : the page title (h1 or first h2)
 
@@ -13,11 +20,6 @@ Each query's `relevant_sources` is the file it was mined from. If the same
 query text is mined from multiple files, their sources are merged.
 
 Output: `outputs/gold_queries.json`
-
-The resulting query set is meant to approximate what an AI coder agent would
-actually send to the retriever (identifier- and task-centric), not FAQ-style
-questions. That matches the downstream use case: feeding retrieved chunks as
-context into a code-generation model.
 """
 
 from __future__ import annotations
