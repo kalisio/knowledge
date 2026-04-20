@@ -44,6 +44,7 @@ from embedding_utils import embed_batch_size, load_embedding_model  # noqa: E402
 from retrieval_metrics import recall_at_k, symbol_hit  # noqa: E402
 
 import js_splitter_experiment as jsx  # noqa: E402
+from hybrid import bm25_rank, rrf_fuse  # noqa: E402
 
 DATA = ROOT / "data"
 DEFAULT_MODEL = os.getenv(
@@ -154,26 +155,14 @@ def _cosine_top_k(query_vecs: np.ndarray, chunk_vecs: np.ndarray, k: int) -> np.
     return np.argpartition(-sims, kth=min(k, sims.shape[1] - 1), axis=1)[:, :k]
 
 
-def evaluate(files, strategy: str, gold: list[GoldQuery], model, k_values=(3, 5, 10)) -> dict:
-    chunks = jsx.chunk_corpus(files, strategy)
-    if not chunks:
-        return {"error": "no chunks"}
-    chunk_texts = [c.text for c in chunks]
-    chunk_sources = [c.source for c in chunks]
-
-    bs = embed_batch_size()
-    chunk_vecs = model.encode(
-        chunk_texts, batch_size=bs, normalize_embeddings=True, show_progress_bar=False
-    )
-    query_vecs = model.encode(
-        [g.query for g in gold], batch_size=bs,
-        normalize_embeddings=True, show_progress_bar=False,
-    )
-
-    sims = np.asarray(query_vecs) @ np.asarray(chunk_vecs).T
-    ranked = np.argsort(-sims, axis=1)
-
-    out: dict = {"chunks": len(chunks), "queries": len(gold)}
+def _compute_metrics(
+    chunk_sources: list[str],
+    chunk_texts: list[str],
+    ranked: np.ndarray,
+    gold: list[GoldQuery],
+    k_values=(3, 5, 10),
+) -> dict:
+    out: dict = {"chunks": len(chunk_sources), "queries": len(gold)}
     mrr_vals = []
     for q_idx, g in enumerate(gold):
         rank = None
@@ -208,6 +197,44 @@ def evaluate(files, strategy: str, gold: list[GoldQuery], model, k_values=(3, 5,
     return out
 
 
+def _dense_rank(chunks, gold: list[GoldQuery], model) -> tuple[np.ndarray, list[str], list[str]]:
+    """Encode chunks + queries, return dense rank matrix + chunk texts/sources."""
+    chunk_texts = [c.text for c in chunks]
+    chunk_sources = [c.source for c in chunks]
+    bs = embed_batch_size()
+    chunk_vecs = model.encode(
+        chunk_texts, batch_size=bs, normalize_embeddings=True, show_progress_bar=False
+    )
+    query_vecs = model.encode(
+        [g.query for g in gold], batch_size=bs,
+        normalize_embeddings=True, show_progress_bar=False,
+    )
+    sims = np.asarray(query_vecs) @ np.asarray(chunk_vecs).T
+    ranked = np.argsort(-sims, axis=1)
+    return ranked, chunk_texts, chunk_sources
+
+
+def evaluate(files, strategy: str, gold: list[GoldQuery], model, k_values=(3, 5, 10)) -> dict:
+    chunks = jsx.chunk_corpus(files, strategy)
+    if not chunks:
+        return {"error": "no chunks"}
+    ranked, chunk_texts, chunk_sources = _dense_rank(chunks, gold, model)
+    return _compute_metrics(chunk_sources, chunk_texts, ranked, gold, k_values)
+
+
+def evaluate_hybrid(
+    files, gold: list[GoldQuery], model, k_values=(3, 5, 10),
+) -> dict:
+    """Dense + BM25 fused with RRF on D-strategy chunks."""
+    chunks = jsx.chunk_corpus(files, "D_js_plus_breadcrumb")
+    if not chunks:
+        return {"error": "no chunks"}
+    dense_ranked, chunk_texts, chunk_sources = _dense_rank(chunks, gold, model)
+    bm25_ranked = bm25_rank(chunk_texts, [g.query for g in gold])
+    fused_ranked = rrf_fuse(dense_ranked, bm25_ranked)
+    return _compute_metrics(chunk_sources, chunk_texts, fused_ranked, gold, k_values)
+
+
 def run(sample_limit: int | None = None, strategies=None, model_name: str = DEFAULT_MODEL) -> dict:
     files = scan_corpus(DATA, profile="js_vue_rag").included_with_extensions({".js"})
     if sample_limit and sample_limit < len(files):
@@ -233,7 +260,8 @@ def run(sample_limit: int | None = None, strategies=None, model_name: str = DEFA
                 break
 
     model = load_embedding_model(model_name)
-    strategies = strategies or list(jsx.STRATEGIES.keys())
+    available = list(jsx.STRATEGIES.keys()) + ["F_js_hybrid"]
+    strategies = strategies or available
     results: dict = {
         "_meta": {
             "sampled_files": len(files),
@@ -243,7 +271,10 @@ def run(sample_limit: int | None = None, strategies=None, model_name: str = DEFA
         }
     }
     for name in strategies:
-        results[name] = evaluate(files, name, gold, model)
+        if name == "F_js_hybrid":
+            results[name] = evaluate_hybrid(files, gold, model)
+        else:
+            results[name] = evaluate(files, name, gold, model)
     return results
 
 

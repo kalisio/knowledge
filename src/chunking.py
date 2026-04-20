@@ -4,7 +4,10 @@ Exposes three public entry points, one per file type:
 
 - ``chunk_markdown()`` — nb02 winner (AST-Merge + Breadcrumb)
 - ``chunk_js()``       — nb03 winner (Recursive JS + breadcrumb)
-- ``chunk_vue()``      — nb03 winner (SFC dispatcher + breadcrumb)
+- ``chunk_vue()``      — nb03 winner (SFC dispatcher + expanded breadcrumb).
+                          Defaults to the expanded-phrase variant (strategy E);
+                          ``strategy="D_vue_breadcrumb"`` selects the plain
+                          path-only breadcrumb.
 
 Plus ``chunk_files()`` which dispatches by extension.
 
@@ -271,13 +274,29 @@ def chunk_js(
     return out
 
 
-# ── Vue SFC chunking (nb03 winner: D — SFC dispatcher + breadcrumb) ─────────
+# ── Vue SFC chunking (nb03 winner: E — SFC dispatcher + expanded breadcrumb) ─
 
 _SFC_BLOCK_RE = re.compile(
     r"<(template|script|style)\b([^>]*)>(.*?)</\1>",
     re.IGNORECASE | re.DOTALL,
 )
 _LANG_ATTR_RE = re.compile(r"""lang\s*=\s*["']([^"']+)["']""", re.IGNORECASE)
+
+_VUE_CAMEL_RE = re.compile(r"(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])")
+
+
+def _component_phrase(source: str) -> str:
+    """Derive a human-readable phrase from a ``.vue`` filename.
+
+    ``KZoomControl.vue`` → ``"zoom control"``.  Consecutive capitals are
+    kept as one acronym token (``KHTTPClient`` → ``"http client"``); the
+    leading ``K`` prefix and 1-char shards are dropped.
+    """
+    stem = Path(source).stem
+    name = stem[1:] if stem.startswith("K") and len(stem) > 1 else stem
+    words = [w.lower() for w in _VUE_CAMEL_RE.split(name) if w]
+    words = [w for w in words if len(w) > 1]
+    return " ".join(words)
 
 
 def _vue_split_template(body: str, attrs: str, chunk_size: int, chunk_overlap: int) -> list[str]:
@@ -306,10 +325,32 @@ def chunk_vue(
     text: str,
     source: str,
     *,
+    strategy: str = "E_vue_expanded_breadcrumb",
     chunk_size: int = JS_CHUNK_SIZE,
     chunk_overlap: int = JS_CHUNK_OVERLAP,
 ) -> list[dict]:
-    """Chunk one Vue SFC using the nb03 winner strategy (D — breadcrumb)."""
+    """Chunk one Vue SFC.
+
+    Two strategies are available:
+
+    - ``E_vue_expanded_breadcrumb`` (default, nb03 winner) — SFC dispatcher
+      with a breadcrumb that includes both the file path and the component's
+      paraphrased name, so dense retrieval sees surface tokens shared with
+      natural-language queries (``"zoom control"`` matches ``KZoomControl``).
+    - ``D_vue_breadcrumb`` — path-only breadcrumb, retained for callers
+      that prefer minimal per-chunk overhead.
+
+    The ``F_hybrid`` winner from nb03 uses E chunks at retrieval time
+    (dense + BM25 fused with RRF); it is not a chunking strategy.
+    """
+    if strategy not in ("E_vue_expanded_breadcrumb", "D_vue_breadcrumb"):
+        raise ValueError(
+            f"Unknown Vue strategy {strategy!r}. Choose E_vue_expanded_breadcrumb "
+            "or D_vue_breadcrumb."
+        )
+
+    phrase = _component_phrase(source) if strategy == "E_vue_expanded_breadcrumb" else ""
+
     out: list[dict] = []
     idx = 0
     for m in _SFC_BLOCK_RE.finditer(text):
@@ -331,15 +372,23 @@ def chunk_vue(
 
         for piece in pieces:
             if kind == "script":
-                header = f"// {source} [{kind}]"
+                header = (
+                    f"// {source} — {phrase} [{kind}]" if phrase
+                    else f"// {source} [{kind}]"
+                )
             else:
-                header = f"<!-- {source} [{kind}] -->"
-            breadcrumb = {"path": source, "symbol": "", "block": kind}
+                header = (
+                    f"<!-- {source} — {phrase} [{kind}] -->" if phrase
+                    else f"<!-- {source} [{kind}] -->"
+                )
+            breadcrumb = {
+                "path": source, "symbol": phrase, "block": kind,
+            }
             out.append({
                 "text": header + "\n" + piece,
                 "metadata": {
                     "source": source,
-                    "strategy": "D_vue_breadcrumb",
+                    "strategy": strategy,
                     "chunk_index": idx,
                     "breadcrumb": breadcrumb,
                     "block_type": kind,
@@ -362,7 +411,7 @@ STRATEGIES = MD_STRATEGIES
 
 MD_WINNER = "D_ast_breadcrumb"
 JS_WINNER = "D_js_breadcrumb"
-VUE_WINNER = "D_vue_breadcrumb"
+VUE_WINNER = "E_vue_expanded_breadcrumb"
 
 # Legacy alias
 WINNER_STRATEGY = MD_WINNER
