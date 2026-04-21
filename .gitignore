@@ -6,3 +6,7 @@ qdrant_data/
 DS_Store
 outputs/
 .env
+
+# uv / Claude Code
+.venv/
+uv.lock
