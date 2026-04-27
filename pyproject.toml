@@ -13,6 +13,12 @@ dependencies = [
     "rank-bm25>=0.2.2",
     "requests>=2.32.5",
     "sentence-transformers>=5.3.0",
+    "transformers>=4.51.0,<6.0.0",
+    "tokenizers>=0.20.0",
+    "huggingface-hub>=0.30.0",
+    "safetensors>=0.4.5",
+    "accelerate>=1.0.0",
+    "pandas>=2.2.0",
 ]
 
 [tool.pytest.ini_options]

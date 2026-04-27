@@ -1,0 +1,2158 @@
+{
+  "version": "nb05.gold.v2",
+  "counts": {
+    "A_symbol": 60,
+    "B_docs": 80,
+    "C_code": 45,
+    "negative": 15,
+    "total": 200
+  },
+  "queries": [
+    {
+      "id": "A-001",
+      "layer": "A_symbol",
+      "en": "addLayer function",
+      "fr": "fonction addLayer",
+      "gold_sources": [
+        "kdk/docs/api/map/map-mixins.md",
+        "kdk/docs/api/map/globe-mixins.md"
+      ],
+      "notes": "exact API symbol on the map mixin"
+    },
+    {
+      "id": "A-002",
+      "layer": "A_symbol",
+      "en": "removeLayer method",
+      "fr": "méthode removeLayer",
+      "gold_sources": [
+        "kdk/docs/api/map/map-mixins.md",
+        "kdk/docs/api/map/globe-mixins.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-003",
+      "layer": "A_symbol",
+      "en": "KGrid component",
+      "fr": "composant KGrid",
+      "gold_sources": [
+        "kdk/docs/api/core/components/collections.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-004",
+      "layer": "A_symbol",
+      "en": "KCard component",
+      "fr": "composant KCard",
+      "gold_sources": [
+        "kdk/docs/api/core/components/collections.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-005",
+      "layer": "A_symbol",
+      "en": "KFilter component",
+      "fr": "composant KFilter",
+      "gold_sources": [
+        "kdk/docs/api/core/components/collections.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-006",
+      "layer": "A_symbol",
+      "en": "KAction component",
+      "fr": "composant KAction",
+      "gold_sources": [
+        "kdk/docs/api/core/components.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-007",
+      "layer": "A_symbol",
+      "en": "KChart component",
+      "fr": "composant KChart",
+      "gold_sources": [
+        "kdk/docs/api/core/components/graphics.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-008",
+      "layer": "A_symbol",
+      "en": "useActivity composable",
+      "fr": "composable useActivity",
+      "gold_sources": [
+        "kdk/docs/api/core/composables/composables.activity.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-009",
+      "layer": "A_symbol",
+      "en": "useSelection composable",
+      "fr": "composable useSelection",
+      "gold_sources": [
+        "kdk/docs/api/core/composables/composables.selection.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-010",
+      "layer": "A_symbol",
+      "en": "useSession composable",
+      "fr": "composable useSession",
+      "gold_sources": [
+        "kdk/docs/api/core/composables/composables.session.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-011",
+      "layer": "A_symbol",
+      "en": "useStore composable",
+      "fr": "composable useStore",
+      "gold_sources": [
+        "kdk/docs/api/core/composables/composables.store.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-012",
+      "layer": "A_symbol",
+      "en": "useCollection composable",
+      "fr": "composable useCollection",
+      "gold_sources": [
+        "kdk/docs/api/core/composables/composables.collection.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-013",
+      "layer": "A_symbol",
+      "en": "useCatalog composable",
+      "fr": "composable useCatalog",
+      "gold_sources": [
+        "kdk/docs/api/map/composables/composables.catalog.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-014",
+      "layer": "A_symbol",
+      "en": "useHighlight composable",
+      "fr": "composable useHighlight",
+      "gold_sources": [
+        "kdk/docs/api/map/composables/composables.highlight.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-015",
+      "layer": "A_symbol",
+      "en": "useProbe composable",
+      "fr": "composable useProbe",
+      "gold_sources": [
+        "kdk/docs/api/map/composables/composables.probe.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-016",
+      "layer": "A_symbol",
+      "en": "users service",
+      "fr": "service users",
+      "gold_sources": [
+        "kdk/docs/api/core/services/users.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-017",
+      "layer": "A_symbol",
+      "en": "authorisations service",
+      "fr": "service authorisations",
+      "gold_sources": [
+        "kdk/docs/api/core/services/authorisations.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-018",
+      "layer": "A_symbol",
+      "en": "storage service",
+      "fr": "service storage",
+      "gold_sources": [
+        "kdk/docs/api/core/services/storage.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-019",
+      "layer": "A_symbol",
+      "en": "tags service",
+      "fr": "service tags",
+      "gold_sources": [
+        "kdk/docs/api/core/services/tags.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-020",
+      "layer": "A_symbol",
+      "en": "messages service",
+      "fr": "service messages",
+      "gold_sources": [
+        "kdk/docs/api/core/services/messages.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-021",
+      "layer": "A_symbol",
+      "en": "mailer service",
+      "fr": "service mailer",
+      "gold_sources": [
+        "kdk/docs/api/core/services/mailer.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-022",
+      "layer": "A_symbol",
+      "en": "import-export service",
+      "fr": "service import-export",
+      "gold_sources": [
+        "kdk/docs/api/core/services/import-export.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-023",
+      "layer": "A_symbol",
+      "en": "hooks.authentication",
+      "fr": "hooks.authentication",
+      "gold_sources": [
+        "kdk/docs/api/core/hooks/hooks.authentication.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-024",
+      "layer": "A_symbol",
+      "en": "hooks.authorisations",
+      "fr": "hooks.authorisations",
+      "gold_sources": [
+        "kdk/docs/api/core/hooks/hooks.authorisations.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-025",
+      "layer": "A_symbol",
+      "en": "hooks.query",
+      "fr": "hooks.query",
+      "gold_sources": [
+        "kdk/docs/api/core/hooks/hooks.query.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-026",
+      "layer": "A_symbol",
+      "en": "hooks.storage",
+      "fr": "hooks.storage",
+      "gold_sources": [
+        "kdk/docs/api/core/hooks/hooks.storage.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-027",
+      "layer": "A_symbol",
+      "en": "hooks.logger",
+      "fr": "hooks.logger",
+      "gold_sources": [
+        "kdk/docs/api/core/hooks/hooks.logger.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-028",
+      "layer": "A_symbol",
+      "en": "mixin.base-activity",
+      "fr": "mixin.base-activity",
+      "gold_sources": [
+        "kdk/docs/api/core/mixins/mixins.base-activity.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-029",
+      "layer": "A_symbol",
+      "en": "mixin.base-editor",
+      "fr": "mixin.base-editor",
+      "gold_sources": [
+        "kdk/docs/api/core/mixins/mixins.base-editor.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-030",
+      "layer": "A_symbol",
+      "en": "mixin.feature-selection",
+      "fr": "mixin.feature-selection",
+      "gold_sources": [
+        "kdk/docs/api/map/map-mixins.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-031",
+      "layer": "A_symbol",
+      "en": "utils.layers helper",
+      "fr": "fonction utils.layers",
+      "gold_sources": [
+        "kdk/docs/api/map/utilities/utils.layers.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-032",
+      "layer": "A_symbol",
+      "en": "utils.features helper",
+      "fr": "fonction utils.features",
+      "gold_sources": [
+        "kdk/docs/api/map/utilities/utils.features.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-033",
+      "layer": "A_symbol",
+      "en": "utils.style helper",
+      "fr": "fonction utils.style",
+      "gold_sources": [
+        "kdk/docs/api/map/utilities/utils.style.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-034",
+      "layer": "A_symbol",
+      "en": "utils.capture helper",
+      "fr": "fonction utils.capture",
+      "gold_sources": [
+        "kdk/docs/api/map/utilities/utils.capture.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-035",
+      "layer": "A_symbol",
+      "en": "utils.locale helper",
+      "fr": "fonction utils.locale",
+      "gold_sources": [
+        "kdk/docs/api/core/utilities/utils.locale.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-036",
+      "layer": "A_symbol",
+      "en": "utils.colors helper",
+      "fr": "fonction utils.colors",
+      "gold_sources": [
+        "kdk/docs/api/core/utilities/utils.colors.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-037",
+      "layer": "A_symbol",
+      "en": "utils.account helper",
+      "fr": "fonction utils.account",
+      "gold_sources": [
+        "kdk/docs/api/core/utilities/utils.account.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-038",
+      "layer": "A_symbol",
+      "en": "useWeather composable",
+      "fr": "composable useWeather",
+      "gold_sources": [
+        "kdk/docs/api/map/composables/composables.weather.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-039",
+      "layer": "A_symbol",
+      "en": "useMeasure composable",
+      "fr": "composable useMeasure",
+      "gold_sources": [
+        "kdk/docs/api/map/composables/composables.measure.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-040",
+      "layer": "A_symbol",
+      "en": "directives reference",
+      "fr": "référence des directives",
+      "gold_sources": [
+        "kdk/docs/api/core/directives.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "A-041",
+      "layer": "A_symbol",
+      "en": "useContext composable",
+      "fr": "composable useContext",
+      "gold_sources": [
+        "kdk/docs/api/core/composables/composables.context.md"
+      ],
+      "notes": "added: covers context composable not in initial set"
+    },
+    {
+      "id": "A-042",
+      "layer": "A_symbol",
+      "en": "useScreen composable",
+      "fr": "composable useScreen",
+      "gold_sources": [
+        "kdk/docs/api/core/composables/composables.screen.md"
+      ],
+      "notes": "added"
+    },
+    {
+      "id": "A-043",
+      "layer": "A_symbol",
+      "en": "useLayout composable",
+      "fr": "composable useLayout",
+      "gold_sources": [
+        "kdk/docs/api/core/composables/composables.layout.md"
+      ],
+      "notes": "added"
+    },
+    {
+      "id": "A-044",
+      "layer": "A_symbol",
+      "en": "KForm component",
+      "fr": "composant KForm",
+      "gold_sources": [
+        "kdk/core/client/components/form/KForm.vue",
+        "kdk/docs/api/core/components.md"
+      ],
+      "notes": "v2: exact form component lookup"
+    },
+    {
+      "id": "A-045",
+      "layer": "A_symbol",
+      "en": "KSelectField component",
+      "fr": "composant KSelectField",
+      "gold_sources": [
+        "kdk/core/client/components/form/KSelectField.vue"
+      ],
+      "notes": "v2: form field component"
+    },
+    {
+      "id": "A-046",
+      "layer": "A_symbol",
+      "en": "KDateTimeRangeField component",
+      "fr": "champ KDateTimeRangeField",
+      "gold_sources": [
+        "kdk/core/client/components/form/KDateTimeRangeField.vue"
+      ],
+      "notes": "v2: date range form field"
+    },
+    {
+      "id": "A-047",
+      "layer": "A_symbol",
+      "en": "KLocationSearch component",
+      "fr": "composant KLocationSearch",
+      "gold_sources": [
+        "kdk/map/client/components/location/KLocationSearch.vue"
+      ],
+      "notes": "v2: map location search UI"
+    },
+    {
+      "id": "A-048",
+      "layer": "A_symbol",
+      "en": "KLayerEditor component",
+      "fr": "composant KLayerEditor",
+      "gold_sources": [
+        "kdk/map/client/components/KLayerEditor.vue"
+      ],
+      "notes": "v2: layer editing UI"
+    },
+    {
+      "id": "A-049",
+      "layer": "A_symbol",
+      "en": "KStyleManager component",
+      "fr": "composant KStyleManager",
+      "gold_sources": [
+        "kdk/map/client/components/styles/KStyleManager.vue"
+      ],
+      "notes": "v2: style management UI"
+    },
+    {
+      "id": "A-050",
+      "layer": "A_symbol",
+      "en": "KTimeSeries component",
+      "fr": "widget KTimeSeries",
+      "gold_sources": [
+        "kdk/map/client/components/widget/KTimeSeries.vue",
+        "kdk/docs/api/map/utilities/utils.time-series.md"
+      ],
+      "notes": "v2: time series widget"
+    },
+    {
+      "id": "A-051",
+      "layer": "A_symbol",
+      "en": "KFeaturesTable component",
+      "fr": "tableau KFeaturesTable",
+      "gold_sources": [
+        "kdk/map/client/components/KFeaturesTable.vue"
+      ],
+      "notes": "v2: feature table UI"
+    },
+    {
+      "id": "A-052",
+      "layer": "A_symbol",
+      "en": "KSearchTool component",
+      "fr": "outil KSearchTool",
+      "gold_sources": [
+        "kdk/map/client/components/tools/KSearchTool.vue"
+      ],
+      "notes": "v2: map search tool"
+    },
+    {
+      "id": "A-053",
+      "layer": "A_symbol",
+      "en": "KGeolocateTool component",
+      "fr": "outil KGeolocateTool",
+      "gold_sources": [
+        "kdk/map/client/components/tools/KGeolocateTool.vue"
+      ],
+      "notes": "v2: geolocation tool"
+    },
+    {
+      "id": "A-054",
+      "layer": "A_symbol",
+      "en": "KZoomControl component",
+      "fr": "contrôle KZoomControl",
+      "gold_sources": [
+        "kdk/map/client/components/stickies/KZoomControl.vue"
+      ],
+      "notes": "v2: sticky map control"
+    },
+    {
+      "id": "A-055",
+      "layer": "A_symbol",
+      "en": "KProjectManager component",
+      "fr": "composant KProjectManager",
+      "gold_sources": [
+        "kdk/map/client/components/catalog/KProjectManager.vue"
+      ],
+      "notes": "v2: project/catalog management"
+    },
+    {
+      "id": "A-056",
+      "layer": "A_symbol",
+      "en": "KLayerLegend component",
+      "fr": "légende KLayerLegend",
+      "gold_sources": [
+        "kdk/map/client/components/legend/KLayerLegend.vue"
+      ],
+      "notes": "v2: layer legend UI"
+    },
+    {
+      "id": "A-057",
+      "layer": "A_symbol",
+      "en": "KFeatureEditor component",
+      "fr": "éditeur KFeatureEditor",
+      "gold_sources": [
+        "kdk/map/client/components/KFeatureEditor.vue"
+      ],
+      "notes": "v2: feature editing UI"
+    },
+    {
+      "id": "A-058",
+      "layer": "A_symbol",
+      "en": "KMessageComposer component",
+      "fr": "composant KMessageComposer",
+      "gold_sources": [
+        "kdk/core/client/components/messages/KMessageComposer.vue"
+      ],
+      "notes": "v2: messaging UI"
+    },
+    {
+      "id": "A-059",
+      "layer": "A_symbol",
+      "en": "hooks.schemas",
+      "fr": "hooks.schemas",
+      "gold_sources": [
+        "kdk/docs/api/core/hooks/hooks.schemas.md",
+        "kdk/core/api/hooks/hooks.schemas.js"
+      ],
+      "notes": "v2: schema hook lookup"
+    },
+    {
+      "id": "A-060",
+      "layer": "A_symbol",
+      "en": "utils.offline helper",
+      "fr": "utilitaire utils.offline",
+      "gold_sources": [
+        "kdk/docs/api/core/utilities/utils.offline.md",
+        "kdk/core/client/utils/utils.offline.js"
+      ],
+      "notes": "v2: offline utility lookup"
+    },
+    {
+      "id": "B-001",
+      "layer": "B_docs",
+      "en": "How do I add a new layer to a map?",
+      "fr": "Comment ajouter une nouvelle couche à la carte ?",
+      "gold_sources": [
+        "kdk/docs/api/map/map-mixins.md",
+        "kdk/docs/api/map/globe-mixins.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-002",
+      "layer": "B_docs",
+      "en": "How do I show or hide a layer at runtime?",
+      "fr": "Comment afficher ou masquer une couche dynamiquement ?",
+      "gold_sources": [
+        "kdk/docs/api/map/map-mixins.md",
+        "kdk/docs/api/map/globe-mixins.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-003",
+      "layer": "B_docs",
+      "en": "How does the layer catalog work?",
+      "fr": "Comment fonctionne le catalogue de couches ?",
+      "gold_sources": [
+        "kdk/docs/api/map/composables/composables.catalog.md",
+        "kdk/docs/api/map/utilities/utils.catalog.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-004",
+      "layer": "B_docs",
+      "en": "How is feature selection implemented in the map plugin?",
+      "fr": "Comment fonctionne la sélection d'entités sur la carte ?",
+      "gold_sources": [
+        "kdk/docs/api/map/map-mixins.md",
+        "kdk/docs/api/map/composables/composables.selection.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-005",
+      "layer": "B_docs",
+      "en": "How can I capture the map view as an image?",
+      "fr": "Comment exporter la carte en image ?",
+      "gold_sources": [
+        "kdk/docs/api/map/utilities/utils.capture.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-006",
+      "layer": "B_docs",
+      "en": "How do I configure user authentication?",
+      "fr": "Comment configurer l'authentification des utilisateurs ?",
+      "gold_sources": [
+        "kdk/docs/api/core/hooks/hooks.authentication.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-007",
+      "layer": "B_docs",
+      "en": "How does the authorisation system control access?",
+      "fr": "Comment fonctionne le contrôle d'accès par autorisations ?",
+      "gold_sources": [
+        "kdk/docs/api/core/hooks/hooks.authorisations.md",
+        "kdk/docs/api/core/services/authorisations.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-008",
+      "layer": "B_docs",
+      "en": "How do I send a transactional email from a service?",
+      "fr": "Comment envoyer un email transactionnel depuis un service ?",
+      "gold_sources": [
+        "kdk/docs/api/core/services/mailer.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-009",
+      "layer": "B_docs",
+      "en": "How do I store a file uploaded by a user?",
+      "fr": "Comment stocker un fichier uploadé par un utilisateur ?",
+      "gold_sources": [
+        "kdk/docs/api/core/services/storage.md",
+        "kdk/docs/api/core/hooks/hooks.storage.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-010",
+      "layer": "B_docs",
+      "en": "How do I tag items with arbitrary keywords?",
+      "fr": "Comment tagger des items avec des mots-clés ?",
+      "gold_sources": [
+        "kdk/docs/api/core/services/tags.md",
+        "kdk/docs/api/core/hooks/hooks.tags.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-011",
+      "layer": "B_docs",
+      "en": "How do I send a push notification to a subscriber?",
+      "fr": "Comment envoyer une notification push à un abonné ?",
+      "gold_sources": [
+        "kdk/docs/api/core/services/push.md",
+        "kdk/docs/api/core/hooks/hooks.push.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-012",
+      "layer": "B_docs",
+      "en": "How do I import or export a dataset?",
+      "fr": "Comment importer ou exporter des données ?",
+      "gold_sources": [
+        "kdk/docs/api/core/services/import-export.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-013",
+      "layer": "B_docs",
+      "en": "How do I localise the UI in another language?",
+      "fr": "Comment internationaliser l'interface ?",
+      "gold_sources": [
+        "kdk/docs/api/core/utilities/utils.locale.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-014",
+      "layer": "B_docs",
+      "en": "How can the app keep working without a network connection?",
+      "fr": "Comment faire fonctionner l'application hors ligne ?",
+      "gold_sources": [
+        "kdk/docs/api/core/utilities/utils.offline.md",
+        "kdk/docs/api/core/composables/composables.pwa.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-015",
+      "layer": "B_docs",
+      "en": "How do I display a chart in the dashboard?",
+      "fr": "Comment afficher un graphique dans le tableau de bord ?",
+      "gold_sources": [
+        "kdk/docs/api/core/components/graphics.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-016",
+      "layer": "B_docs",
+      "en": "How do I read or update the user session state?",
+      "fr": "Comment lire ou modifier l'état de la session utilisateur ?",
+      "gold_sources": [
+        "kdk/docs/api/core/composables/composables.session.md",
+        "kdk/docs/api/core/composables/composables.user.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-017",
+      "layer": "B_docs",
+      "en": "How do I hook into the request query before it hits the database?",
+      "fr": "Comment intercepter une requête avant qu'elle n'arrive en base ?",
+      "gold_sources": [
+        "kdk/docs/api/core/hooks/hooks.query.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-018",
+      "layer": "B_docs",
+      "en": "How do I deploy a Kalisio application to production?",
+      "fr": "Comment déployer une application Kalisio en production ?",
+      "gold_sources": [
+        "kdk/docs/guides/development/deploy.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-019",
+      "layer": "B_docs",
+      "en": "How do I set up the development environment?",
+      "fr": "Comment mettre en place l'environnement de développement ?",
+      "gold_sources": [
+        "kdk/docs/guides/development/setup.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-020",
+      "layer": "B_docs",
+      "en": "How do I run the test suite?",
+      "fr": "Comment lancer les tests ?",
+      "gold_sources": [
+        "kdk/docs/guides/development/test.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-021",
+      "layer": "B_docs",
+      "en": "How do I configure the application for a target environment?",
+      "fr": "Comment configurer l'application pour un environnement cible ?",
+      "gold_sources": [
+        "kdk/docs/guides/development/configure.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-022",
+      "layer": "B_docs",
+      "en": "What changed when migrating to version 2.7?",
+      "fr": "Quels changements pour la migration vers la 2.7 ?",
+      "gold_sources": [
+        "kdk/docs/guides/migration/v2.7.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-023",
+      "layer": "B_docs",
+      "en": "How does the global architecture of the SDK fit together?",
+      "fr": "Comment s'articule l'architecture globale du SDK ?",
+      "gold_sources": [
+        "kdk/docs/architecture/global-architecture.md",
+        "kdk/docs/architecture/main-concepts.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-024",
+      "layer": "B_docs",
+      "en": "What is KDK and what does it do?",
+      "fr": "Qu'est-ce que le KDK et à quoi ça sert ?",
+      "gold_sources": [
+        "kdk/docs/about/introduction.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-025",
+      "layer": "B_docs",
+      "en": "How do I probe values from a weather layer?",
+      "fr": "Comment échantillonner les valeurs d'une couche météo ?",
+      "gold_sources": [
+        "kdk/docs/api/map/composables/composables.probe.md",
+        "kdk/docs/api/map/composables/composables.weather.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-026",
+      "layer": "B_docs",
+      "en": "How do I measure distances or areas on the map?",
+      "fr": "Comment mesurer des distances ou des surfaces sur la carte ?",
+      "gold_sources": [
+        "kdk/docs/api/map/composables/composables.measure.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-027",
+      "layer": "B_docs",
+      "en": "How do I project coordinates into another reference system?",
+      "fr": "Comment projeter des coordonnées dans un autre système de référence ?",
+      "gold_sources": [
+        "kdk/docs/api/map/composables/composables.project.md",
+        "kdk/docs/api/map/utilities/utils.project.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-028",
+      "layer": "B_docs",
+      "en": "How do I style a vector layer based on feature properties?",
+      "fr": "Comment styliser une couche vectorielle en fonction des propriétés des entités ?",
+      "gold_sources": [
+        "kdk/docs/api/map/utilities/utils.style.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-029",
+      "layer": "B_docs",
+      "en": "How do I render a time series of values on a chart?",
+      "fr": "Comment afficher une série temporelle sur un graphique ?",
+      "gold_sources": [
+        "kdk/docs/api/map/utilities/utils.time-series.md",
+        "kdk/docs/api/core/components/graphics.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-030",
+      "layer": "B_docs",
+      "en": "How do I display a list of items as a sortable, filterable collection?",
+      "fr": "Comment afficher une liste triable et filtrable d'items ?",
+      "gold_sources": [
+        "kdk/docs/api/core/components/collections.md",
+        "kdk/docs/api/core/composables/composables.collection.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "B-031",
+      "layer": "B_docs",
+      "en": "How do I add a custom action to the application menu?",
+      "fr": "Comment ajouter une action personnalisée au menu de l'application ?",
+      "gold_sources": [
+        "kdk/docs/api/core/components.md"
+      ],
+      "notes": "added: KAction usage"
+    },
+    {
+      "id": "B-032",
+      "layer": "B_docs",
+      "en": "How do I restrict an endpoint by user role?",
+      "fr": "Comment restreindre un endpoint selon le rôle utilisateur ?",
+      "gold_sources": [
+        "kdk/docs/api/core/hooks/hooks.authorisations.md",
+        "kdk/docs/api/core/services/authorisations.md"
+      ],
+      "notes": "added: RBAC"
+    },
+    {
+      "id": "B-033",
+      "layer": "B_docs",
+      "en": "How do users reset a forgotten password?",
+      "fr": "Comment permettre aux utilisateurs de réinitialiser leur mot de passe oublié ?",
+      "gold_sources": [
+        "kdk/docs/api/core/services/account.md"
+      ],
+      "notes": "added: account flow"
+    },
+    {
+      "id": "B-034",
+      "layer": "B_docs",
+      "en": "What does the account service handle?",
+      "fr": "À quoi sert le service account ?",
+      "gold_sources": [
+        "kdk/docs/api/core/services/account.md"
+      ],
+      "notes": "added"
+    },
+    {
+      "id": "B-035",
+      "layer": "B_docs",
+      "en": "How do I add a custom hook on a feature query?",
+      "fr": "Comment ajouter un hook personnalisé sur une requête de feature ?",
+      "gold_sources": [
+        "kdk/docs/api/map/hooks/hooks.features.md",
+        "kdk/docs/api/map/hooks/hooks.query.md"
+      ],
+      "notes": "added: map-side hook composition"
+    },
+    {
+      "id": "B-036",
+      "layer": "B_docs",
+      "en": "I am starting a new Kalisio app: should I begin from skeleton or from kapp?",
+      "fr": "Je démarre une nouvelle appli Kalisio : je pars plutôt du skeleton ou de kapp ?",
+      "gold_sources": [
+        "skeleton/README.md",
+        "skeleton/docs/guides/structure.md",
+        "kapp/README.md",
+        "kapp/docs/about/introduction.md"
+      ],
+      "notes": "v2: newcomer comparison across app templates"
+    },
+    {
+      "id": "B-037",
+      "layer": "B_docs",
+      "en": "What is the role of KDK compared with Kano and the application repositories?",
+      "fr": "KDK sert à quoi exactement par rapport à Kano et aux applis comme kapp ou crisis ?",
+      "gold_sources": [
+        "kdk/docs/about/introduction.md",
+        "kano/docs/guides/understanding-kano.md",
+        "kapp/docs/about/introduction.md",
+        "crisis/README.md"
+      ],
+      "notes": "v2: ecosystem orientation"
+    },
+    {
+      "id": "B-038",
+      "layer": "B_docs",
+      "en": "How do I wire KDK into a Quasar/Vue application at boot time?",
+      "fr": "Dans une appli Quasar/Vue, où est-ce qu’on branche KDK au démarrage ?",
+      "gold_sources": [
+        "skeleton/src/boot/kdk.js",
+        "kapp/src/boot/kdk.js",
+        "kano/src/boot/kdk.js",
+        "kdk/docs/guides/development/setup.md"
+      ],
+      "notes": "v2: boot integration"
+    },
+    {
+      "id": "B-039",
+      "layer": "B_docs",
+      "en": "Where are routes declared in Kalisio applications?",
+      "fr": "Les routes de l’application sont déclarées où dans les projets Kalisio ?",
+      "gold_sources": [
+        "skeleton/src/router/routes.js",
+        "kapp/src/router/routes.js",
+        "kano/src/router/routes.js",
+        "crisis/src/router/routes.js"
+      ],
+      "notes": "v2: newcomer route discovery"
+    },
+    {
+      "id": "B-040",
+      "layer": "B_docs",
+      "en": "How are client-side services registered in a Kalisio app?",
+      "fr": "Comment les services côté client sont-ils enregistrés dans une appli Kalisio ?",
+      "gold_sources": [
+        "skeleton/src/services/index.js",
+        "kapp/src/services/index.js",
+        "kano/src/services/index.js",
+        "crisis/src/services/index.js",
+        "kdk/docs/api/core/services.md"
+      ],
+      "notes": "v2: service registration pattern"
+    },
+    {
+      "id": "B-041",
+      "layer": "B_docs",
+      "en": "What is the difference between KDK core components and map components?",
+      "fr": "Quelle est la différence entre les composants core de KDK et les composants map ?",
+      "gold_sources": [
+        "kdk/docs/api/core/components.md",
+        "kdk/docs/api/map/components.md",
+        "kdk/core/client/components/index.js",
+        "kdk/map/client/components/index.js"
+      ],
+      "notes": "v2: API hierarchy question"
+    },
+    {
+      "id": "B-042",
+      "layer": "B_docs",
+      "en": "How do KDK composables relate to the older mixins?",
+      "fr": "Les composables KDK remplacent-ils les mixins, ou les deux cohabitent encore ?",
+      "gold_sources": [
+        "kdk/docs/api/core/composables.md",
+        "kdk/docs/api/core/mixins.md",
+        "kdk/core/client/composables/index.js",
+        "kdk/core/client/mixins/index.js"
+      ],
+      "notes": "v2: architecture relationship"
+    },
+    {
+      "id": "B-043",
+      "layer": "B_docs",
+      "en": "How do I build a list or card collection with filters and pagination?",
+      "fr": "Pour faire une liste filtrable avec cartes ou pagination, quels composants KDK je dois regarder ?",
+      "gold_sources": [
+        "kdk/docs/api/core/components/collections.md",
+        "kdk/core/client/components/collection/KGrid.vue",
+        "kdk/core/client/components/collection/KFilter.vue",
+        "kdk/core/client/composables/collection-filter.js"
+      ],
+      "notes": "v2: practical collection workflow"
+    },
+    {
+      "id": "B-044",
+      "layer": "B_docs",
+      "en": "Where should I look to understand forms generated from schemas?",
+      "fr": "Je veux comprendre les formulaires générés depuis les schémas, je regarde quoi ?",
+      "gold_sources": [
+        "kdk/core/client/components/form/KForm.vue",
+        "kdk/docs/api/core/composables/composables.schema.md",
+        "kdk/core/common/schema.js",
+        "kdk/docs/api/core/hooks/hooks.schemas.md"
+      ],
+      "notes": "v2: schema/form workflow"
+    },
+    {
+      "id": "B-045",
+      "layer": "B_docs",
+      "en": "How is authentication handled on the API side?",
+      "fr": "Côté API, l’authentification est gérée à quel endroit ?",
+      "gold_sources": [
+        "kdk/docs/api/core/hooks/hooks.authentication.md",
+        "kdk/core/api/authentication.js",
+        "kdk/core/api/hooks/hooks.authentication.js",
+        "kdk/core/api/services/account/account.service.js"
+      ],
+      "notes": "v2: senior engineer API reuse"
+    },
+    {
+      "id": "B-046",
+      "layer": "B_docs",
+      "en": "How are permissions and authorisations modeled?",
+      "fr": "Les permissions et les authorisations sont modélisées où ?",
+      "gold_sources": [
+        "kdk/docs/api/core/services/authorisations.md",
+        "kdk/docs/api/core/hooks/hooks.authorisations.md",
+        "kdk/core/common/permissions.js",
+        "crisis/common/permissions.mjs"
+      ],
+      "notes": "v2: cross-repo permission question"
+    },
+    {
+      "id": "B-047",
+      "layer": "B_docs",
+      "en": "How does file upload and storage work in KDK?",
+      "fr": "Comment fonctionne l’upload et le stockage de fichiers dans KDK ?",
+      "gold_sources": [
+        "kdk/docs/api/core/services/storage.md",
+        "kdk/docs/api/core/hooks/hooks.storage.md",
+        "kdk/core/api/services/storage/storage.service.js",
+        "kdk/core/client/storage.js"
+      ],
+      "notes": "v2: storage workflow"
+    },
+    {
+      "id": "B-048",
+      "layer": "B_docs",
+      "en": "How are tags managed and filtered in the UI?",
+      "fr": "Pour gérer des tags et filtrer dessus dans l’interface, quelles briques KDK sont prévues ?",
+      "gold_sources": [
+        "kdk/docs/api/core/services/tags.md",
+        "kdk/docs/api/core/utilities/utils.tags.md",
+        "kdk/core/client/components/tags/KTagManager.vue",
+        "kdk/core/client/components/collection/KTagsFilterControl.vue"
+      ],
+      "notes": "v2: tags workflow"
+    },
+    {
+      "id": "B-049",
+      "layer": "B_docs",
+      "en": "How do messages and timelines work in the core UI?",
+      "fr": "Les messages et les timelines dans le core UI, ça s’appuie sur quels composants ?",
+      "gold_sources": [
+        "kdk/docs/api/core/services/messages.md",
+        "kdk/core/client/components/messages/KMessagesTimeLine.vue",
+        "kdk/core/client/components/messages/KMessageComposer.vue",
+        "kdk/core/client/composables/messages.js"
+      ],
+      "notes": "v2: messaging workflow"
+    },
+    {
+      "id": "B-050",
+      "layer": "B_docs",
+      "en": "How is offline/PWA support implemented?",
+      "fr": "Le mode offline/PWA est implémenté où dans KDK et les applis ?",
+      "gold_sources": [
+        "kdk/docs/api/core/composables/composables.pwa.md",
+        "kdk/docs/api/core/utilities/utils.offline.md",
+        "kdk/core/client/hooks/hooks.offline.js",
+        "skeleton/src-pwa/custom-service-worker.js"
+      ],
+      "notes": "v2: PWA/offline workflow"
+    },
+    {
+      "id": "B-051",
+      "layer": "B_docs",
+      "en": "How do I configure a Kalisio application for deployment?",
+      "fr": "Pour configurer une appli Kalisio avant déploiement, quels fichiers et guides sont pertinents ?",
+      "gold_sources": [
+        "kdk/docs/guides/development/configure.md",
+        "kdk/docs/guides/development/deploy.md",
+        "skeleton/config/default.js",
+        "kapp/config/default.js"
+      ],
+      "notes": "v2: deployment/configuration"
+    },
+    {
+      "id": "B-052",
+      "layer": "B_docs",
+      "en": "How do I publish or release a KDK-based application?",
+      "fr": "Comment se passe la publication ou la release d’une appli basée sur KDK ?",
+      "gold_sources": [
+        "kdk/docs/guides/development/publish.md",
+        "kdk/docs/guides/development/deploy.md",
+        "kdk/docs/guides/development/configure.md"
+      ],
+      "notes": "v2: release workflow; v2.1: gold sources aligned with indexed corpus"
+    },
+    {
+      "id": "B-053",
+      "layer": "B_docs",
+      "en": "What changed in the KDK migration guides around v2.5 to v2.8?",
+      "fr": "Pour migrer entre les versions 2.5, 2.6, 2.7 et 2.8 de KDK, je dois lire quelles notes ?",
+      "gold_sources": [
+        "kdk/docs/guides/migration/v2.5.md",
+        "kdk/docs/guides/migration/v2.6.md",
+        "kdk/docs/guides/migration/v2.7.md",
+        "kdk/docs/guides/migration/v2.8.md"
+      ],
+      "notes": "v2: migration overview"
+    },
+    {
+      "id": "B-054",
+      "layer": "B_docs",
+      "en": "How does Kano bootstrap a map or globe activity?",
+      "fr": "Dans Kano, comment l’activité carte ou globe est-elle montée au démarrage ?",
+      "gold_sources": [
+        "kano/src/components/MapActivity.vue",
+        "kano/src/components/GlobeActivity.vue",
+        "kano/src/router/routes.js",
+        "kano/docs/guides/understanding-kano.md"
+      ],
+      "notes": "v2: Kano activity architecture"
+    },
+    {
+      "id": "B-055",
+      "layer": "B_docs",
+      "en": "How do I add custom layers in Kano?",
+      "fr": "Dans Kano, comment j’ajoute mes propres couches métier ?",
+      "gold_sources": [
+        "kano/docs/guides/customizing-kano.md",
+        "kano/docs/guides/kano-api.md",
+        "kdk/docs/api/map/composables/composables.catalog.md",
+        "kdk/docs/api/map/utilities/utils.catalog.md"
+      ],
+      "notes": "v2: Kano customization; v2.1: gold sources aligned with indexed corpus"
+    },
+    {
+      "id": "B-056",
+      "layer": "B_docs",
+      "en": "How are OGC or sensor layers configured in Kano?",
+      "fr": "Les couches OGC ou capteurs dans Kano se configurent où ?",
+      "gold_sources": [
+        "kano/docs/guides/advanced-usage.md",
+        "kano/docs/guides/customizing-kano.md",
+        "kano/docs/guides/installing-services.md",
+        "kdk/docs/api/map/utilities/utils.layers.md"
+      ],
+      "notes": "v2: Kano layer examples; v2.1: gold sources aligned with indexed corpus"
+    },
+    {
+      "id": "B-057",
+      "layer": "B_docs",
+      "en": "How does Kano connect to companion services like geokoder or weacast?",
+      "fr": "Kano se connecte comment aux services comme geokoder, weacast ou hubeau ?",
+      "gold_sources": [
+        "kano/docs/guides/installing-services.md",
+        "kano/docs/guides/installing-kano.md",
+        "kano/docs/reference/configuration.md"
+      ],
+      "notes": "v2: service integration; v2.1: gold sources aligned with indexed corpus"
+    },
+    {
+      "id": "B-058",
+      "layer": "B_docs",
+      "en": "Where is Kano configuration documented and implemented?",
+      "fr": "La configuration Kano est documentée et chargée à quels endroits ?",
+      "gold_sources": [
+        "kano/docs/reference/configuration.md",
+        "kano/config/default.js",
+        "kano/src/boot/kdk.js",
+        "kano/docs/guides/kano-api.md"
+      ],
+      "notes": "v2: Kano config; v2.1: gold sources aligned with indexed corpus"
+    },
+    {
+      "id": "B-059",
+      "layer": "B_docs",
+      "en": "What is the relationship between Kano and KDK map catalog utilities?",
+      "fr": "Le catalogue de Kano s’appuie sur quelles parties du plugin map de KDK ?",
+      "gold_sources": [
+        "kano/src/components/MapActivity.vue",
+        "kdk/docs/api/map/composables/composables.catalog.md",
+        "kdk/docs/api/map/utilities/utils.catalog.md",
+        "kdk/map/client/components/catalog/KLayersPanel.vue"
+      ],
+      "notes": "v2: cross-repo catalog relationship"
+    },
+    {
+      "id": "B-060",
+      "layer": "B_docs",
+      "en": "How are guided tours declared in Kalisio apps?",
+      "fr": "Les visites guidées dans les applis Kalisio, elles sont déclarées où ?",
+      "gold_sources": [
+        "kano/src/tours/index.js",
+        "kapp/src/tours/index.js",
+        "crisis/src/tours/index.js",
+        "kdk/core/client/components/app/KTour.vue"
+      ],
+      "notes": "v2: tours pattern"
+    },
+    {
+      "id": "B-061",
+      "layer": "B_docs",
+      "en": "How does Crisis organize events, plans, organisations and groups?",
+      "fr": "Dans Crisis, comment s’articulent les événements, les plans, les organisations et les groupes ?",
+      "gold_sources": [
+        "crisis/README.md",
+        "crisis/src/components/EventsActivity.vue",
+        "crisis/src/components/PlansActivity.vue",
+        "crisis/src/components/OrganisationMenu.vue",
+        "crisis/src/components/PlanMenu.vue"
+      ],
+      "notes": "v2: Crisis domain orientation"
+    },
+    {
+      "id": "B-062",
+      "layer": "B_docs",
+      "en": "Where is the Crisis event workflow implemented?",
+      "fr": "Le workflow des événements dans Crisis est implémenté où ?",
+      "gold_sources": [
+        "crisis/src/components/EventTemplateWorkflowEditor.vue",
+        "crisis/src/components/EventTemplateWorkflowForm.vue",
+        "crisis/src/schemas/event-templates.update-workflow.json",
+        "crisis/test/event-workflow.test.mjs"
+      ],
+      "notes": "v2: Crisis workflow"
+    },
+    {
+      "id": "B-063",
+      "layer": "B_docs",
+      "en": "How are Crisis event templates created and edited?",
+      "fr": "Dans Crisis, la création et l’édition des modèles d’événements passent par quels composants ?",
+      "gold_sources": [
+        "crisis/src/components/EventTemplateEditor.vue",
+        "crisis/src/components/EventTemplateCard.vue",
+        "crisis/src/components/EventTemplatesActivity.vue",
+        "crisis/src/schemas/event-templates.create.json"
+      ],
+      "notes": "v2: Crisis templates"
+    },
+    {
+      "id": "B-064",
+      "layer": "B_docs",
+      "en": "Where are Crisis plan templates and plan objectives handled?",
+      "fr": "Les modèles de plans et les objectifs de plan dans Crisis sont gérés où ?",
+      "gold_sources": [
+        "crisis/src/components/PlanTemplateCard.vue",
+        "crisis/src/components/PlanTemplatesActivity.vue",
+        "crisis/src/components/PlanObjectivesEditor.vue",
+        "crisis/src/components/PlanObjectiveItem.vue"
+      ],
+      "notes": "v2: Crisis plans"
+    },
+    {
+      "id": "B-065",
+      "layer": "B_docs",
+      "en": "How does Crisis archive events and plans?",
+      "fr": "L’archivage des événements et des plans dans Crisis se fait avec quels scripts ou composants ?",
+      "gold_sources": [
+        "crisis/src/components/ArchivedEventsActivity.vue",
+        "crisis/src/components/ArchivedPlansActivity.vue",
+        "crisis/tools/EventArchiving_MongoAtlas.js",
+        "crisis/tools/PlanArchiving_MongoAtlas.js"
+      ],
+      "notes": "v2: Crisis archiving"
+    },
+    {
+      "id": "B-066",
+      "layer": "B_docs",
+      "en": "How are Crisis forms constrained by JSON schemas?",
+      "fr": "Dans Crisis, les formulaires événements/plans sont contraints par quels schémas JSON ?",
+      "gold_sources": [
+        "crisis/src/schemas/events.create.json",
+        "crisis/src/schemas/events.update.json",
+        "crisis/src/schemas/plans.create.json",
+        "crisis/src/schemas/plans.update.json"
+      ],
+      "notes": "v2: Crisis schema usage"
+    },
+    {
+      "id": "B-067",
+      "layer": "B_docs",
+      "en": "Where is Crisis map integration defined?",
+      "fr": "L’intégration carte dans Crisis est définie où ?",
+      "gold_sources": [
+        "crisis/src/components/MapActivity.vue",
+        "crisis/src/components/CatalogActivity.vue",
+        "crisis/src/tours/catalog.js",
+        "kdk/docs/api/map/introduction.md"
+      ],
+      "notes": "v2: Crisis map reuse"
+    },
+    {
+      "id": "B-068",
+      "layer": "B_docs",
+      "en": "How is the Crisis user onboarding or tour content organized?",
+      "fr": "Les contenus d’aide et d’onboarding dans Crisis sont organisés comment ?",
+      "gold_sources": [
+        "crisis/src/tours/index.js",
+        "crisis/src/tours/create-event.js",
+        "crisis/src/tours/navigation-bar.js",
+        "crisis/src/tours/side-nav.js"
+      ],
+      "notes": "v2: Crisis onboarding; v2.1: gold sources aligned with indexed corpus"
+    },
+    {
+      "id": "B-069",
+      "layer": "B_docs",
+      "en": "What does kapp demonstrate compared with a real product app?",
+      "fr": "kapp sert à démontrer quoi par rapport à une vraie appli produit ?",
+      "gold_sources": [
+        "kapp/README.md",
+        "kapp/docs/about/introduction.md",
+        "kapp/src/components/components/ComponentsActivity.vue",
+        "kapp/src/components/layout/LayoutActivity.vue"
+      ],
+      "notes": "v2: kapp role"
+    },
+    {
+      "id": "B-070",
+      "layer": "B_docs",
+      "en": "Where can I see examples of KDK document rendering components?",
+      "fr": "Je cherche des exemples d’affichage de documents avec KDK, je regarde où dans kapp ?",
+      "gold_sources": [
+        "kapp/src/components/document/DocumentActivity.vue",
+        "kdk/core/client/components/document/KDocument.vue",
+        "kdk/core/client/components/document/KPdf.vue",
+        "kdk/core/client/components/document/KMarkdown.vue"
+      ],
+      "notes": "v2: document components"
+    },
+    {
+      "id": "B-071",
+      "layer": "B_docs",
+      "en": "Where can I see examples of KDK editor components?",
+      "fr": "Pour comprendre les éditeurs KDK côté UI, il y a des exemples dans kapp ?",
+      "gold_sources": [
+        "kapp/src/components/editor/EditorActivity.vue",
+        "kdk/core/client/components/editor/KEditor.vue",
+        "kdk/core/client/components/editor/KModalEditor.vue"
+      ],
+      "notes": "v2: editor examples"
+    },
+    {
+      "id": "B-072",
+      "layer": "B_docs",
+      "en": "How are web push features demonstrated in kapp?",
+      "fr": "La démo web push dans kapp passe par quels fichiers ?",
+      "gold_sources": [
+        "kapp/src/components/webpush/WebpushActivity.vue",
+        "kapp/src/schemas/push.create.json",
+        "kdk/docs/api/core/services/push.md",
+        "kdk/core/api/services/push/push.service.js"
+      ],
+      "notes": "v2: push workflow"
+    },
+    {
+      "id": "B-073",
+      "layer": "B_docs",
+      "en": "How is a custom service added in kapp?",
+      "fr": "Dans kapp, l’exemple de service custom est câblé comment ?",
+      "gold_sources": [
+        "kapp/src/services/custom.service.js",
+        "kapp/src/services/index.js",
+        "kapp/src/schemas/custom.get.json",
+        "kapp/api/src/services.js"
+      ],
+      "notes": "v2: custom service example"
+    },
+    {
+      "id": "B-074",
+      "layer": "B_docs",
+      "en": "How is internationalization organized across the apps?",
+      "fr": "L’i18n est organisée comment entre KDK, Kano, kapp, skeleton et Crisis ?",
+      "gold_sources": [
+        "kdk/core/client/i18n/core_fr.json",
+        "kano/src/i18n/app_fr.json",
+        "kapp/src/i18n/app_fr.json",
+        "skeleton/src/i18n/app_fr.json",
+        "crisis/src/i18n/crisis_fr.json"
+      ],
+      "notes": "v2: i18n cross-repo"
+    },
+    {
+      "id": "B-075",
+      "layer": "B_docs",
+      "en": "How do app hooks customize application startup?",
+      "fr": "Les app hooks servent à quoi dans les applis Kalisio ?",
+      "gold_sources": [
+        "skeleton/src/main.hooks.js",
+        "kapp/src/main.hooks.js",
+        "kano/src/app.hooks.js",
+        "crisis/src/app.hooks.js"
+      ],
+      "notes": "v2: app hooks comparison"
+    },
+    {
+      "id": "B-076",
+      "layer": "B_docs",
+      "en": "Where are Feathers API services assembled on the server side?",
+      "fr": "Côté serveur Feathers, les services API sont assemblés où ?",
+      "gold_sources": [
+        "skeleton/api/src/services.js",
+        "kapp/api/src/services.js",
+        "crisis/api/src/services.js",
+        "kdk/core/api/services/index.js"
+      ],
+      "notes": "v2: API service assembly"
+    },
+    {
+      "id": "B-077",
+      "layer": "B_docs",
+      "en": "How are MongoDB models declared for KDK services?",
+      "fr": "Les modèles MongoDB des services KDK sont déclarés où ?",
+      "gold_sources": [
+        "kdk/core/api/models/users.model.mongodb.js",
+        "kdk/core/api/models/tags.model.mongodb.js",
+        "kdk/map/api/models/projects.model.mongodb.js",
+        "kdk/map/api/models/catalog.model.mongodb.js"
+      ],
+      "notes": "v2: database model discovery"
+    },
+    {
+      "id": "B-078",
+      "layer": "B_docs",
+      "en": "How are map projects and catalog entries modeled on the API?",
+      "fr": "Les projets carto et les entrées de catalogue sont modélisés comment côté API ?",
+      "gold_sources": [
+        "kdk/map/api/models/projects.model.mongodb.js",
+        "kdk/map/api/models/catalog.model.mongodb.js",
+        "kdk/map/api/services/projects/projects.hooks.js",
+        "kdk/map/api/services/catalog/catalog.hooks.js"
+      ],
+      "notes": "v2: map API models"
+    },
+    {
+      "id": "B-079",
+      "layer": "B_docs",
+      "en": "How does KDK handle map feature services and feature hooks?",
+      "fr": "Pour les features cartographiques, quels services et hooks KDK interviennent ?",
+      "gold_sources": [
+        "kdk/docs/api/map/hooks/hooks.features.md",
+        "kdk/map/api/services/features/features.service.js",
+        "kdk/map/api/hooks/hooks.features.js",
+        "kdk/map/client/mixins/mixin.feature-service.js"
+      ],
+      "notes": "v2: feature service workflow"
+    },
+    {
+      "id": "B-080",
+      "layer": "B_docs",
+      "en": "How do I style vector layers in 2D and 3D?",
+      "fr": "Pour styliser des couches vectorielles en 2D et en 3D, quelles parties de KDK regarder ?",
+      "gold_sources": [
+        "kdk/docs/api/map/utilities/utils.style.md",
+        "kdk/map/client/leaflet/utils/utils.style.js",
+        "kdk/map/client/cesium/utils/utils.style.js",
+        "kdk/map/client/components/styles/KStyleEditor.vue"
+      ],
+      "notes": "v2: layer styling workflow"
+    },
+    {
+      "id": "C-001",
+      "layer": "C_code",
+      "en": "Where is the addLayer logic implemented for the 2D map?",
+      "fr": "Où est implémentée la logique addLayer pour la carte 2D ?",
+      "gold_sources": [
+        "kdk/core/client/mixins/mixin.service.js",
+        "kdk/map/client/mixins/map/mixin.base-map.js"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "C-002",
+      "layer": "C_code",
+      "en": "Where is the addLayer logic implemented for the 3D globe?",
+      "fr": "Où est implémentée la logique addLayer pour le globe 3D ?",
+      "gold_sources": [
+        "kdk/map/client/mixins/globe/mixin.base-globe.js"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "C-003",
+      "layer": "C_code",
+      "en": "Show the GeoJSON layer mixin for the 2D map",
+      "fr": "Montre le mixin de couches GeoJSON pour la carte 2D",
+      "gold_sources": [
+        "kdk/map/client/mixins/map/mixin.geojson-layers.js"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "C-004",
+      "layer": "C_code",
+      "en": "Show the heatmap layer mixin",
+      "fr": "Montre le mixin de couches heatmap",
+      "gold_sources": [
+        "kdk/map/client/mixins/map/mixin.heatmap-layers.js"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "C-005",
+      "layer": "C_code",
+      "en": "Where is feature selection state managed?",
+      "fr": "Où est géré l'état de sélection des entités ?",
+      "gold_sources": [
+        "kdk/map/client/mixins/mixin.feature-selection.js"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "C-006",
+      "layer": "C_code",
+      "en": "Where is the popup behaviour for the 2D map defined?",
+      "fr": "Où est défini le comportement des popups pour la carte 2D ?",
+      "gold_sources": [
+        "kdk/map/client/mixins/map/mixin.popup.js"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "C-007",
+      "layer": "C_code",
+      "en": "Where is the storage backend service implemented?",
+      "fr": "Où est implémenté le service de stockage de fichiers ?",
+      "gold_sources": [
+        "kdk/core/api/services/storage/storage.service.js"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "C-008",
+      "layer": "C_code",
+      "en": "Where is the users service implemented?",
+      "fr": "Où est implémenté le service users ?",
+      "gold_sources": [
+        "kdk/core/api/services/users/users.service.js"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "C-009",
+      "layer": "C_code",
+      "en": "Where is the authorisations service implemented?",
+      "fr": "Où est implémenté le service d'autorisations ?",
+      "gold_sources": [
+        "kdk/core/api/services/authorisations/authorisations.service.js"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "C-010",
+      "layer": "C_code",
+      "en": "Where is the mailer service implemented?",
+      "fr": "Où est implémenté le service d'envoi d'emails ?",
+      "gold_sources": [
+        "kdk/core/api/services/mailer/mailer.service.js"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "C-011",
+      "layer": "C_code",
+      "en": "Where is the alerts service of the map plugin implemented?",
+      "fr": "Où est implémenté le service d'alertes du plugin cartographique ?",
+      "gold_sources": [
+        "kdk/map/api/services/alerts/alerts.service.js"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "C-012",
+      "layer": "C_code",
+      "en": "Where is the features service of the map plugin implemented?",
+      "fr": "Où est implémenté le service de features du plugin cartographique ?",
+      "gold_sources": [
+        "kdk/map/api/services/features/features.service.js"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "C-013",
+      "layer": "C_code",
+      "en": "Where is the user profile component defined?",
+      "fr": "Où est défini le composant KProfile ?",
+      "gold_sources": [
+        "kdk/core/client/components/account/KProfile.vue"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "C-014",
+      "layer": "C_code",
+      "en": "Where is the chart component implemented?",
+      "fr": "Où est implémenté le composant KChart ?",
+      "gold_sources": [
+        "kdk/core/client/components/chart/KChart.vue"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "C-015",
+      "layer": "C_code",
+      "en": "Where is the data table component implemented?",
+      "fr": "Où est implémenté le composant KDataTable ?",
+      "gold_sources": [
+        "kdk/core/client/components/chart/KDataTable.vue"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "C-016",
+      "layer": "C_code",
+      "en": "Where is the time-series chart component implemented?",
+      "fr": "Où est implémenté le composant KTimeSeriesChart ?",
+      "gold_sources": [
+        "kdk/core/client/components/chart/KTimeSeriesChart.vue"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "C-017",
+      "layer": "C_code",
+      "en": "Where is the about page of the application defined?",
+      "fr": "Où est définie la page « à propos » de l'application ?",
+      "gold_sources": [
+        "kdk/core/client/components/app/KAbout.vue"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "C-018",
+      "layer": "C_code",
+      "en": "Where is the home page component defined?",
+      "fr": "Où est défini le composant KHome de la page d'accueil ?",
+      "gold_sources": [
+        "kdk/core/client/components/app/KHome.vue"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "C-019",
+      "layer": "C_code",
+      "en": "Where is the user settings UI defined?",
+      "fr": "Où est définie l'interface des paramètres utilisateur ?",
+      "gold_sources": [
+        "kdk/core/client/components/app/KSettings.vue"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "C-020",
+      "layer": "C_code",
+      "en": "Where is the password reset component implemented?",
+      "fr": "Où est implémenté KResetPassword ?",
+      "gold_sources": [
+        "kdk/core/client/components/account/KResetPassword.vue"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "C-021",
+      "layer": "C_code",
+      "en": "Where is the popup behaviour for the 3D globe defined?",
+      "fr": "Où est défini le comportement des popups sur le globe 3D ?",
+      "gold_sources": [
+        "kdk/map/client/mixins/globe/mixin.popup.js"
+      ],
+      "notes": "added: globe-side counterpart of C-006"
+    },
+    {
+      "id": "C-022",
+      "layer": "C_code",
+      "en": "Show the GeoJSON layer mixin for the 3D globe",
+      "fr": "Montre le mixin GeoJSON pour le globe 3D",
+      "gold_sources": [
+        "kdk/map/client/mixins/globe/mixin.geojson-layers.js"
+      ],
+      "notes": "added: globe-side counterpart of C-003"
+    },
+    {
+      "id": "C-023",
+      "layer": "C_code",
+      "en": "Where is the file layers mixin defined?",
+      "fr": "Où est défini le mixin pour les couches de fichiers ?",
+      "gold_sources": [
+        "kdk/map/client/mixins/map/mixin.file-layers.js"
+      ],
+      "notes": "added"
+    },
+    {
+      "id": "C-024",
+      "layer": "C_code",
+      "en": "Where is the skeleton main activity implemented?",
+      "fr": "Dans skeleton, l’activité principale est implémentée où ?",
+      "gold_sources": [
+        "skeleton/src/components/Activity.vue",
+        "skeleton/src/components/Index.vue"
+      ],
+      "notes": "v2: app template code lookup"
+    },
+    {
+      "id": "C-025",
+      "layer": "C_code",
+      "en": "Show me the skeleton app routing setup",
+      "fr": "Montre-moi le routage de base dans skeleton",
+      "gold_sources": [
+        "skeleton/src/router/routes.js",
+        "skeleton/src/router/index.js"
+      ],
+      "notes": "v2: routing implementation"
+    },
+    {
+      "id": "C-026",
+      "layer": "C_code",
+      "en": "Where does kapp define its demo activity links?",
+      "fr": "Dans kapp, la liste des activités de démo est définie où ?",
+      "gold_sources": [
+        "kapp/src/components/ActivityLinks.vue",
+        "kapp/src/router/routes.js"
+      ],
+      "notes": "v2: kapp navigation"
+    },
+    {
+      "id": "C-027",
+      "layer": "C_code",
+      "en": "Where is kapp custom service implemented?",
+      "fr": "Le service custom de kapp est implémenté où ?",
+      "gold_sources": [
+        "kapp/src/services/custom.service.js",
+        "kapp/src/services/index.js"
+      ],
+      "notes": "v2: custom service implementation"
+    },
+    {
+      "id": "C-028",
+      "layer": "C_code",
+      "en": "Where is Kano map activity implemented?",
+      "fr": "L’activité carte de Kano est codée où ?",
+      "gold_sources": [
+        "kano/src/components/MapActivity.vue"
+      ],
+      "notes": "v2: Kano map UI"
+    },
+    {
+      "id": "C-029",
+      "layer": "C_code",
+      "en": "Where is Kano globe activity implemented?",
+      "fr": "L’activité globe de Kano est codée où ?",
+      "gold_sources": [
+        "kano/src/components/GlobeActivity.vue"
+      ],
+      "notes": "v2: Kano globe UI"
+    },
+    {
+      "id": "C-030",
+      "layer": "C_code",
+      "en": "Where does Kano load plugins at boot?",
+      "fr": "Kano charge ses plugins au démarrage dans quel fichier ?",
+      "gold_sources": [
+        "kano/src/boot/kdk.js",
+        "kano/src/boot/tour.js",
+        "kano/src/services/index.js"
+      ],
+      "notes": "v2: Kano boot implementation; v2.1: gold sources aligned with indexed corpus"
+    },
+    {
+      "id": "C-031",
+      "layer": "C_code",
+      "en": "Where is the Crisis event editor implemented?",
+      "fr": "L’éditeur d’événement dans Crisis est implémenté où ?",
+      "gold_sources": [
+        "crisis/src/components/EventEditor.vue",
+        "crisis/src/schemas/events.create.json",
+        "crisis/src/schemas/events.update.json"
+      ],
+      "notes": "v2: Crisis event editor"
+    },
+    {
+      "id": "C-032",
+      "layer": "C_code",
+      "en": "Where is the Crisis event log editor implemented?",
+      "fr": "L’éditeur de journal d’événement dans Crisis est où ?",
+      "gold_sources": [
+        "crisis/src/components/EventLogEditor.vue",
+        "crisis/src/components/EventLogsList.vue"
+      ],
+      "notes": "v2: Crisis event logs"
+    },
+    {
+      "id": "C-033",
+      "layer": "C_code",
+      "en": "Where is the Crisis plan editor implemented?",
+      "fr": "L’éditeur de plan dans Crisis est implémenté où ?",
+      "gold_sources": [
+        "crisis/src/components/PlanEditor.vue",
+        "crisis/src/components/PlanObjectivesEditor.vue"
+      ],
+      "notes": "v2: Crisis plan editor"
+    },
+    {
+      "id": "C-034",
+      "layer": "C_code",
+      "en": "Where is Crisis organisation UI implemented?",
+      "fr": "L’interface des organisations dans Crisis est codée où ?",
+      "gold_sources": [
+        "crisis/src/components/OrganisationCard.vue",
+        "crisis/src/components/OrganisationMenu.vue"
+      ],
+      "notes": "v2: Crisis organisation UI"
+    },
+    {
+      "id": "C-035",
+      "layer": "C_code",
+      "en": "Where are Crisis composables for plans and organisations?",
+      "fr": "Les composables Crisis pour les plans et les organisations sont où ?",
+      "gold_sources": [
+        "crisis/src/composables/composable.plan.js",
+        "crisis/src/composables/composable.organisations.js",
+        "crisis/src/composables/index.js"
+      ],
+      "notes": "v2: Crisis composables"
+    },
+    {
+      "id": "C-036",
+      "layer": "C_code",
+      "en": "Where is the KDK collection filter composable implemented?",
+      "fr": "Le composable de filtre de collection KDK est implémenté où ?",
+      "gold_sources": [
+        "kdk/core/client/composables/collection-filter.js"
+      ],
+      "notes": "v2: KDK composable implementation"
+    },
+    {
+      "id": "C-037",
+      "layer": "C_code",
+      "en": "Where is KDK schema composable implemented?",
+      "fr": "Le composable schema de KDK est implémenté où ?",
+      "gold_sources": [
+        "kdk/core/client/composables/schema.js"
+      ],
+      "notes": "v2: schema composable implementation"
+    },
+    {
+      "id": "C-038",
+      "layer": "C_code",
+      "en": "Where is KDK local cache or offline hook implemented?",
+      "fr": "Le cache local ou le hook offline de KDK est implémenté où ?",
+      "gold_sources": [
+        "kdk/core/client/local-cache.js",
+        "kdk/core/client/hooks/hooks.offline.js"
+      ],
+      "notes": "v2: offline implementation"
+    },
+    {
+      "id": "C-039",
+      "layer": "C_code",
+      "en": "Where is KDK map catalog composable implemented?",
+      "fr": "Le composable catalogue du plugin map est implémenté où ?",
+      "gold_sources": [
+        "kdk/map/client/composables/catalog.js"
+      ],
+      "notes": "v2: map catalog composable"
+    },
+    {
+      "id": "C-040",
+      "layer": "C_code",
+      "en": "Where is KDK map location composable implemented?",
+      "fr": "Le composable de localisation carto est implémenté où ?",
+      "gold_sources": [
+        "kdk/map/client/composables/location.js"
+      ],
+      "notes": "v2: map location composable"
+    },
+    {
+      "id": "C-041",
+      "layer": "C_code",
+      "en": "Where is the Leaflet popup utility implemented?",
+      "fr": "L’utilitaire popup Leaflet est dans quel fichier ?",
+      "gold_sources": [
+        "kdk/map/client/leaflet/utils/utils.popup.js"
+      ],
+      "notes": "v2: Leaflet implementation"
+    },
+    {
+      "id": "C-042",
+      "layer": "C_code",
+      "en": "Where is the Cesium feature utility implemented?",
+      "fr": "Les utilitaires features côté Cesium sont implémentés où ?",
+      "gold_sources": [
+        "kdk/map/client/cesium/utils/utils.features.js"
+      ],
+      "notes": "v2: Cesium implementation"
+    },
+    {
+      "id": "C-043",
+      "layer": "C_code",
+      "en": "Where is the map layer import UI implemented?",
+      "fr": "L’interface d’import de couche carto est implémentée où ?",
+      "gold_sources": [
+        "kdk/map/client/components/catalog/KImportLayer.vue",
+        "kdk/map/client/components/catalog/KConnectLayer.vue"
+      ],
+      "notes": "v2: catalog UI implementation"
+    },
+    {
+      "id": "C-044",
+      "layer": "C_code",
+      "en": "Where is the time series toolbar implemented?",
+      "fr": "La barre d’outils des séries temporelles est implémentée où ?",
+      "gold_sources": [
+        "kdk/map/client/components/widget/KTimeSeriesToolbar.vue",
+        "kdk/map/client/components/widget/KTimeSeriesSelector.vue"
+      ],
+      "notes": "v2: time series UI implementation"
+    },
+    {
+      "id": "C-045",
+      "layer": "C_code",
+      "en": "Where is the API users hook implementation?",
+      "fr": "Les hooks API users sont implémentés dans quel fichier ?",
+      "gold_sources": [
+        "kdk/core/api/hooks/hooks.users.js",
+        "kdk/core/api/services/users/users.hooks.js"
+      ],
+      "notes": "v2: API hook implementation"
+    },
+    {
+      "id": "N-001",
+      "layer": "negative",
+      "en": "How do I integrate TensorFlow.js for ML predictions?",
+      "fr": "Comment intégrer TensorFlow.js pour des prédictions ML ?",
+      "gold_sources": [],
+      "notes": "ML stack is out of scope"
+    },
+    {
+      "id": "N-002",
+      "layer": "negative",
+      "en": "Where is the GraphQL schema defined?",
+      "fr": "Où est défini le schéma GraphQL ?",
+      "gold_sources": [],
+      "notes": "Kalisio uses Feathers/REST, not GraphQL"
+    },
+    {
+      "id": "N-003",
+      "layer": "negative",
+      "en": "How do I write a Solidity smart contract?",
+      "fr": "Comment écrire un smart contract en Solidity ?",
+      "gold_sources": [],
+      "notes": "blockchain unrelated"
+    },
+    {
+      "id": "N-004",
+      "layer": "negative",
+      "en": "How do I configure Kubernetes auto-scaling for the API?",
+      "fr": "Comment configurer l'auto-scaling Kubernetes pour l'API ?",
+      "gold_sources": [],
+      "notes": "infra concern, not in repo"
+    },
+    {
+      "id": "N-005",
+      "layer": "negative",
+      "en": "Show me the Stripe payment integration",
+      "fr": "Montre-moi l'intégration de paiement Stripe",
+      "gold_sources": [],
+      "notes": "payments not part of Kalisio"
+    },
+    {
+      "id": "N-006",
+      "layer": "negative",
+      "en": "How do I render a 3D character model with three.js?",
+      "fr": "Comment afficher un modèle de personnage 3D avec three.js ?",
+      "gold_sources": [],
+      "notes": "Cesium for terrain, not generic 3D"
+    },
+    {
+      "id": "N-007",
+      "layer": "negative",
+      "en": "How do I train a YOLO model on satellite images?",
+      "fr": "Comment entraîner un modèle YOLO sur des images satellite ?",
+      "gold_sources": [],
+      "notes": "v2: ML training is outside Kalisio codebase"
+    },
+    {
+      "id": "N-008",
+      "layer": "negative",
+      "en": "Where is the React Native mobile app entry point?",
+      "fr": "Elle est où l’entrée de l’appli mobile React Native ?",
+      "gold_sources": [],
+      "notes": "v2: repositories are Vue/Quasar, not React Native"
+    },
+    {
+      "id": "N-009",
+      "layer": "negative",
+      "en": "How do I configure a Django admin for Kalisio?",
+      "fr": "Comment configurer un admin Django pour Kalisio ?",
+      "gold_sources": [],
+      "notes": "v2: Python/Django stack not present"
+    },
+    {
+      "id": "N-010",
+      "layer": "negative",
+      "en": "Where is the PostgreSQL migration for users?",
+      "fr": "La migration PostgreSQL des users est dans quel dossier ?",
+      "gold_sources": [],
+      "notes": "v2: services use MongoDB models, not PostgreSQL migrations"
+    },
+    {
+      "id": "N-011",
+      "layer": "negative",
+      "en": "How do I add OAuth with Laravel Passport?",
+      "fr": "Comment ajouter OAuth avec Laravel Passport ?",
+      "gold_sources": [],
+      "notes": "v2: PHP/Laravel unrelated"
+    },
+    {
+      "id": "N-012",
+      "layer": "negative",
+      "en": "Where is the Unity scene for the 3D map?",
+      "fr": "La scène Unity de la carte 3D se trouve où ?",
+      "gold_sources": [],
+      "notes": "v2: Cesium/Leaflet web stack, no Unity"
+    },
+    {
+      "id": "N-013",
+      "layer": "negative",
+      "en": "How do I deploy this on AWS Lambda with API Gateway?",
+      "fr": "Comment déployer ça sur AWS Lambda avec API Gateway ?",
+      "gold_sources": [],
+      "notes": "v2: deployment target not documented in corpus"
+    },
+    {
+      "id": "N-014",
+      "layer": "negative",
+      "en": "Where are the Kafka consumers for event processing?",
+      "fr": "Les consumers Kafka pour traiter les événements sont où ?",
+      "gold_sources": [],
+      "notes": "v2: Kafka is not part of the indexed codebase"
+    },
+    {
+      "id": "N-015",
+      "layer": "negative",
+      "en": "How do I use Terraform to provision the Kalisio infrastructure?",
+      "fr": "Où sont les modules Terraform pour provisionner l’infra Kalisio ?",
+      "gold_sources": [],
+      "notes": "v2: Terraform modules are not in corpus"
+    }
+  ]
+}

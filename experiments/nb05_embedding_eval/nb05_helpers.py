@@ -13,12 +13,12 @@ from pathlib import Path
 from typing import Iterable, Literal, Sequence
 
 import numpy as np
-import pandas as pd
 
 
 # --- Gold set ----------------------------------------------------------------
 
-GOLD_SCHEMA_VERSION = "nb05.gold.v1"
+GOLD_SCHEMA_VERSION = "nb05.gold.v2"
+SUPPORTED_GOLD_SCHEMA_VERSIONS = {"nb05.gold.v1", GOLD_SCHEMA_VERSION}
 
 LayerType = Literal["A_symbol", "B_docs", "C_code", "negative"]
 LAYERS: tuple[LayerType, ...] = ("A_symbol", "B_docs", "C_code", "negative")
@@ -35,14 +35,17 @@ class GoldQuery:
 
     @property
     def is_negative(self) -> bool:
+        """Return True when the query is expected to have no gold source."""
         return self.layer == "negative" or not self.gold_sources
 
 
 def load_gold(path: str | Path) -> list[GoldQuery]:
+    """Load the nb05 gold query set from JSON and validate its schema version."""
     payload = json.loads(Path(path).read_text(encoding="utf-8"))
     got = payload.get("version")
-    if got != GOLD_SCHEMA_VERSION:
-        raise ValueError(f"{path} schema version is {got!r}, expected {GOLD_SCHEMA_VERSION!r}")
+    if got not in SUPPORTED_GOLD_SCHEMA_VERSIONS:
+        expected = ", ".join(sorted(SUPPORTED_GOLD_SCHEMA_VERSIONS))
+        raise ValueError(f"{path} schema version is {got!r}, expected one of: {expected}")
     return [
         GoldQuery(
             id=q["id"],
@@ -57,6 +60,7 @@ def load_gold(path: str | Path) -> list[GoldQuery]:
 
 
 def load_gold_validated(path: str | Path, corpus_sources: Iterable[str]) -> list[GoldQuery]:
+    """Load gold queries and fail fast when any gold source is missing from the corpus."""
     queries = load_gold(path)
     corpus_set = set(corpus_sources)
     missing = [
@@ -72,6 +76,7 @@ def load_gold_validated(path: str | Path, corpus_sources: Iterable[str]) -> list
 
 
 def gold_summary(queries: list[GoldQuery]) -> dict[str, int]:
+    """Count gold queries by evaluation layer."""
     counts: dict[str, int] = {layer: 0 for layer in LAYERS}
     for q in queries:
         counts[q.layer] = counts.get(q.layer, 0) + 1
@@ -152,10 +157,23 @@ RECIPES: dict[str, Recipe] = {
         gpu_batch_size=16,
         family="multilingual-dense",
     ),
+    "qwen3-0.6b": Recipe(
+        model_id="Qwen/Qwen3-Embedding-0.6B",
+        short_label="qwen3-0.6b",
+        query_prefix=(
+            "Instruct: Given a developer question in French or English, retrieve "
+            "the relevant Kalisio documentation page or source code file.\nQuery: "
+        ),
+        passage_prefix="",
+        max_tokens=8192,
+        gpu_batch_size=4,
+        family="multilingual-code-dense",
+    ),
 }
 
 
 def load_recipe_model(recipe: Recipe, device: str | None = None):
+    """Instantiate a SentenceTransformer model for one embedding recipe."""
     from sentence_transformers import SentenceTransformer
 
     if device is None:
@@ -178,10 +196,12 @@ def load_recipe_model(recipe: Recipe, device: str | None = None):
 
 
 def _prefix(texts: list[str], prefix: str) -> list[str]:
+    """Apply the model-specific query or passage prefix to each text."""
     return [prefix + t for t in texts] if prefix else texts
 
 
 def _truncate_dim(vectors: np.ndarray, dim: int | None) -> np.ndarray:
+    """Apply optional Matryoshka truncation and renormalize the vectors."""
     if dim is None or dim >= vectors.shape[1]:
         return vectors
     out = vectors[:, :dim]
@@ -191,12 +211,14 @@ def _truncate_dim(vectors: np.ndarray, dim: int | None) -> np.ndarray:
 
 
 def _is_oom(exc: BaseException) -> bool:
+    """Detect CUDA or PyTorch out-of-memory exceptions by type or message."""
     name = type(exc).__name__
     msg = str(exc).lower()
     return name in {"OutOfMemoryError", "CudaOutOfMemoryError"} or "out of memory" in msg
 
 
 def _encode(model, recipe: Recipe, texts: list[str], batch_size: int) -> np.ndarray:
+    """Encode texts with automatic batch-size reduction on OOM failures."""
     bs = max(1, batch_size)
     last: BaseException | None = None
     while bs >= 1:
@@ -226,17 +248,20 @@ def _encode(model, recipe: Recipe, texts: list[str], batch_size: int) -> np.ndar
 
 
 def encode_corpus(model, recipe: Recipe, texts: list[str]) -> np.ndarray:
+    """Encode corpus chunks with passage prefixes and recipe-specific truncation."""
     vecs = _encode(model, recipe, _prefix(texts, recipe.passage_prefix), recipe.gpu_batch_size)
     return _truncate_dim(vecs, recipe.matryoshka_dim)
 
 
 def encode_queries(model, recipe: Recipe, queries: list[str]) -> np.ndarray:
+    """Encode evaluation queries with query prefixes and recipe-specific truncation."""
     bs = max(recipe.gpu_batch_size, 16)
     vecs = _encode(model, recipe, _prefix(queries, recipe.query_prefix), bs)
     return _truncate_dim(vecs, recipe.matryoshka_dim)
 
 
 def truncation_audit(recipe: Recipe, texts: list[str]) -> dict:
+    """Measure how many corpus chunks exceed a recipe's token limit."""
     from transformers import AutoTokenizer
 
     tok = AutoTokenizer.from_pretrained(
@@ -261,6 +286,7 @@ def truncation_audit(recipe: Recipe, texts: list[str]) -> dict:
 
 
 def measure_throughput(model, recipe: Recipe, texts: list[str]) -> dict:
+    """Measure corpus encoding throughput for one loaded embedding model."""
     if not texts:
         return {"chunks_per_sec": 0.0, "n": 0}
     warmup = texts[: min(recipe.gpu_batch_size, len(texts))]
@@ -279,6 +305,7 @@ def measure_throughput(model, recipe: Recipe, texts: list[str]) -> dict:
 # --- Dense / BM25 / RRF ------------------------------------------------------
 
 def dense_rank(query_vecs: np.ndarray, corpus_vecs: np.ndarray) -> np.ndarray:
+    """Rank corpus vectors for each query using dense dot-product similarity."""
     sims = query_vecs @ corpus_vecs.T
     return np.argsort(-sims, axis=1)
 
@@ -287,6 +314,7 @@ _TOKEN_RE = re.compile(r"[\w]+", re.UNICODE)
 
 
 def tokenize(text: str) -> list[str]:
+    """Tokenize text for BM25 with lowercase accent-insensitive matching."""
     # Accent-strip so "géolocaliser" and "geolocaliser" collide (FR typing).
     nfkd = unicodedata.normalize("NFKD", text.lower())
     stripped = "".join(c for c in nfkd if not unicodedata.combining(c))
@@ -300,6 +328,7 @@ def bm25_rank(
     k1: float = 1.5,
     b: float = 0.75,
 ) -> np.ndarray:
+    """Rank corpus chunks for each query with a local BM25 implementation."""
     docs = [tokenize(t) for t in chunk_texts]
     n_docs = len(docs)
     avgdl = sum(len(d) for d in docs) / max(n_docs, 1)
@@ -333,6 +362,7 @@ def bm25_rank(
 
 
 def rrf_fuse(*rank_matrices: np.ndarray, k_rrf: int = 60) -> np.ndarray:
+    """Fuse several rank matrices using Reciprocal Rank Fusion."""
     if not rank_matrices:
         raise ValueError("rrf_fuse needs at least one rank matrix")
     shape = rank_matrices[0].shape
@@ -356,6 +386,7 @@ DEFAULT_RERANKER = "BAAI/bge-reranker-v2-m3"
 
 
 def load_reranker(model_id: str = DEFAULT_RERANKER, device: str | None = None):
+    """Load the cross-encoder reranker used for top-k candidate reranking."""
     from sentence_transformers import CrossEncoder
 
     if device is None:
@@ -368,6 +399,7 @@ def load_reranker(model_id: str = DEFAULT_RERANKER, device: str | None = None):
 
 
 def rerank_topk(reranker, query: str, candidate_texts: Sequence[str]) -> np.ndarray:
+    """Return candidate order after scoring query-document pairs with the reranker."""
     pairs = [(query, t) for t in candidate_texts]
     scores = reranker.predict(pairs, show_progress_bar=False)
     return np.argsort(-np.asarray(scores))
@@ -376,6 +408,7 @@ def rerank_topk(reranker, query: str, candidate_texts: Sequence[str]) -> np.ndar
 # --- Evaluation --------------------------------------------------------------
 
 def _file_rank(rank_row: np.ndarray, chunk_sources: list[str]) -> list[str]:
+    """Convert chunk-level ranking into a de-duplicated file-level ranking."""
     seen: set[str] = set()
     out: list[str] = []
     for idx in rank_row:
@@ -388,6 +421,7 @@ def _file_rank(rank_row: np.ndarray, chunk_sources: list[str]) -> list[str]:
 
 
 def _hit(retrieved_top_k: list[str], gold: tuple[str, ...]) -> int:
+    """Return 1 when at least one gold file appears in the retrieved list."""
     if not gold:
         return 0
     gset = set(gold)
@@ -395,6 +429,7 @@ def _hit(retrieved_top_k: list[str], gold: tuple[str, ...]) -> int:
 
 
 def _recall(retrieved_top_k: list[str], gold: tuple[str, ...]) -> float:
+    """Compute file-level recall for the retrieved list against gold sources."""
     if not gold:
         return 0.0
     gset = set(gold)
@@ -403,6 +438,7 @@ def _recall(retrieved_top_k: list[str], gold: tuple[str, ...]) -> float:
 
 
 def _reciprocal_rank(retrieved_files: list[str], gold: tuple[str, ...]) -> float:
+    """Compute reciprocal rank of the first retrieved gold file."""
     if not gold:
         return 0.0
     gset = set(gold)
@@ -420,7 +456,11 @@ def evaluate_ranks(
     language: str,
     approach: str,
     k: int = 5,
+    ks: tuple[int, ...] = (1, 5, 10),
 ) -> pd.DataFrame:
+    """Evaluate one rank matrix against the gold queries at multiple cutoffs."""
+    import pandas as pd
+
     if rank_matrix.shape[0] != len(queries):
         raise ValueError(
             f"rank_matrix has {rank_matrix.shape[0]} rows but {len(queries)} queries"
@@ -431,10 +471,22 @@ def evaluate_ranks(
         if not q.is_negative:
             positive_gold.update(q.gold_sources)
 
+    metric_ks = tuple(sorted(set(ks) | {k}))
     rows = []
     for i, q in enumerate(queries):
         files = _file_rank(rank_matrix[i], chunk_sources)
         top_k = files[:k]
+        metrics: dict[str, float | int] = {}
+        for metric_k in metric_ks:
+            current_top = files[:metric_k]
+            if q.is_negative:
+                metrics[f"hit@{metric_k}"] = int(
+                    not any(s in positive_gold for s in current_top)
+                )
+                metrics[f"recall@{metric_k}"] = float("nan")
+            else:
+                metrics[f"hit@{metric_k}"] = _hit(current_top, q.gold_sources)
+                metrics[f"recall@{metric_k}"] = _recall(current_top, q.gold_sources)
         if q.is_negative:
             hit = int(not any(s in positive_gold for s in top_k))
             recall = float("nan")
@@ -452,6 +504,7 @@ def evaluate_ranks(
             "hit@k": hit,
             "recall@k": recall,
             "mrr": rr,
+            **metrics,
         })
     df = pd.DataFrame(rows)
     df.attrs["k"] = k
@@ -459,6 +512,7 @@ def evaluate_ranks(
 
 
 def leaderboard(df_all: pd.DataFrame, *, layer: str | None = None) -> pd.DataFrame:
+    """Build a language-level hit@k leaderboard for all approaches."""
     df = df_all if layer is None else df_all[df_all["layer"] == layer]
     pivot = (
         df.pivot_table(values="hit@k", index="approach", columns="language", aggfunc="mean")
@@ -469,6 +523,7 @@ def leaderboard(df_all: pd.DataFrame, *, layer: str | None = None) -> pd.DataFra
 
 
 def per_layer_summary(df_all: pd.DataFrame) -> pd.DataFrame:
+    """Summarize mean hit@k for each approach across evaluation layers."""
     return (
         df_all.groupby(["approach", "layer"])["hit@k"]
         .mean()
@@ -480,6 +535,7 @@ def per_layer_summary(df_all: pd.DataFrame) -> pd.DataFrame:
 # --- Cost profile ------------------------------------------------------------
 
 def index_size_bytes(n_chunks: int, dim: int, *, dtype_bytes: int = 4) -> int:
+    """Estimate the raw dense-vector index size in bytes."""
     return n_chunks * dim * dtype_bytes
 
 
@@ -491,6 +547,7 @@ def query_latency_ms(
     top_k: int = 10,
     warmup: int = 2,
 ) -> dict:
+    """Measure query encoding plus dense-search latency over sample queries."""
     for q in sample_queries[:warmup]:
         qv = encode_query_fn(q)
         _ = np.argsort(-(qv @ corpus_vecs.T), axis=1)[:, :top_k]
