@@ -84,6 +84,41 @@ def gold_summary(queries: list[GoldQuery]) -> dict[str, int]:
     return counts
 
 
+# --- Query augmentation ------------------------------------------------------
+
+def augment_fr_query_with_project_glossary(fr_query: str) -> tuple[str, list[str]]:
+    """Append project-specific English anchors to one French query."""
+    from nb05_glossary import augment_query_with_project_glossary
+
+    augmented, matches = augment_query_with_project_glossary(fr_query)
+    return augmented, [match.expansion for match in matches]
+
+
+def augment_gold_fr_queries_with_project_glossary(
+    queries: Sequence[GoldQuery],
+) -> list[str]:
+    """Return FR queries augmented with the project glossary."""
+    return [augment_fr_query_with_project_glossary(q.fr)[0] for q in queries]
+
+
+def project_glossary_coverage(queries: Sequence[GoldQuery]) -> list[dict[str, object]]:
+    """Report which gold queries are touched by the project glossary."""
+    rows: list[dict[str, object]] = []
+    for q in queries:
+        augmented, expansions = augment_fr_query_with_project_glossary(q.fr)
+        if not expansions:
+            continue
+        rows.append({
+            "query_id": q.id,
+            "layer": q.layer,
+            "is_negative": q.is_negative,
+            "fr": q.fr,
+            "augmented_fr": augmented,
+            "expansions": expansions,
+        })
+    return rows
+
+
 # --- Embedding recipes -------------------------------------------------------
 
 @dataclass(frozen=True)
@@ -398,11 +433,35 @@ def load_reranker(model_id: str = DEFAULT_RERANKER, device: str | None = None):
     return CrossEncoder(model_id, device=device)
 
 
-def rerank_topk(reranker, query: str, candidate_texts: Sequence[str]) -> np.ndarray:
+def rerank_topk(
+    reranker,
+    query: str,
+    candidate_texts: Sequence[str],
+    batch_size: int = 8,
+) -> np.ndarray:
     """Return candidate order after scoring query-document pairs with the reranker."""
     pairs = [(query, t) for t in candidate_texts]
-    scores = reranker.predict(pairs, show_progress_bar=False)
-    return np.argsort(-np.asarray(scores))
+    bs = max(1, batch_size)
+    last: BaseException | None = None
+    while bs >= 1:
+        try:
+            scores = reranker.predict(pairs, batch_size=bs, show_progress_bar=False)
+            return np.argsort(-np.asarray(scores))
+        except Exception as exc:
+            if not _is_oom(exc):
+                raise
+            last = exc
+            try:
+                import torch
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+            except ImportError:
+                pass
+            if bs == 1:
+                break
+            bs = max(1, bs // 2)
+            print(f"[reranker] OOM -> retry batch={bs}")
+    raise RuntimeError("Persistent reranker OOM at batch=1") from last
 
 
 # --- Evaluation --------------------------------------------------------------

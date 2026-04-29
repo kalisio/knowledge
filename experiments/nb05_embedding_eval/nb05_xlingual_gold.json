@@ -1,0 +1,412 @@
+{
+  "version": "nb05.xlingual.v1",
+  "description": "Cross-lingual retrieval evaluation gold set for kalisio/dok user documentation. Each query has a single relpath that resolves to docs/<relpath> in EN and docs/fr/<relpath> in FR (relative to nb05_xlingual_data/).",
+  "doc_root": "docs",
+  "queries": [
+    {
+      "id": "Q-001",
+      "section": "about",
+      "en": "What software stack is Kalisio Crisis built on?",
+      "fr": "Sur quelle pile logicielle Kalisio Crisis est-il construit ?",
+      "gold_relpath": ["about/introduction.md"],
+      "richer_in_fr": false,
+      "notes": "Lists KDK, Kano, Weacast, Kargo"
+    },
+    {
+      "id": "Q-002",
+      "section": "about",
+      "en": "How can end users get in touch with Kalisio?",
+      "fr": "Comment un utilisateur final peut-il contacter Kalisio ?",
+      "gold_relpath": ["about/contact.md"],
+      "richer_in_fr": false,
+      "notes": "End user -> kalisio.com website"
+    },
+    {
+      "id": "Q-003",
+      "section": "about",
+      "en": "How can developers join the Kalisio community?",
+      "fr": "Comment les développeurs peuvent-ils rejoindre la communauté Kalisio ?",
+      "gold_relpath": ["about/contact.md"],
+      "richer_in_fr": false,
+      "notes": "Developer -> Slack channel"
+    },
+    {
+      "id": "Q-004",
+      "section": "about",
+      "en": "Under what license is Kalisio Crisis distributed?",
+      "fr": "Sous quelle licence Kalisio Crisis est-il distribué ?",
+      "gold_relpath": ["about/license.md"],
+      "richer_in_fr": false,
+      "notes": "MIT, 100% open source"
+    },
+    {
+      "id": "Q-005",
+      "section": "quickstart",
+      "en": "What was Kalisio Crisis previously called?",
+      "fr": "Quel était l'ancien nom de Kalisio Crisis ?",
+      "gold_relpath": ["quickstart/introduction.md"],
+      "richer_in_fr": false,
+      "notes": "Akt'n'Map (literal anchor across languages)"
+    },
+    {
+      "id": "Q-006",
+      "section": "quickstart",
+      "en": "Where can I check the current availability of the Kalisio Crisis service?",
+      "fr": "Où puis-je consulter la disponibilité actuelle du service Kalisio Crisis ?",
+      "gold_relpath": ["quickstart/introduction.md"],
+      "richer_in_fr": false,
+      "notes": "status.kalisio.com (URL anchor)"
+    },
+    {
+      "id": "Q-007",
+      "section": "quickstart",
+      "en": "Is Kalisio Crisis a native mobile app or a web application?",
+      "fr": "Kalisio Crisis est-il une application mobile native ou une application web ?",
+      "gold_relpath": ["quickstart/introduction.md", "quickstart/installation.md"],
+      "richer_in_fr": false,
+      "notes": "PWA - both intro and installation mention it"
+    },
+    {
+      "id": "Q-008",
+      "section": "quickstart",
+      "en": "Which web browsers are supported by Kalisio Crisis?",
+      "fr": "Quels navigateurs web sont pris en charge par Kalisio Crisis ?",
+      "gold_relpath": ["quickstart/installation.md"],
+      "richer_in_fr": false,
+      "notes": "Chrome, Firefox, Edge, Safari"
+    },
+    {
+      "id": "Q-009",
+      "section": "quickstart",
+      "en": "Can I install Kalisio Crisis on my desktop computer using Firefox?",
+      "fr": "Puis-je installer Kalisio Crisis sur mon ordinateur de bureau avec Firefox ?",
+      "gold_relpath": ["quickstart/installation.md"],
+      "richer_in_fr": false,
+      "notes": "Firefox install only on mobile, requires PWAs for Firefox extension on desktop"
+    },
+    {
+      "id": "Q-010",
+      "section": "quickstart",
+      "en": "Which browser is recommended when installing the application on iOS?",
+      "fr": "Quel navigateur est recommandé pour installer l'application sur iOS ?",
+      "gold_relpath": ["quickstart/installation.md"],
+      "richer_in_fr": false,
+      "notes": "Safari"
+    },
+    {
+      "id": "Q-011",
+      "section": "quickstart",
+      "en": "How do I update the Kalisio Crisis web application?",
+      "fr": "Comment mettre à jour l'application web Kalisio Crisis ?",
+      "gold_relpath": ["quickstart/update.md"],
+      "richer_in_fr": false,
+      "notes": "No manual procedure, popup appears"
+    },
+    {
+      "id": "Q-012",
+      "section": "quickstart",
+      "en": "What pricing model does Kalisio Crisis use?",
+      "fr": "Quel modèle tarifaire Kalisio Crisis utilise-t-il ?",
+      "gold_relpath": ["quickstart/benefits.md"],
+      "richer_in_fr": false,
+      "notes": "Software as a Service / pay-as-you-go"
+    },
+    {
+      "id": "Q-013",
+      "section": "quickstart",
+      "en": "Why does Kalisio Crisis claim to have no vendor lock-in?",
+      "fr": "Pourquoi Kalisio Crisis prétend-il n'imposer aucun verrou commercial ?",
+      "gold_relpath": ["quickstart/benefits.md"],
+      "richer_in_fr": false,
+      "notes": "Open source building blocks / briques technologiques"
+    },
+    {
+      "id": "Q-014",
+      "section": "quickstart",
+      "en": "Which third-party navigation apps does the mobile application work with?",
+      "fr": "Avec quelles applications de navigation tierces l'application mobile fonctionne-t-elle ?",
+      "gold_relpath": ["quickstart/features.md"],
+      "richer_in_fr": false,
+      "notes": "GoogleMaps, Waze (brand-name anchors)"
+    },
+    {
+      "id": "Q-015",
+      "section": "concepts",
+      "en": "What does the term 'activity' mean in Kalisio Crisis?",
+      "fr": "Que désigne le terme « activité » dans Kalisio Crisis ?",
+      "gold_relpath": ["quickstart/concepts.md"],
+      "richer_in_fr": false,
+      "notes": "Entry point screen for a specific task"
+    },
+    {
+      "id": "Q-016",
+      "section": "concepts",
+      "en": "What three roles can a user have inside an organisation?",
+      "fr": "Quels sont les trois rôles qu'un utilisateur peut avoir au sein d'une organisation ?",
+      "gold_relpath": ["quickstart/concepts.md"],
+      "richer_in_fr": false,
+      "notes": "member/manager/owner vs membre/gestionnaire/propriétaire"
+    },
+    {
+      "id": "Q-017",
+      "section": "concepts",
+      "en": "Who is allowed to delete an organisation?",
+      "fr": "Qui est autorisé à supprimer une organisation ?",
+      "gold_relpath": ["quickstart/concepts.md"],
+      "richer_in_fr": false,
+      "notes": "Only the owner / propriétaire"
+    },
+    {
+      "id": "Q-018",
+      "section": "concepts",
+      "en": "What is a tag used for in Kalisio Crisis?",
+      "fr": "À quoi sert une étiquette dans Kalisio Crisis ?",
+      "gold_relpath": ["quickstart/concepts.md"],
+      "richer_in_fr": false,
+      "notes": "tag <-> étiquette translation gap"
+    },
+    {
+      "id": "Q-019",
+      "section": "concepts",
+      "en": "Can a single user belong to multiple organisations at the same time?",
+      "fr": "Un même utilisateur peut-il appartenir à plusieurs organisations en même temps ?",
+      "gold_relpath": ["quickstart/concepts.md"],
+      "richer_in_fr": false,
+      "notes": "Yes - explicitly stated"
+    },
+    {
+      "id": "Q-020",
+      "section": "concepts",
+      "en": "Which subscription tiers can an organisation choose from?",
+      "fr": "Quels niveaux d'abonnement une organisation peut-elle choisir ?",
+      "gold_relpath": ["quickstart/concepts.md"],
+      "richer_in_fr": false,
+      "notes": "bronze/silver/gold/diamond vs bronze/argent/or/diamant"
+    },
+    {
+      "id": "Q-021",
+      "section": "concepts",
+      "en": "What kinds of information can be attached to an event?",
+      "fr": "Quels types d'informations peut-on associer à un événement ?",
+      "gold_relpath": ["quickstart/concepts.md"],
+      "richer_in_fr": false,
+      "notes": "location, photos/documents, workflow"
+    },
+    {
+      "id": "Q-022",
+      "section": "concepts",
+      "en": "What is an event template and what does it define?",
+      "fr": "Qu'est-ce qu'un modèle d'événement et que définit-il ?",
+      "gold_relpath": ["quickstart/concepts.md"],
+      "richer_in_fr": false,
+      "notes": "Default title/description/recipients"
+    },
+    {
+      "id": "Q-023",
+      "section": "concepts",
+      "en": "What can a coordinator do that a participant cannot?",
+      "fr": "Que peut faire un coordonnateur qu'un participant ne peut pas faire ?",
+      "gold_relpath": ["quickstart/concepts.md"],
+      "richer_in_fr": false,
+      "notes": "Update/close event, manage participant list"
+    },
+    {
+      "id": "Q-024",
+      "section": "gofurther",
+      "en": "What advanced features does Kalisio Crisis offer beyond basic event management?",
+      "fr": "Quelles fonctionnalités avancées Kalisio Crisis propose-t-il au-delà de la gestion d'événements ?",
+      "gold_relpath": ["gofurther/introduction.md"],
+      "richer_in_fr": false,
+      "notes": "workflow, archiving/main courante, catalog, alerts, plans"
+    },
+    {
+      "id": "Q-025",
+      "section": "alerts",
+      "en": "What does an environmental alert do automatically?",
+      "fr": "Que fait automatiquement une alerte environnementale ?",
+      "gold_relpath": ["gofurther/alert.md"],
+      "richer_in_fr": false,
+      "notes": "Auto-creates an event when conditions are met"
+    },
+    {
+      "id": "Q-026",
+      "section": "alerts",
+      "en": "Does creating environmental alerts require a specific subscription?",
+      "fr": "La création d'alertes environnementales nécessite-t-elle un abonnement spécifique ?",
+      "gold_relpath": ["gofurther/alert.md"],
+      "richer_in_fr": false,
+      "notes": "Yes - requires environmental data catalog subscription"
+    },
+    {
+      "id": "Q-027",
+      "section": "alerts",
+      "en": "How do I make the alert creation action appear on the map?",
+      "fr": "Comment faire apparaître l'action de création d'alerte sur la carte ?",
+      "gold_relpath": ["gofurther/alert.md"],
+      "richer_in_fr": false,
+      "notes": "Right-click on map after activating layer"
+    },
+    {
+      "id": "Q-028",
+      "section": "alerts",
+      "en": "What sections make up the alert configuration component?",
+      "fr": "Quelles sections composent le composant de configuration d'alerte ?",
+      "gold_relpath": ["gofurther/alert.md"],
+      "richer_in_fr": false,
+      "notes": "Frequency/time-range, conditions/thresholds, event template"
+    },
+    {
+      "id": "Q-029",
+      "section": "archiving",
+      "en": "What is the logbook used for in Kalisio Crisis?",
+      "fr": "À quoi sert la main courante dans Kalisio Crisis ?",
+      "gold_relpath": ["gofurther/archiving.md"],
+      "richer_in_fr": false,
+      "notes": "logbook <-> main courante - significant translation gap"
+    },
+    {
+      "id": "Q-030",
+      "section": "archiving",
+      "en": "What happens to personal data when events are archived?",
+      "fr": "Qu'advient-il des données personnelles lorsque les événements sont archivés ?",
+      "gold_relpath": ["gofurther/archiving.md"],
+      "richer_in_fr": false,
+      "notes": "Anonymized for GDPR/RGPD compliance"
+    },
+    {
+      "id": "Q-031",
+      "section": "archiving",
+      "en": "Can statistics about archived events be exported to Excel?",
+      "fr": "Peut-on exporter les statistiques sur les événements archivés vers Excel ?",
+      "gold_relpath": ["gofurther/archiving.md"],
+      "richer_in_fr": false,
+      "notes": "Yes - export to Microsoft Excel"
+    },
+    {
+      "id": "Q-032",
+      "section": "workflow",
+      "en": "What does adding a workflow to an event template enable?",
+      "fr": "Qu'est-ce que permet l'ajout d'un processus à un modèle d'événement ?",
+      "gold_relpath": ["gofurther/workflow.md"],
+      "richer_in_fr": false,
+      "notes": "Sequence of multiple-choice interactions"
+    },
+    {
+      "id": "Q-033",
+      "section": "workflow",
+      "en": "How does an event template behave by default without a workflow?",
+      "fr": "Comment se comporte un modèle d'événement par défaut sans processus ?",
+      "gold_relpath": ["gofurther/workflow.md"],
+      "richer_in_fr": false,
+      "notes": "Simple informational message, no interaction"
+    },
+    {
+      "id": "Q-034",
+      "section": "catalog",
+      "en": "Which OGC standards can the catalog use to connect to external services?",
+      "fr": "Quels standards OGC le catalogue peut-il utiliser pour se connecter à des services externes ?",
+      "gold_relpath": ["gofurther/catalog.md"],
+      "richer_in_fr": false,
+      "notes": "WMS, WFS, TMS, WMTS (acronym anchors)"
+    },
+    {
+      "id": "Q-035",
+      "section": "catalog",
+      "en": "Which numerical weather forecast models does the catalog include?",
+      "fr": "Quels modèles numériques de prévision météorologique le catalogue intègre-t-il ?",
+      "gold_relpath": ["gofurther/catalog.md"],
+      "richer_in_fr": false,
+      "notes": "ARPEGE, AROME, GFS (model name anchors)"
+    },
+    {
+      "id": "Q-036",
+      "section": "catalog",
+      "en": "What is the spatial resolution of the ORTHO HR dataset?",
+      "fr": "Quelle est la résolution spatiale du jeu de données ORTHO HR ?",
+      "gold_relpath": ["gofurther/catalog.md"],
+      "richer_in_fr": false,
+      "notes": "20 cm/pixel"
+    },
+    {
+      "id": "Q-037",
+      "section": "catalog",
+      "en": "What file format can I use to import my own custom layer data?",
+      "fr": "Quel format de fichier puis-je utiliser pour importer mes propres données de couche personnalisées ?",
+      "gold_relpath": ["gofurther/catalog.md"],
+      "richer_in_fr": false,
+      "notes": "GeoJSON, with optional JSON schema for metadata"
+    },
+    {
+      "id": "Q-038",
+      "section": "catalog",
+      "en": "What does Hub'Eau provide in the catalog?",
+      "fr": "Que fournit Hub'Eau dans le catalogue ?",
+      "gold_relpath": ["gofurther/catalog.md"],
+      "richer_in_fr": true,
+      "notes": "FR doc has detailed paragraph (water height H, discharge Q, 5-60min intervals); EN is one sentence. Tests how richer FR doc beats sparse EN."
+    },
+    {
+      "id": "Q-039",
+      "section": "plans",
+      "en": "What does a plan represent in Kalisio Crisis?",
+      "fr": "Que représente un plan dans Kalisio Crisis ?",
+      "gold_relpath": ["gofurther/plan.md"],
+      "richer_in_fr": false,
+      "notes": "Set of events linked to a situation"
+    },
+    {
+      "id": "Q-040",
+      "section": "plans",
+      "en": "What three columns are shown in the Kanban board of a plan?",
+      "fr": "Quelles trois colonnes sont affichées dans le tableau Kanban d'un plan ?",
+      "gold_relpath": ["gofurther/plan.md"],
+      "richer_in_fr": false,
+      "notes": "To do/Doing/Done vs A faire/En cours/Clôturés - tests semantic mapping"
+    },
+    {
+      "id": "Q-041",
+      "section": "faq",
+      "en": "What should I do if I forgot my account password?",
+      "fr": "Que faire si j'ai oublié le mot de passe de mon compte ?",
+      "gold_relpath": ["faq/account.md"],
+      "richer_in_fr": false,
+      "notes": "Use 'Forgot your password' link, get verification code via email"
+    },
+    {
+      "id": "Q-042",
+      "section": "faq",
+      "en": "Which iOS version is required to receive push notifications?",
+      "fr": "Quelle version d'iOS est requise pour recevoir les notifications push ?",
+      "gold_relpath": ["faq/notifications.md"],
+      "richer_in_fr": false,
+      "notes": "iOS 16.4 or greater (number anchor)"
+    },
+    {
+      "id": "Q-043",
+      "section": "faq",
+      "en": "Which technologies are used to determine my device's geolocation?",
+      "fr": "Quelles technologies sont utilisées pour déterminer la géolocalisation de mon appareil ?",
+      "gold_relpath": ["faq/geolocation.md"],
+      "richer_in_fr": false,
+      "notes": "Wi-Fi, Bluetooth, GPS, cellular - acronym anchors"
+    },
+    {
+      "id": "Q-044",
+      "section": "faq",
+      "en": "How do I report a bug from inside the application?",
+      "fr": "Comment signaler un bug depuis l'application ?",
+      "gold_relpath": ["faq/bug-report.md"],
+      "richer_in_fr": false,
+      "notes": "Main menu > About > Report a bug"
+    },
+    {
+      "id": "Q-045",
+      "section": "tutorials",
+      "en": "Where can I find video tutorials about Kalisio Crisis features?",
+      "fr": "Où puis-je trouver les tutoriels vidéo sur les fonctionnalités de Kalisio Crisis ?",
+      "gold_relpath": ["tutorials/introduction.md"],
+      "richer_in_fr": false,
+      "notes": "YouTube playlist link"
+    }
+  ]
+}
