@@ -7,6 +7,7 @@ requires-python = ">=3.11,<3.12"
 dependencies = [
     "anthropic>=0.52.0",
     "einops>=0.8.0",
+    "fastapi>=0.115.0",
     "langchain-text-splitters>=1.1.0",
     "python-dotenv>=1.1.0",
     "chromadb>=1.0.0",
@@ -22,7 +23,15 @@ dependencies = [
     "accelerate>=1.0.0",
     "pandas>=2.2.0",
     "pytest>=8.0.0",
+    "uvicorn>=0.30.0",
 ]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["src*"]
 
 [tool.pytest.ini_options]
 markers = [

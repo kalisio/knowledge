@@ -1,19 +1,15 @@
-# Knowledge
+# knowledge
 
-Internal starter project for RAG experiments on Kalisio documentation.
+[![Latest Release](https://img.shields.io/github/v/tag/kalisio/knowledge?sort=semver&label=latest)](https://github.com/kalisio/knowledge/releases)
+[![CI](https://github.com/kalisio/knowledge/actions/workflows/main.yml/badge.svg)](https://github.com/kalisio/knowledge/actions/workflows/main.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This repository currently provides a simple local pipeline:
-
-1. chunk Markdown documentation
-2. generate embeddings
-3. ingest vectors into Qdrant
-4. query Qdrant
-5. optionally ask an LLM through Ollama with retrieved context
+Retrieval-augmented question-answering over the documentation and source code of the [Kalisio platform](https://kalisio.com) and its open-source projects ([KDK](https://kalisio.github.io/kdk/), [Kano](https://kalisio.github.io/kano/) and others). Documentation and code are chunked, embedded with [sentence-transformers](https://www.sbert.net/), indexed in [Qdrant](https://qdrant.tech/), and queried through either [Ollama](https://ollama.com/) (local LLM) or [Anthropic Claude](https://www.anthropic.com/claude).
 
 ## Prerequisites
 
 - Miniconda or Anaconda
-- Docker and Docker Compose
+- Docker (no local image building required — images are pulled from Docker Hub)
 - Optional: Ollama, either local or on a machine reachable on the LAN
 
 ## Install Conda
@@ -56,7 +52,7 @@ conda activate knowledge
 
 ## GPU acceleration (optional)
 
-Embedding scripts (`experiments/early_mvp/embed_chunks.py`, `experiments/early_mvp/query_qdrant.py`, `experiments/early_mvp/ask_llm_rag.py`) and the notebooks use `sentence-transformers` with automatic device detection: CUDA if available, CPU otherwise. No code changes are needed either way — each run prints the device it picked, for example `[embed] cuda (NVIDIA GeForce RTX 3060 Ti)` or `[embed] cpu (CUDA not available)`.
+The chunking, embedding, retrieval and notebook code paths use `sentence-transformers` with automatic device detection: CUDA if available, CPU otherwise. No code changes are needed either way — each run prints the device it picked, for example `[embed] cuda (NVIDIA GeForce RTX 3060 Ti)` or `[embed] cpu (CUDA not available)`. Batch size is selected automatically by [src/embedding_utils.py](src/embedding_utils.py) based on the active device.
 
 ### Verify your setup
 
@@ -74,106 +70,62 @@ python -c "import torch; print(torch.cuda.is_available(), torch.version.cuda)"
 
 Run `nvidia-smi` to check your driver's maximum supported CUDA version.
 
-### Rough benchmarks on the KDK corpus
+## Architecture
 
-| Device | Batch size | Time to embed ~2k chunks |
+The codebase is organised as a few independent modules under [src/](src/):
+
+| Module | Role |
+|---|---|
+| [src/corpus_filter/](src/corpus_filter/) | Corpus discovery and profile-driven filtering. Public entry: `scan_corpus(profile=...)`; profiles in `profiles.py`, walker in `engine.py`. |
+| [src/chunking/](src/chunking/) | Production chunkers per file type. Every function returns `list[dict]` with `text` (breadcrumb-prefixed) and `metadata` (structured fields for retriever / reranker / UI). |
+| [src/embedding_utils.py](src/embedding_utils.py) | Automatic device + batch-size selection for `sentence-transformers`. |
+| [src/rag_system/](src/rag_system/) | Runtime components for the v1 RAG service: `config.py` (env-driven settings), `embedding.py`, `qdrant_store.py`, `llm.py` (Ollama / Anthropic). |
+| [src/api/](src/api/) | FastAPI service: `app.py` (HTTP layer), `handlers.py` (RAG pipeline), `schemas.py` (request / response models), `main.py` (entry point). |
+| [src/retrieval_metrics.py](src/retrieval_metrics.py) | Deterministic retrieval metrics (recall@k, source coverage, …) shared across nb02–nb06. |
+
+The chunking package exposes one winner per file type, all selected through the matching notebook:
+
+| File type | Function | Strategy | Notebook |
+|---|---|---|---|
+| Markdown | `chunk_markdown` | AST-Merge + Breadcrumb (D) | nb02 |
+| JS / `.mjs` | `chunk_js` | Recursive JS + breadcrumb | nb03 |
+| Vue SFC | `chunk_vue` | SFC dispatcher + expanded breadcrumb | nb03 |
+| JSON | `chunk_json` | Category-aware key split + breadcrumb | nb04 |
+| any | `chunk_files` | extension dispatcher (calls the right per-type chunker) | — |
+
+## API service
+
+The first runnable system component is a FastAPI retriever at [src/api/](src/api/). Run it locally with:
+
+```bash
+python -m src.api.main
+```
+
+By default it listens on `127.0.0.1:8000` (override via `HOST` / `PORT` environment variables). Endpoints:
+
+| Method | Path | Description |
 |---|---|---|
-| RTX 3060 Ti (8 GB) | 128 | ~30 s |
-| CPU (8 cores) | 32 | ~5 min |
+| `GET` | `/health` | Health check |
+| `POST` | `/ask` | Body `{"question": "..."}` → LLM answer plus the retrieved source chunks |
 
-Batch size is selected automatically by `src/embedding_utils.py` based on the active device.
+The API image is published to Docker Hub as `kalisio/knowledge-api:latest` and `kalisio/knowledge-api:${git_sha}` — see [.github/workflows/main.yml](.github/workflows/main.yml). The CI workflow needs the `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` repository secrets.
 
-## Qdrant
+### Environment
 
-Start Qdrant with Docker:
-
-```bash
-docker compose pull
-docker compose up -d
-```
-
-Check that Qdrant is running:
+[.env.example](.env.example) lists every variable read by [src/rag_system/config.py](src/rag_system/config.py). Copy it to `.env` for local runs:
 
 ```bash
-docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}"
-```
-
-The default REST endpoint is:
-
-```text
-http://localhost:6333
-```
-
-## Project Data Layout
-
-Current scripts expect KDK documentation under:
-
-```text
-data/kdk/docs
-```
-
-If you start from a ZIP archive, extract it under `data/` and make sure the final structure matches:
-
-```text
-data/kdk/docs/...
-```
-
-## Run the Pipeline
-
-All commands below should be run from the project root.
-
-### 1. Chunk Markdown files
-
-```bash
-python experiments/early_mvp/chunk_md.py
-```
-
-Output:
-
-```text
-outputs/md_chunks.jsonl
-```
-
-### 2. Generate embeddings
-
-```bash
-python experiments/early_mvp/embed_chunks.py
-```
-
-Output:
-
-```text
-outputs/md_chunks_with_embeddings.jsonl
-```
-
-### 3. Ingest into Qdrant
-
-```bash
-python experiments/early_mvp/ingest_chunks_to_qdrant.py
-```
-
-### 4. Query Qdrant directly
-
-```bash
-python experiments/early_mvp/query_qdrant.py
-```
-
-### 5. Ask an LLM with retrieved context
-
-```bash
-python experiments/early_mvp/ask_llm_rag.py
+cp .env.example .env
 ```
 
 ## LLM Configuration
 
-The RAG script supports two LLM backends: **Ollama** (default) and **Anthropic Claude**.
-
-Configuration is done through the `.env` file at the project root:
+The RAG service supports two LLM backends: **Ollama** (default) and **Anthropic Claude**. Configuration is done through `.env`:
 
 ```env
 # LLM provider: "ollama" (default) or "anthropic"
 LLM_PROVIDER=ollama
-OLLAMA_BASE_URL=http://192.168.1.109:11434
+OLLAMA_BASE_URL=http://localhost:11434
 OLLAMA_MODEL=qwen2.5:7b
 
 # Only needed when LLM_PROVIDER=anthropic
@@ -184,23 +136,17 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 #### Ollama on the same machine
 
-Set in `.env`:
-
 ```env
 OLLAMA_BASE_URL=http://localhost:11434
 ```
 
 #### Ollama on another machine in the local network
 
-Set in `.env`:
-
 ```env
 OLLAMA_BASE_URL=http://<LAN_IP>:11434
 ```
 
-On the Ollama host machine, the server must listen on the LAN interface instead of only `127.0.0.1`.
-
-For Windows, set the user environment variable:
+On the Ollama host machine, the server must listen on the LAN interface instead of only `127.0.0.1`. For Windows, set the user environment variable:
 
 ```text
 OLLAMA_HOST=0.0.0.0:11434
@@ -216,35 +162,37 @@ curl http://<LAN_IP>:11434/api/tags
 
 ### Anthropic Claude
 
-Set in `.env`:
-
 ```env
 LLM_PROVIDER=anthropic
 ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-Token usage and cost are tracked automatically in `outputs/token_ledger.json` when using Claude. Ollama calls are not tracked (free local model).
+Token usage and cost are tracked automatically in `outputs/token_ledger.json` when Claude is used. Ollama calls are not tracked (free local model).
+
+## Project Data Layout
+
+The corpus is expected under `data/`:
+
+```text
+data/<repo>/<sub-tree>
+```
+
+Default scan root used by `scan_corpus` is `data/`. The KDK documentation set sits at `data/kdk/docs`. If you start from a ZIP archive, extract it under `data/` keeping the per-repo folder layout.
 
 ## Notebooks
 
-### nb02 — Markdown Chunking Strategies
+The research history is captured in six notebooks under [notebooks/](notebooks/), with the matching helpers under `experiments/nbXX_*/`.
 
-`notebooks/nb02_markdown_chunking_strategies.ipynb` compares four markdown chunking strategies for the code-generation RAG pipeline and selects the winner through deterministic, reproducible metrics (no LLM judge required).
+| # | Notebook | Topic | Status |
+|---|---|---|---|
+| nb01 | [nb01_corpus_discovery.ipynb](notebooks/nb01_corpus_discovery.ipynb) | Corpus discovery and filtering profiles, source for [src/corpus_filter/](src/corpus_filter/). | done |
+| nb02 | [nb02_markdown_chunking_strategies.ipynb](notebooks/nb02_markdown_chunking_strategies.ipynb) | Markdown chunking strategies. Winner: `D_ast_breadcrumb` (chunk_size=500), 100% code-block integrity, 2× the bundle efficiency of the RCT baseline. Production code in [src/chunking/markdown.py](src/chunking/markdown.py). | done |
+| nb03 | [nb03_js_vue_chunking.ipynb](notebooks/nb03_js_vue_chunking.ipynb) | JS and Vue SFC chunking strategies; ~97% accuracy on Vue split tests. Adds BM25 + RRF for hybrid retrieval. Production code in [src/chunking/js.py](src/chunking/js.py) and [src/chunking/vue.py](src/chunking/vue.py). | done |
+| nb04 | [nb04_json_chunking.ipynb](notebooks/nb04_json_chunking.ipynb) | JSON chunking with category-aware key splitting. Production code in [src/chunking/json_chunking.py](src/chunking/json_chunking.py). | done |
+| nb05 | [nb05_embedding_evaluation.ipynb](notebooks/nb05_embedding_evaluation.ipynb) | Embedding model evaluation on a 200-question bilingual (FR / EN) gold set ([outputs/nb05_gold.json](outputs/nb05_gold.json)). Recommends `Qwen/Qwen3-Embedding-0.6B`; `intfloat/multilingual-e5-large` is kept as a strong baseline. | done |
+| nb06 | [nb06_qdrant_index_and_eval.ipynb](notebooks/nb06_qdrant_index_and_eval.ipynb) | Reproducible Qdrant index from the selected corpus chunks; re-runs the nb05 evaluation against Qdrant to validate dense / hybrid / reranked retrieval at production scale. | in progress |
 
-**Strategies evaluated:**
-
-| ID | Name | Approach |
-|----|------|----------|
-| A | RCT | `RecursiveCharacterTextSplitter` baseline |
-| B | MHS+RCT | `MarkdownHeaderTextSplitter` → RCT re-split |
-| C | AST-Merge | `ExperimentalMarkdownSyntaxTextSplitter` atoms merged per heading section |
-| D | AST+Breadcrumb | AST-Merge + `Context: h1 > h2 > h3` prefix injected into chunk text |
-
-**Winner: Strategy D (`D_ast_breadcrumb`) with `chunk_size=500`.**
-
-D achieves 100% code block integrity and 2× the bundle efficiency of the RCT baseline while matching recall. The production implementation lives in `src/chunking.py`; downstream code imports `chunk_markdown` or `chunk_files` directly.
-
-**Reproducing the evaluation:**
+### Reproducing the chunking benchmark (nb02)
 
 ```bash
 # 1. Generate the gold query set from KDK docs
@@ -258,13 +206,36 @@ python experiments/nb02_chunking_md/nb02_sweep_winner.py
 
 # 4. Code-generation experiment (dry-run generates context bundles)
 python experiments/nb02_chunking_md/nb02_codegen_experiment.py --dry-run
-
-# 5. Run the golden tests
-pytest tests/test_chunking_golden.py -v
 ```
+
+## Tests
+
+Run the full suite:
+
+```bash
+pytest tests
+```
+
+Coverage:
+
+| File | What it covers |
+|---|---|
+| [tests/test_chunking_golden.py](tests/test_chunking_golden.py) | End-to-end golden tests for the chunking package (marker: `golden`, requires the embedding model and the KDK docs). |
+| [tests/test_corpus_filter_profiles.py](tests/test_corpus_filter_profiles.py) | Corpus filter profiles and `FilterConfig` resolution. |
+| [tests/test_nb05_augmentation.py](tests/test_nb05_augmentation.py) | nb05 query augmentation helpers. |
+| [tests/test_nb06_qdrant_index.py](tests/test_nb06_qdrant_index.py) | nb06 ingestion / index helpers. |
+| [tests/test_system_v1.py](tests/test_system_v1.py) | System v1 FastAPI service. |
 
 ## Notes
 
 - Activate the conda environment with `conda activate knowledge` before running scripts.
 - Generated files under `outputs/` are local artifacts and should not be treated as source files.
 - `qdrant_data/` is local runtime data and should not be committed.
+
+## License
+
+Licensed under the [MIT license](LICENSE).
+
+Copyright (c) 2017-present [Kalisio](https://kalisio.com)
+
+[![Kalisio](https://kalisio.github.io/kalisioscope/kalisio/kalisio-logo-black-256x84.png)](https://kalisio.com)

@@ -1,0 +1,48 @@
+name: ci
+on: [push, workflow_dispatch]
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install package
+        run: pip install .
+      - name: Run tests
+        run: python -m pytest tests
+
+  build_api:
+    name: Build API
+    runs-on: ubuntu-22.04
+    needs: tests
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Init runner
+        run: bash ./scripts/init_runner.sh ${{ github.job }}
+      - name: Setup workspace
+        run: bash ./scripts/setup_workspace.sh
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push API image (sha)
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: bash ./scripts/build_api.sh -p
+      - name: Build and push API image (latest)
+        env:
+          IMAGE_TAG: latest
+        run: bash ./scripts/build_api.sh -p
+

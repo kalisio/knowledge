@@ -1,15 +1,16 @@
 __pycache__/
 *.pyc
-.ipynb_checkpoints/
 data/
 qdrant_data/
 vector_db/
 DS_Store
 outputs/
 experiments/nb05_embedding_eval/nb05_xlingual_data/
-.env
-AGENTS.md
 
-# uv / Claude Code
 .venv/
 uv.lock
+
+# setuptools editable install metadata
+*.egg-info/
+
+.vscode/
