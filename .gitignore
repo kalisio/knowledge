@@ -1,16 +1,21 @@
+# ── Python
 __pycache__/
 *.pyc
+*.egg-info/
+
+# ── Data & ML artifacts
 data/
 qdrant_data/
 vector_db/
-DS_Store
 outputs/
 experiments/nb05_embedding_eval/nb05_xlingual_data/
 
+# ── Dependencies & lock files
 .venv/
 uv.lock
 
-# setuptools editable install metadata
-*.egg-info/
+# ── OS artifacts
+.DS_Store
 
+# ── IDE & tooling
 .vscode/
