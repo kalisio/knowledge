@@ -14,6 +14,11 @@ experiments/nb05_embedding_eval/nb05_xlingual_data/
 .venv/
 uv.lock
 
+# ── Secrets & environment
+.env
+.env.*
+*.log
+
 # ── OS artifacts
 .DS_Store
 
