@@ -1,8 +1,9 @@
-.git
+# ── Version control
 .github
 .gitignore
 .dockerignore
 
+# ── Python artifacts
 .venv
 __pycache__
 *.pyc
@@ -11,18 +12,23 @@ __pycache__
 .pytest_cache
 .ipynb_checkpoints
 
-data
-qdrant_data
-vector_db
-outputs
-notebooks
-experiments
+# ── Data & ML artifacts
+data/
+qdrant_data/
+vector_db/
+outputs/
+notebooks/
+experiments/
 
+# ── Secrets & environment
 .env
 .env.*
 *.log
 
+# ── Dependencies & lock files
 uv.lock
+
+# ── IDE & tooling
 .claude
 .vscode
 .idea
