@@ -6,11 +6,11 @@ from functools import lru_cache
 
 from qdrant_client import QdrantClient
 
-from src.api.schemas import AskResponse, SourceChunk
-from src.rag_system.config import ApiConfig
-from src.rag_system.embedding import EmbeddingService
-from src.rag_system.llm import LLMClient
-from src.rag_system.qdrant_store import create_client, query_points
+from knowledge.src.schemas import AskResponse, SourceChunk
+from knowledge.ingestion_job.rag_system.config import ApiConfig
+from knowledge.ingestion_job.rag_system.embedding import EmbeddingService
+from knowledge.ingestion_job.rag_system.llm import LLMClient
+from knowledge.ingestion_job.rag_system.qdrant_store import create_client, query_points
 
 
 @lru_cache(maxsize=1)

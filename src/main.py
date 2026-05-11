@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uvicorn
 
-from src.rag_system.config import ApiConfig
+from knowledge.ingestion_job.rag_system.config import ApiConfig
 
 
 def main() -> None:

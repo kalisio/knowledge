@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 import requests
 
-from src.rag_system.config import ApiConfig
+from knowledge.ingestion_job.rag_system.config import ApiConfig
 
 
 SYSTEM_PROMPT = (
