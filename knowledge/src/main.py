@@ -10,7 +10,7 @@ from knowledge.ingestion_job.rag_system.config import ApiConfig
 def main() -> None:
     config = ApiConfig()
     uvicorn.run(
-        "src.api.app:app",
+        "knowledge.src.app:app",
         host=config.host,
         port=config.port,
         workers=config.workers_count,
