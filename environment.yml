@@ -6,7 +6,7 @@ dependencies:
   - python=3.11
   - pip
   - pip:
-      - anthropic>=0.52.0
+      - openai>=1.0.0
       - einops>=0.8.0
       - fastapi>=0.115.0
       - langchain-text-splitters>=1.1.0

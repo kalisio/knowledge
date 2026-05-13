@@ -4,7 +4,7 @@
 [![CI](https://github.com/kalisio/knowledge/actions/workflows/main.yml/badge.svg)](https://github.com/kalisio/knowledge/actions/workflows/main.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Retrieval-augmented question-answering over the documentation and source code of the [Kalisio platform](https://kalisio.com) and its open-source projects ([KDK](https://kalisio.github.io/kdk/), [Kano](https://kalisio.github.io/kano/) and others). Documentation and code are chunked, embedded with [sentence-transformers](https://www.sbert.net/), indexed in [Qdrant](https://qdrant.tech/), and queried through either [Ollama](https://ollama.com/) (local LLM) or [Anthropic Claude](https://www.anthropic.com/claude).
+Retrieval-augmented question-answering over the documentation and source code of the [Kalisio platform](https://kalisio.com) and its open-source projects ([KDK](https://kalisio.github.io/kdk/), [Kano](https://kalisio.github.io/kano/) and others). Documentation and code are chunked, embedded with [sentence-transformers](https://www.sbert.net/), indexed in [Qdrant](https://qdrant.tech/), and queried through a provider-agnostic LLM client (Anthropic Claude, OpenAI, Mistral, or Kimi/Moonshot — selected from `MODEL_URL`).
 
 ## Prerequisites
 
@@ -98,7 +98,7 @@ The chunking package exposes one winner per file type, all selected through the 
 The first runnable system component is a FastAPI retriever at [src/api/](src/api/). Run it locally with:
 
 ```bash
-python -m src.api.main
+python -m src.main
 ```
 
 By default it listens on `127.0.0.1:8000` (override via `HOST` / `PORT` environment variables). Endpoints:
@@ -120,54 +120,22 @@ cp .env.example .env
 
 ## LLM Configuration
 
-The RAG service supports two LLM backends: **Ollama** (default) and **Anthropic Claude**. Configuration is done through `.env`:
+The RAG service uses a single OpenAI-compatible client for all four providers; the provider label is detected from `MODEL_URL`:
 
 ```env
-# LLM provider: "ollama" (default) or "anthropic"
-LLM_PROVIDER=ollama
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=qwen2.5:7b
-
-# Only needed when LLM_PROVIDER=anthropic
-ANTHROPIC_API_KEY=sk-ant-...
+MODEL_API_KEY=        # required
+MODEL_NAME=           # required
+MODEL_URL=            # required; must match anthropic|openai|mistral|kimi|moonshot
 ```
 
-### Ollama (default)
+If any of the three variables is empty, or if `MODEL_URL` does not match a known provider, the API raises `RuntimeError` at startup. All four providers expose `/v1/chat/completions`, so a single `OpenAI(api_key=MODEL_API_KEY, base_url=MODEL_URL)` instance with `model=MODEL_NAME` covers them all. Adding a new provider only requires adding one more `if "<name>" in url` branch.
 
-#### Ollama on the same machine
-
-```env
-OLLAMA_BASE_URL=http://localhost:11434
-```
-
-#### Ollama on another machine in the local network
-
-```env
-OLLAMA_BASE_URL=http://<LAN_IP>:11434
-```
-
-On the Ollama host machine, the server must listen on the LAN interface instead of only `127.0.0.1`. For Windows, set the user environment variable:
-
-```text
-OLLAMA_HOST=0.0.0.0:11434
-```
-
-Then fully restart Ollama.
-
-You can test connectivity from this machine with:
-
-```bash
-curl http://<LAN_IP>:11434/api/tags
-```
-
-### Anthropic Claude
-
-```env
-LLM_PROVIDER=anthropic
-ANTHROPIC_API_KEY=sk-ant-...
-```
-
-Token usage and cost are tracked automatically in `outputs/token_ledger.json` when Claude is used. Ollama calls are not tracked (free local model).
+| Provider | `MODEL_NAME` example | `MODEL_URL` |
+|---|---|---|
+| Anthropic Claude | `claude-sonnet-4-20250514` | `https://api.anthropic.com/v1` |
+| OpenAI | `gpt-4o-mini` | `https://api.openai.com/v1` |
+| Mistral | `mistral-large-latest` | `https://api.mistral.ai/v1` |
+| Kimi / Moonshot | `kimi-latest` | `https://api.moonshot.cn/v1` |
 
 ## Project Data Layout
 

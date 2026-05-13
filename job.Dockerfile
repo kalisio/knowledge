@@ -9,7 +9,4 @@ WORKDIR ${HOME}
 
 RUN pip install --no-cache-dir .
 
-EXPOSE 8000
-
-CMD ["python", "-m", "src.main"]
-
+CMD ["python", "-m", "ingestion_job"]

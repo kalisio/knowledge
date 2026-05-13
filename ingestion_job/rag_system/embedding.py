@@ -6,8 +6,8 @@ from collections.abc import Sequence
 
 import numpy as np
 
-from knowledge.ingestion_job.embedding_utils import load_embedding_model
-from knowledge.ingestion_job.rag_system.config import RuntimeConfig
+from ingestion_job.embedding_utils import load_embedding_model
+from ingestion_job.rag_system.config import RuntimeConfig
 
 
 class EmbeddingService:

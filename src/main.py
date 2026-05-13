@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import uvicorn
 
-from knowledge.ingestion_job.rag_system.config import ApiConfig
+from ingestion_job.rag_system.config import ApiConfig
 
 
 def main() -> None:
     config = ApiConfig()
     uvicorn.run(
-        "src.api.app:app",
+        "src.app:app",
         host=config.host,
         port=config.port,
         workers=config.workers_count,
