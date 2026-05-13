@@ -6,6 +6,7 @@ THIS_FILE=$(readlink -f "${BASH_SOURCE[0]}")
 THIS_DIR=$(dirname "$THIS_FILE")
 ROOT_DIR=$(dirname "$THIS_DIR")
 WORKSPACE_DIR="$(dirname "$ROOT_DIR")"
+PROJECT_DIR="$ROOT_DIR/conversion_tool"
 
 . "$THIS_DIR/kash/kash.sh"
 
@@ -32,8 +33,8 @@ done
 ## Init workspace
 ##
 
-NAME=$(get_toml_value "$ROOT_DIR/pyproject.toml" 'project.name')
-VERSION=$(get_toml_value "$ROOT_DIR/pyproject.toml" 'project.version')
+NAME=$(get_toml_value "$PROJECT_DIR/pyproject.toml" 'project.name')
+VERSION=$(get_toml_value "$PROJECT_DIR/pyproject.toml" 'project.version')
 
 echo "About to build $NAME v$VERSION ..."
 
@@ -43,17 +44,16 @@ load_value_files "$WORKSPACE_DIR/development/common/KALISIO_DOCKERHUB_PASSWORD.e
 ## Build container
 ##
 
-IMAGE_NAME="$KALISIO_DOCKERHUB_URL/kalisio/${NAME}-ingestion-job"
+IMAGE_NAME="$KALISIO_DOCKERHUB_URL/kalisio/$NAME"
 IMAGE_TAG=latest
 
 begin_group "Building container $IMAGE_NAME:$IMAGE_TAG ..."
 
 docker login --username "$KALISIO_DOCKERHUB_USERNAME" --password-stdin "$KALISIO_DOCKERHUB_URL" < "$KALISIO_DOCKERHUB_PASSWORD"
-# DOCKER_BUILDKIT is here to be able to use Dockerfile specific dockerginore (job.Dockerfile.dockerignore)
+# DOCKER_BUILDKIT is here to be able to use Dockerfile specific dockerginore (app.Dockerfile.dockerignore)
 DOCKER_BUILDKIT=1 docker build \
-    -f job.Dockerfile \
     -t "$IMAGE_NAME:$IMAGE_TAG" \
-    "$ROOT_DIR"
+    "$PROJECT_DIR"
 
 if [ "$PUBLISH" = true ]; then
     docker push "$IMAGE_NAME:$IMAGE_TAG"

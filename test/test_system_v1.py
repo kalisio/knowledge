@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 
-import knowledge.src.app as api_app
-from knowledge.src.app import app
+import src.api.app as api_app
+from src.api.app import app
 
 
 def test_health_endpoint() -> None:
