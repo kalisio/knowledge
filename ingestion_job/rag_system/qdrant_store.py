@@ -77,6 +77,7 @@ def normalize_chunk(
     source_path: str | None = None,
     file_sha1: str = "",
     index_version: str = "system.v1",
+    profile: str = "",
 ) -> dict[str, Any]:
     text = chunk["text"]
     metadata = dict(chunk.get("metadata") or {})
@@ -91,6 +92,7 @@ def normalize_chunk(
         "vector": None,
         "payload": {
             "index_version": index_version,
+            "profile": profile,
             "source_path": resolved_source,
             "repository": source_repository(resolved_source),
             "file_type": source_file_type(resolved_source),
@@ -113,6 +115,7 @@ def normalize_chunks(
     source_path: str | None = None,
     file_sha1: str = "",
     index_version: str = "system.v1",
+    profile: str = "",
 ) -> list[dict[str, Any]]:
     return [
         normalize_chunk(
@@ -121,6 +124,7 @@ def normalize_chunks(
             source_path=source_path,
             file_sha1=file_sha1,
             index_version=index_version,
+            profile=profile,
         )
         for index, chunk in enumerate(chunks)
     ]
@@ -155,7 +159,7 @@ def ensure_collection(
             collection_name=collection_name,
             vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE),
         )
-    for field in ("repository", "source_path", "file_type", "chunk_type", "strategy", "index_version"):
+    for field in ("repository", "profile", "source_path", "file_type", "chunk_type", "strategy", "index_version"):
         try:
             client.create_payload_index(
                 collection_name=collection_name,
@@ -189,6 +193,22 @@ def upsert_records(
     return total
 
 
+def upsert_chunks(
+    client: QdrantClient,
+    collection_name: str,
+    chunks: Sequence[dict[str, Any]],
+    vectors: np.ndarray,
+    *,
+    batch_size: int = 64,
+    index_version: str = "system.v1",
+    profile: str = "",
+) -> int:
+    """Normalize chunks, attach vectors, and upsert them to Qdrant."""
+    records = normalize_chunks(chunks, index_version=index_version, profile=profile)
+    vector_records = attach_vectors(records, vectors)
+    return upsert_records(client, collection_name, vector_records, batch_size=batch_size)
+
+
 def delete_source_path(client: QdrantClient, collection_name: str, source_path: str) -> None:
     if not client.collection_exists(collection_name):
         return
@@ -207,6 +227,59 @@ def delete_source_path(client: QdrantClient, collection_name: str, source_path: 
     )
 
 
+def scroll_source_paths(
+    client: QdrantClient,
+    collection_name: str,
+    *,
+    profile: str = "",
+    batch_size: int = 256,
+) -> set[str]:
+    """Return source_path payload values currently present in a collection."""
+    if not client.collection_exists(collection_name):
+        return set()
+
+    query_filter = None
+    if profile:
+        query_filter = Filter(
+            must=[FieldCondition(key="profile", match=MatchValue(value=profile))]
+        )
+
+    paths: set[str] = set()
+    offset = None
+    while True:
+        points, offset = client.scroll(
+            collection_name=collection_name,
+            scroll_filter=query_filter,
+            limit=batch_size,
+            offset=offset,
+            with_payload=["source_path"],
+            with_vectors=False,
+        )
+        for point in points:
+            payload = point.payload or {}
+            source_path = payload.get("source_path")
+            if source_path:
+                paths.add(str(source_path))
+        if offset is None:
+            break
+    return paths
+
+
+def prune_missing_source_paths(
+    client: QdrantClient,
+    collection_name: str,
+    alive_source_paths: set[str],
+    *,
+    profile: str = "",
+) -> int:
+    """Delete indexed chunks whose source_path is no longer in the scan."""
+    existing_paths = scroll_source_paths(client, collection_name, profile=profile)
+    stale_paths = sorted(existing_paths - alive_source_paths)
+    for source_path in stale_paths:
+        delete_source_path(client, collection_name, source_path)
+    return len(stale_paths)
+
+
 def query_points(
     client: QdrantClient,
     collection_name: str,
@@ -220,4 +293,3 @@ def query_points(
         limit=limit,
         with_payload=True,
     ).points
-
