@@ -16,13 +16,13 @@ PUBLISH=false
 CI_STEP_NAME="Build docs"
 while getopts "pr:" OPT; do
     case $OPT in
-        p) # define to publish docs
+        p) # publish doc
             PUBLISH=true
             ;;
         r) # report outcome to slack
-            CI_STEP_NAME=$OPTARG
-            load_env_files "$WORKSPACE_DIR/development/common/SLACK_WEBHOOK_APPS.enc.env"
-            trap 'slack_ci_report "$ROOT_DIR" "$CI_STEP_NAME" "$?" "$SLACK_WEBHOOK_APPS"' EXIT
+            CI_STEP_NAME=$OPTARG        
+            load_env_files "$WORKSPACE_DIR/development/common/SLACK_WEBHOOK_LIBS.enc.env"
+            trap 'slack_ci_report "$ROOT_DIR" "$CI_STEP_NAME" "$?" "$SLACK_WEBHOOK_LIBS"' EXIT
             ;;
         *)
             ;;
@@ -32,4 +32,4 @@ done
 ## Build docs
 ##
 
-build_docs "$ROOT_DIR" "kalisio/kano" "$PUBLISH"
+build_docs "$ROOT_DIR" "kalisio/knowledge" "$PUBLISH"
