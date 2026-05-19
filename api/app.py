@@ -7,8 +7,8 @@ import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.handlers import answer_question
-from src.schemas import AskRequest, AskResponse
+from api.handlers import answer_question
+from api.schemas import AskRequest, AskResponse
 
 
 app = FastAPI(

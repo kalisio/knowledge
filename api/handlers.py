@@ -6,7 +6,7 @@ from functools import lru_cache
 
 from qdrant_client import QdrantClient
 
-from src.schemas import AskResponse, SourceChunk
+from api.schemas import AskResponse, SourceChunk
 from ingestion_job.rag_system.config import ApiConfig
 from ingestion_job.rag_system.embedding import EmbeddingService
 from ingestion_job.rag_system.llm import LLMClient

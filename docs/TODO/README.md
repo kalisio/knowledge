@@ -95,10 +95,10 @@ The chunking package exposes one winner per file type, all selected through the 
 
 ## API service
 
-The first runnable system component is a FastAPI retriever at [src/api/](src/api/). Run it locally with:
+The first runnable system component is a FastAPI retriever at [api/](api/). Run it locally with:
 
 ```bash
-python -m src.main
+python -m api.main
 ```
 
 By default it listens on `127.0.0.1:8000` (override via `HOST` / `PORT` environment variables). Endpoints:
