@@ -4,7 +4,7 @@
 [![CI](https://github.com/kalisio/knowledge/actions/workflows/main.yml/badge.svg)](https://github.com/kalisio/knowledge/actions/workflows/main.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-_RAG system over Kalisio ecosystem docs & source code_
+_AI developer assistant for the Kalisio ecosystem_
 
 ## Documentation
 
