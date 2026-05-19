@@ -7,10 +7,10 @@ export default defineConfig({
   ignoreDeadLinks: true,
   head: [
     ['link', { href: 'https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css', rel: 'stylesheet' }],
-    ['link', { rel: 'icon', href: `/knowledge/.vitepress/public/images/favicon.ico` }]
+    ['link', { rel: 'icon', href: `/knowledge/images/favicon.ico` }]
   ],
   themeConfig: {
-    logo: '/.vitepress/public/images/knowledge-logo.png',
+    logo: '/images/knowledge-logo.png',
     domain: 'dev.kalisio.xyz',
     socialLinks: [{ icon: 'github', link: 'https://github.com/kalisio/knowledge' }],
     nav: [
