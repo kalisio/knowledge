@@ -12,7 +12,7 @@ hero:
       link: /about/introduction
     - theme: alt
       text: Architecture
-      link: /guides/architecture
+      link: /architecture/introduction
 features:
 - title: Context-aware AI assistant
   details: Indexes the entire Kalisio codebase into a vector database so AI agents retrieve only the relevant chunks
