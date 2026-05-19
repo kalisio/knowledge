@@ -1,0 +1,1 @@
+import{_ as e,c as t,o}from"./chunks/framework.DIWxUZFy.js";const _=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"guides/agent-config/codex.md","filePath":"guides/agent-config/codex.md"}'),a={name:"guides/agent-config/codex.md"};function c(n,s,r,d,i,f){return o(),t("div")}const g=e(a,[["render",c]]);export{_ as __pageData,g as default};

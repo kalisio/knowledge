@@ -1,0 +1,1 @@
+import{_ as e,c as t,o as a}from"./chunks/framework.DIWxUZFy.js";const _=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"guides/agent-config/vibe.md","filePath":"guides/agent-config/vibe.md"}'),n={name:"guides/agent-config/vibe.md"};function i(o,s,c,r,d,f){return a(),t("div")}const g=e(n,[["render",i]]);export{_ as __pageData,g as default};
