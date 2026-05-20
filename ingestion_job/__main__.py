@@ -18,7 +18,11 @@ from .chunking.api import chunk_files
 from .corpus_filter.api import scan_corpus
 from .corpus_filter.models import FilterConfig, FileRecord
 from .corpus_filter.profiles import build_default_profile
+from .git_history import significant_commits
 from .rag_system.config import IngestionConfig
+
+
+COMMIT_HISTORY_LIMIT = 10
 
 
 def build_ingestion_filter_config() -> FilterConfig:
@@ -72,8 +76,36 @@ def stale_source_paths(records: Sequence[FileRecord], indexed_manifest: dict[str
     return sorted(set(indexed_manifest) - alive)
 
 
-def chunk_records(records: Sequence[FileRecord], file_sha1s: dict[str, str]) -> list[dict]:
-    chunks = chunk_files(records)
+def build_commit_history_map(
+    sources: Iterable[str],
+    ingestion_root: Path,
+    *,
+    limit: int = COMMIT_HISTORY_LIMIT,
+) -> dict[str, list[str]]:
+    """Map each ``source_path`` to its last ``limit`` significant commits.
+
+    ``source_path`` is ``<profile>/<rel_inside_repo>``. The repo root is
+    ``ingestion_root / <profile>``; the file argument to git log is the
+    remainder of the path.
+    """
+    out: dict[str, list[str]] = {}
+    for src in sources:
+        normalized = src.replace("\\", "/")
+        if "/" not in normalized:
+            continue
+        profile, rel = normalized.split("/", 1)
+        out[src] = significant_commits(ingestion_root / profile, rel, limit=limit)
+    return out
+
+
+def chunk_records(
+    records: Sequence[FileRecord],
+    file_sha1s: dict[str, str],
+    *,
+    chunk_size: int,
+    chunk_overlap: int,
+) -> list[dict]:
+    chunks = chunk_files(records, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
     for chunk in chunks:
         metadata = chunk.setdefault("metadata", {})
         src = str(metadata.get("source") or "")
@@ -125,7 +157,12 @@ def run_profile(
     stale_paths = stale_source_paths(records, indexed_manifest) if cfg.incremental else []
     print(f"[change] profile={profile} changed_files={len(target_records)} stale_source_paths={len(stale_paths)}")
 
-    chunks = chunk_records(target_records, file_sha1s)
+    chunks = chunk_records(
+        target_records,
+        file_sha1s,
+        chunk_size=cfg.chunk_size,
+        chunk_overlap=cfg.chunk_overlap,
+    )
     chunked_sources = {str((chunk.get("metadata") or {}).get("source") or "") for chunk in chunks}
     zero_chunk_files: list[tuple[str, str]] = [
         (source_path(record), file_sha1s[source_path(record)])
@@ -185,6 +222,9 @@ def run_profile(
         delete_source_path(client, cfg.qdrant_collection, replaced_source_path, profile=profile)
     print(f"[cleanup] profile={profile} replaced_source_paths={len(replaced_source_paths)}")
 
+    commit_history_by_source = build_commit_history_map(chunked_sources, cfg.ingestion_root)
+    print(f"[git] profile={profile} files_with_history={sum(1 for h in commit_history_by_source.values() if h)}")
+
     upserted = upsert_chunks(
         client,
         cfg.qdrant_collection,
@@ -193,6 +233,7 @@ def run_profile(
         batch_size=batch_size,
         index_version=cfg.index_version,
         profile=profile,
+        commit_history_by_source=commit_history_by_source,
     )
     print(f"[upsert] profile={profile} points={upserted} collection={cfg.qdrant_collection} qdrant={cfg.qdrant_url}")
 
@@ -218,11 +259,17 @@ def main() -> None:
     cfg = IngestionConfig()
     root = cfg.ingestion_root.resolve()
 
+    if cfg.kli_config is not None:
+        from .kli_clone import clone_with_kli
+
+        print(f"[clone] kli_config={cfg.kli_config} root={root}")
+        clone_with_kli(cfg.kli_config, root, kli_dir=cfg.kli_dir)
+
     missing = [name for name in cfg.repos if not (root / name).is_dir()]
     if missing:
         raise SystemExit(
-            f"INGESTION_REPOS lists repositories missing under {root}: {', '.join(missing)}. "
-            "Run `k-clone kalisio all` to fetch them."
+            f"REPO_LIST contains repositories missing under {root}: {', '.join(missing)}. "
+            "Set KLI_CONFIG to clone automatically, or run `k-clone <workspace>` manually."
         )
 
     scan = scan_corpus(root=root, config=build_ingestion_filter_config(), profile="ingestion")

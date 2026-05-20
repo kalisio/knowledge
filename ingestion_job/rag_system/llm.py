@@ -28,12 +28,12 @@ class LLMResponse:
 
 class LLMClient:
     def __init__(self, config: ApiConfig):
-        if not all([config.model_api_key, config.model_name, config.model_url]):
+        if not all([config.llm_api_key, config.llm_model, config.llm_endpoint]):
             raise RuntimeError(
-                "MODEL_API_KEY, MODEL_NAME, MODEL_URL all required"
+                "LLM_API_KEY, LLM_MODEL, LLM_ENDPOINT all required"
             )
 
-        url = config.model_url
+        url = config.llm_endpoint
         if "anthropic" in url:
             self._provider = "anthropic"
         elif "openai" in url:
@@ -43,14 +43,14 @@ class LLMClient:
         elif "kimi" in url or "moonshot" in url:
             self._provider = "kimi"
         else:
-            raise RuntimeError(f"Unknown provider in MODEL_URL: {url}")
+            raise RuntimeError(f"Unknown provider in LLM_ENDPOINT: {url}")
 
         self.config = config
-        self._client = OpenAI(api_key=config.model_api_key, base_url=url)
+        self._client = OpenAI(api_key=config.llm_api_key, base_url=url)
 
     def ask(self, prompt: str) -> LLMResponse:
         response = self._client.chat.completions.create(
-            model=self.config.model_name,
+            model=self.config.llm_model,
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": prompt},
@@ -60,5 +60,5 @@ class LLMClient:
         return LLMResponse(
             answer=(response.choices[0].message.content or "").strip(),
             provider=self._provider,
-            model=self.config.model_name,
+            model=self.config.llm_model,
         )

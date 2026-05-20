@@ -6,7 +6,7 @@ from functools import lru_cache
 
 from qdrant_client import QdrantClient
 
-from api.schemas import AskResponse, SourceChunk
+from api.schemas import AskResponse, SearchResponse, SearchResultChunk, SourceChunk
 from ingestion_job.rag_system.config import ApiConfig
 from ingestion_job.rag_system.embedding import EmbeddingService
 from ingestion_job.rag_system.llm import LLMClient
@@ -68,14 +68,8 @@ def build_context(points, *, max_chars: int) -> tuple[str, list[SourceChunk]]:
     return "\n\n".join(parts), sources
 
 
-def build_prompt(question: str, context: str) -> str:
-    return (
-        "Context:\n"
-        f"{context}\n\n"
-        "Question:\n"
-        f"{question}\n\n"
-        "Answer:"
-    )
+def build_prompt(template: str, question: str, context: str) -> str:
+    return template.format(context=context, question=question)
 
 
 def answer_question(question: str) -> AskResponse:
@@ -88,11 +82,50 @@ def answer_question(question: str) -> AskResponse:
         limit=config.top_k,
     )
     context, sources = build_context(points, max_chars=config.max_context_chars)
-    response = get_llm_client().ask(build_prompt(question, context))
+    response = get_llm_client().ask(build_prompt(config.llm_prompt, question, context))
     return AskResponse(
         answer=response.answer,
         sources=sources,
         provider=response.provider,
         model=response.model,
     )
+
+
+def _format_lines(start: int, end: int) -> str:
+    if start <= 0 and end <= 0:
+        return ""
+    if start <= 0:
+        return str(end)
+    if end <= 0 or end == start:
+        return str(start)
+    return f"{start}-{end}"
+
+
+def search_chunks(query: str, top_k: int) -> SearchResponse:
+    """Retrieve raw chunks for agent consumption — no LLM call."""
+    config = get_config()
+    query_vector = get_embedder().encode_query(query)
+    points = query_points(
+        get_qdrant_client(),
+        config.qdrant_collection,
+        query_vector,
+        limit=top_k,
+    )
+    results: list[SearchResultChunk] = []
+    for point in points:
+        payload = point.payload or {}
+        results.append(
+            SearchResultChunk(
+                path=str(payload.get("source_path") or ""),
+                repo=str(payload.get("repository") or ""),
+                lines=_format_lines(
+                    int(payload.get("start_line") or 0),
+                    int(payload.get("end_line") or 0),
+                ),
+                score=float(point.score),
+                content=str(payload.get("text") or ""),
+                commit_history=list(payload.get("commit_history") or []),
+            )
+        )
+    return SearchResponse(results=results)
 

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from typing import Iterable
 
+from ._line_range import compute_line_range
 from .js import chunk_js
 from .json_chunking import JSON_INDEXED_CATEGORIES, chunk_json, json_category
 from .markdown import DEFAULT_CHUNK_OVERLAP, DEFAULT_CHUNK_SIZE, MD_WINNER, chunk_markdown
@@ -47,16 +48,25 @@ def chunk_files(
         ext = rec.path.suffix.lower()
         kind = _EXT_DISPATCH.get(ext)
         if kind == "markdown":
-            out.extend(chunk_markdown(
+            chunks = chunk_markdown(
                 text, src, strategy=md_strategy,
                 chunk_size=chunk_size, chunk_overlap=chunk_overlap,
-            ))
+            )
         elif kind == "js":
-            out.extend(chunk_js(text, src))
+            chunks = chunk_js(text, src)
         elif kind == "vue":
-            out.extend(chunk_vue(text, src))
+            chunks = chunk_vue(text, src)
         elif kind == "json":
             if json_categories is not None and json_category(src) not in json_categories:
                 continue
-            out.extend(chunk_json(text, src))
+            chunks = chunk_json(text, src)
+        else:
+            continue
+
+        for chunk in chunks:
+            start_line, end_line = compute_line_range(chunk["text"], text)
+            metadata = chunk.setdefault("metadata", {})
+            metadata["start_line"] = start_line
+            metadata["end_line"] = end_line
+        out.extend(chunks)
     return out

@@ -82,6 +82,7 @@ def normalize_chunk(
     file_sha1: str = "",
     index_version: str = "system.v1",
     profile: str = "",
+    commit_history: list[str] | None = None,
 ) -> dict[str, Any]:
     text = chunk["text"]
     metadata = dict(chunk.get("metadata") or {})
@@ -91,6 +92,9 @@ def normalize_chunk(
     text_hash = sha1_text(text)
     breadcrumb = metadata.get("breadcrumb")
     symbol = breadcrumb.get("symbol", "") if isinstance(breadcrumb, dict) else ""
+    start_line = int(metadata.get("start_line", 0) or 0)
+    end_line = int(metadata.get("end_line", 0) or 0)
+    history = list(commit_history) if commit_history is not None else list(metadata.get("commit_history") or [])
     return {
         "id": stable_point_id(resolved_source, chunk_index, text),
         "text": text,
@@ -106,6 +110,9 @@ def normalize_chunk(
             "strategy": metadata.get("strategy", ""),
             "breadcrumb": breadcrumb_text(metadata),
             "symbol": symbol,
+            "start_line": start_line,
+            "end_line": end_line,
+            "commit_history": history,
             "text": text,
             "text_chars": len(text),
             "text_sha1": text_hash,
@@ -121,18 +128,24 @@ def normalize_chunks(
     file_sha1: str = "",
     index_version: str = "system.v1",
     profile: str = "",
+    commit_history_by_source: dict[str, list[str]] | None = None,
 ) -> list[dict[str, Any]]:
-    return [
-        normalize_chunk(
-            chunk,
-            index,
-            source_path=source_path,
-            file_sha1=file_sha1,
-            index_version=index_version,
-            profile=profile,
+    by_source = commit_history_by_source or {}
+    out: list[dict[str, Any]] = []
+    for index, chunk in enumerate(chunks):
+        per_chunk_source = source_path or str((chunk.get("metadata") or {}).get("source") or "")
+        out.append(
+            normalize_chunk(
+                chunk,
+                index,
+                source_path=source_path,
+                file_sha1=file_sha1,
+                index_version=index_version,
+                profile=profile,
+                commit_history=by_source.get(per_chunk_source),
+            )
         )
-        for index, chunk in enumerate(chunks)
-    ]
+    return out
 
 
 def attach_vectors(records: Sequence[dict[str, Any]], vectors: np.ndarray) -> list[dict[str, Any]]:
@@ -216,9 +229,15 @@ def upsert_chunks(
     batch_size: int = 64,
     index_version: str = "system.v1",
     profile: str = "",
+    commit_history_by_source: dict[str, list[str]] | None = None,
 ) -> int:
     """Normalize chunks, attach vectors, and upsert them to Qdrant."""
-    records = normalize_chunks(chunks, index_version=index_version, profile=profile)
+    records = normalize_chunks(
+        chunks,
+        index_version=index_version,
+        profile=profile,
+        commit_history_by_source=commit_history_by_source,
+    )
     vector_records = attach_vectors(records, vectors)
     return upsert_records(client, collection_name, vector_records, batch_size=batch_size)
 
