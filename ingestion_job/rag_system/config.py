@@ -76,6 +76,10 @@ class ApiConfig(RuntimeConfig):
     llm_prompt: str = field(default_factory=lambda: _env("LLM_PROMPT", DEFAULT_LLM_PROMPT))
     max_context_chars: int = field(default_factory=lambda: _env_int("MAX_CONTEXT_CHARS", 14000))
     max_answer_tokens: int = field(default_factory=lambda: _env_int("MAX_ANSWER_TOKENS", 1024))
+    app_secret: str = field(default_factory=lambda: _env("APP_SECRET", ""))
+    jwt_audience: str = field(default_factory=lambda: _env("JWT_AUDIENCE", "knowledge"))
+    jwt_issuer: str = field(default_factory=lambda: _env("JWT_ISSUER", "kalisio"))
+    jwt_algorithm: str = field(default_factory=lambda: _env("JWT_ALGORITHM", "HS256"))
 
 
 def _kalisio_development_dir() -> Path:

@@ -24,6 +24,7 @@ dependencies = [
     "pandas>=2.2.0",
     "pytest>=8.0.0",
     "uvicorn>=0.30.0",
+    "PyJWT>=2.8.0",
 ]
 
 [build-system]
