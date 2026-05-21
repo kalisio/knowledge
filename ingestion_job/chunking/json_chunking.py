@@ -1,4 +1,4 @@
-"""JSON chunking — nb04 winner is ``D_json_category_breadcrumb``.
+"""JSON chunking with category-aware breadcrumbs.
 
 Module is named ``json_chunking.py`` (not ``json.py``) so it never
 shadows the standard library in sub-package imports.
@@ -23,8 +23,7 @@ path / name:
     test_fixtures         structural integrity.
 
 Every chunk text starts with a ``// <rel_path> :: <unit>`` header
-(the nb03 breadcrumb pattern) so JSON chunks use the same retrieval
-anchor as JS/Vue chunks.
+so JSON chunks use the same retrieval anchor style as JS/Vue chunks.
 """
 
 from __future__ import annotations
@@ -51,9 +50,7 @@ _JSON_FILENAME_SCHEMA = re.compile(
 def json_category(source: str) -> str:
     """Classify a JSON file by payload role from its relative path.
 
-    Mirrors ``experiments/nb04_chunking_json/json_inventory.categorize``
-    — kept here so ``src/chunking`` doesn't depend on the experiments
-    package at runtime.
+    Classifies files without importing optional analysis helpers at runtime.
     """
     s = source.replace("\\", "/").lower()
     name = Path(source).name.lower()
@@ -73,9 +70,8 @@ def json_category(source: str) -> str:
     return "other"
 
 
-# Categories worth sending to the index — derived from nb01 (priority
-# table) and nb04 (per-category retrieval analysis). Callers are free
-# to index more; this is the recommended default.
+# Categories included in the default index. Callers can pass a different
+# category set to include more JSON files.
 JSON_INDEXED_CATEGORIES = {
     "schemas_validation",
     "i18n_translations",
@@ -203,7 +199,7 @@ def chunk_json(
     *,
     strategy: str = "D_json_category_breadcrumb",
 ) -> list[dict]:
-    """Chunk one JSON file with the nb04 winner (category-aware + breadcrumb).
+    """Chunk one JSON file with category-aware breadcrumbs.
 
     Falls back to ``RecursiveCharacterTextSplitter`` if the file is
     malformed — robustness matters more than correctness when a stray

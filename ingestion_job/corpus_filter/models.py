@@ -65,8 +65,7 @@ class FileRecord:
 class ScanResult:
     """Rich container for the results of a corpus scan.
     
-    Provides helper methods to group files by extension or zone, which is 
-    essential for structural statistics (nb01) and chunking experiments (nb03).
+    Provides helper methods to group files by extension, zone, or exclusion reason.
     """
 
     root_dir: Path

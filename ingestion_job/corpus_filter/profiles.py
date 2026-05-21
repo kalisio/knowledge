@@ -1,9 +1,8 @@
-"""Configuration profiles for different corpus scanning scenarios.
+"""Configuration profiles for corpus scanning.
 
-This module provides pre-defined 'FilterConfig' objects tailored for 
-specific experiments. For example, the 'js_vue_rag' profile is optimized for 
-source code analysis in nb03, while the 'default' profile is used for 
-general corpus inventory in nb01.
+This module provides pre-defined ``FilterConfig`` objects for common scanning
+scenarios. Profiles define which files are considered useful input for
+downstream indexing and retrieval.
 """
 
 from __future__ import annotations
@@ -26,11 +25,10 @@ def build_default_profile() -> FilterConfig:
 
 
 def build_js_vue_rag_profile() -> FilterConfig:
-    """Specialized profile for nb03 (JS/Vue Chunking Experiment).
-    
-    This profile focuses exclusively on source code files. It aggressively 
-    excludes non-source directories (docs, tools, examples) to ensure the 
-    RAG experiments are measured against high-value production code only.
+    """Source-focused profile for JavaScript, Vue, TypeScript, and JSON files.
+
+    Excludes documentation, generated assets, and example directories so the
+    scan focuses on implementation files.
     """
     cfg = FilterConfig()
     return replace(

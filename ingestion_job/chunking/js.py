@@ -1,8 +1,8 @@
-"""JavaScript chunking — nb03 winner is ``D_js_breadcrumb``.
+"""JavaScript chunking with path and symbol breadcrumbs.
 
 ``RecursiveCharacterTextSplitter.from_language(Language.JS)`` drives the
 cut points, then a ``// <rel_path> :: <nearest symbol>`` header is
-prepended to every chunk so the embedding model has a stable path +
+prepended to every chunk so the embedding model has a stable path and
 symbol anchor in the text itself.
 """
 
@@ -39,7 +39,7 @@ def chunk_js(
     chunk_size: int = JS_CHUNK_SIZE,
     chunk_overlap: int = JS_CHUNK_OVERLAP,
 ) -> list[dict]:
-    """Chunk one JS file using the nb03 winner strategy (D — breadcrumb)."""
+    """Chunk one JavaScript file with path and symbol breadcrumbs."""
     splitter = RecursiveCharacterTextSplitter.from_language(
         language=Language.JS, chunk_size=chunk_size, chunk_overlap=chunk_overlap
     )

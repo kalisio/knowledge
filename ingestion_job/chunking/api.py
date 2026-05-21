@@ -1,7 +1,7 @@
 """Public dispatcher for the chunking package.
 
 ``chunk_files()`` walks a batch of ``corpus_filter`` records and
-dispatches each by file extension to the per-type winner chunker
+dispatches each by file extension to the per-type chunker
 (``chunk_markdown`` / ``chunk_js`` / ``chunk_vue`` / ``chunk_json``).
 """
 
@@ -38,8 +38,7 @@ def chunk_files(
 
     Accepts any iterable of objects exposing ``.path`` and ``.rel_path``.
 
-    ``json_categories`` filters JSON files by semantic role — defaults
-    to the set nb04 recommends for the production index. Pass ``None``
+    ``json_categories`` filters JSON files by semantic role. Pass ``None``
     to include every JSON regardless of category.
     """
     out: list[dict] = []

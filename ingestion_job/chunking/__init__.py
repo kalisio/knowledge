@@ -3,10 +3,10 @@
 Exposes four public entry points, one per file type, plus a batch
 dispatcher:
 
-- :func:`chunk_markdown` — nb02 winner (AST-Merge + Breadcrumb)
-- :func:`chunk_js`       — nb03 winner (Recursive JS + breadcrumb)
-- :func:`chunk_vue`      — nb03 winner (SFC dispatcher + expanded breadcrumb)
-- :func:`chunk_json`     — nb04 winner (category-aware key split + breadcrumb)
+- :func:`chunk_markdown` — Markdown section chunks with breadcrumbs
+- :func:`chunk_js`       — JavaScript chunks with path and symbol breadcrumbs
+- :func:`chunk_vue`      — Vue SFC chunks split by block with breadcrumbs
+- :func:`chunk_json`     — JSON chunks split by semantic category
 - :func:`chunk_files`    — dispatches a batch by file extension
 
 Every function returns ``list[dict]`` with keys ``text`` and
@@ -28,14 +28,12 @@ Metadata schema (all file types)::
                              (schemas_validation / i18n_translations / …)
         doc_title    — Markdown: first h1 title
 
-Internal layout (added in nb04 — ``src/chunking.py`` was promoted to a
-package so each file-type's strategies live in their own module and
-nb04's JSON code didn't balloon a single file past 600 lines):
+Internal layout:
 
 - ``markdown.py``       — MD strategies A/B/C/D, helpers
 - ``js.py``             — JS splitter (D)
 - ``vue.py``            — Vue SFC splitter (D/E)
-- ``json_chunking.py``  — JSON strategies (nb04)
+- ``json_chunking.py``  — JSON chunking helpers
 - ``api.py``            — ``chunk_files`` dispatcher
 """
 
@@ -67,7 +65,7 @@ from .markdown import (
 )
 from .vue import VUE_WINNER, chunk_vue
 
-# Legacy alias — tests/nb02_sweep_winner.py still import this name.
+# Legacy alias kept for compatibility with existing callers.
 STRATEGIES = MD_STRATEGIES
 WINNER_STRATEGY = MD_WINNER
 
@@ -78,7 +76,7 @@ __all__ = [
     "chunk_vue",
     "chunk_json",
     "chunk_files",
-    # markdown strategies (exported for tests / benchmarks)
+    # markdown strategies
     "chunk_rct",
     "chunk_mhs_rct",
     "chunk_ast_merge",
@@ -87,7 +85,7 @@ __all__ = [
     "get_doc_title",
     "heading_key",
     "MD_STRATEGIES",
-    # winners / constants
+    # strategy names / constants
     "MD_WINNER",
     "JS_WINNER",
     "VUE_WINNER",

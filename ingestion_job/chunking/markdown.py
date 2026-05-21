@@ -1,6 +1,6 @@
-"""Markdown chunking — nb02 winner is ``D_ast_breadcrumb``.
+"""Markdown chunking with structural and breadcrumb strategies.
 
-Four strategies ship, mirroring the nb02 benchmark:
+Four strategies are available:
 
     A_rct         RecursiveCharacterTextSplitter with heading-aware separators
     B_mhs_rct     MarkdownHeaderTextSplitter → RCT re-split (metadata carries h1/h2/h3)
@@ -171,7 +171,7 @@ def chunk_ast_breadcrumb(
 
     The breadcrumb (``Context: h1 > h2 > h3``) gives the embedding model
     and downstream LLM an explicit hierarchy without forcing them to
-    read metadata. nb02 winner.
+    read metadata.
     """
     splitter = ExperimentalMarkdownSyntaxTextSplitter(strip_headers=False)
     atoms = splitter.split_text(text)

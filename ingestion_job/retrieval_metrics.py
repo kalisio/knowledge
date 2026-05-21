@@ -1,4 +1,4 @@
-"""Deterministic retrieval metrics for the nb02 chunking benchmark.
+"""Deterministic retrieval metrics for source-level evaluation.
 
 All metrics are reproducible from gold source files and/or target symbols —
 no LLM judge is needed. They are aligned with how an AI coder agent actually

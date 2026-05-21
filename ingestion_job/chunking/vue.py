@@ -1,4 +1,4 @@
-"""Vue SFC chunking — nb03 winner is ``E_vue_expanded_breadcrumb``.
+"""Vue SFC chunking with block-aware breadcrumbs.
 
 Dispatches on SFC block (``<template>`` / ``<script>`` / ``<style>``),
 splits each with the appropriate language-aware splitter, then prepends
@@ -70,8 +70,8 @@ def chunk_vue(
 ) -> list[dict]:
     """Chunk one Vue SFC.
 
-    - ``E_vue_expanded_breadcrumb`` (default, nb03 winner): SFC dispatcher
-      with a breadcrumb that includes the paraphrased component name.
+    - ``E_vue_expanded_breadcrumb`` (default): split SFC blocks and add
+      a breadcrumb that includes the paraphrased component name.
     - ``D_vue_breadcrumb``: path-only breadcrumb.
     """
     if strategy not in ("E_vue_expanded_breadcrumb", "D_vue_breadcrumb"):
