@@ -65,7 +65,7 @@ def chunk_type(metadata: dict[str, Any], source_path: str) -> str:
         return str(block_type)
     if source_path.endswith(".vue"):
         return "vue"
-    if source_path.endswith((".js", ".mjs")):
+    if source_path.endswith((".js", ".mjs", ".cjs")):
         return "javascript"
     if source_path.endswith(".json"):
         return "json"

@@ -29,12 +29,12 @@ def build_ingestion_filter_config() -> FilterConfig:
     """Filter config for scanning live Kalisio repositories.
 
     Keeps `docs/` in scope so each repo's documentation markdown is indexed,
-    and restricts inputs to the four extensions the RAG pipeline supports.
+    and restricts inputs to the extensions the RAG pipeline supports.
     """
     base = build_default_profile()
     return replace(
         base,
-        included_extensions={".md", ".js", ".mjs", ".vue", ".json"},
+        included_extensions={".md", ".js", ".mjs", ".cjs", ".vue", ".json"},
     )
 
 

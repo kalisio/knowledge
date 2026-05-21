@@ -1,8 +1,14 @@
 from pathlib import Path
 
-from ingestion_job.__main__ import build_file_sha1_map, changed_records, stale_source_paths
+from ingestion_job.__main__ import (
+    build_file_sha1_map,
+    build_ingestion_filter_config,
+    changed_records,
+    stale_source_paths,
+)
+from ingestion_job.chunking.api import chunk_files
 from ingestion_job.corpus_filter.models import FileRecord
-from ingestion_job.rag_system.qdrant_store import normalize_chunk
+from ingestion_job.rag_system.qdrant_store import normalize_chunk, source_file_type
 
 
 def _record(path: Path, rel_path: str) -> FileRecord:
@@ -58,3 +64,26 @@ def test_normalize_chunk_prefers_metadata_file_sha1() -> None:
 
     assert record["payload"]["profile"] == "kdk"
     assert record["payload"]["file_sha1"] == "abc123"
+
+
+def test_cjs_files_follow_javascript_ingestion_path(tmp_path: Path) -> None:
+    path = tmp_path / "vite.config.cjs"
+    path.write_text(
+        "const plugin = require('demo')\n"
+        "function configure() {\n"
+        "  return plugin()\n"
+        "}\n"
+        "module.exports = { configure }\n",
+        encoding="utf-8",
+    )
+    record = _record(path, "kapp/vite.config.cjs")
+
+    assert ".cjs" in build_ingestion_filter_config().included_extensions
+
+    chunks = chunk_files([record])
+
+    assert chunks
+    assert chunks[0]["metadata"]["source"] == "kapp/vite.config.cjs"
+    assert source_file_type("kapp/vite.config.cjs") == "cjs"
+    normalized = normalize_chunk(chunks[0], 0)
+    assert normalized["payload"]["chunk_type"] == "javascript"

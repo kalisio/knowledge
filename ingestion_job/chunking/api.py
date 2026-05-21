@@ -20,6 +20,7 @@ _EXT_DISPATCH = {
     ".md": "markdown",
     ".js": "js",
     ".mjs": "js",
+    ".cjs": "js",
     ".vue": "vue",
     ".json": "json",
 }
