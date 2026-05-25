@@ -46,9 +46,11 @@ def _unauthorized() -> HTTPException:
 def verify_jwt(
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
 ) -> None:
+    config = get_config()
+    if not config.auth_enabled:
+        return
     if credentials is None or credentials.scheme.lower() != "bearer":
         raise _unauthorized()
-    config = get_config()
     if not config.app_secret:
         raise RuntimeError(
             "APP_SECRET is not configured — refusing to accept any JWT. "
@@ -61,7 +63,7 @@ def verify_jwt(
             algorithms=[config.jwt_algorithm],
             audience=config.jwt_audience,
             issuer=config.jwt_issuer,
-            options={"require": ["exp"]},
+            options={"require": []},
             leeway=10,
         )
     except jwt.PyJWTError:

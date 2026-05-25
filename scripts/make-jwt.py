@@ -33,7 +33,7 @@ def main() -> int:
     args = parser.parse_args()
 
     secret = os.environ.get("APP_SECRET", "")
-    audience = os.environ.get("JWT_AUDIENCE", "knowledge")
+    audience = os.environ.get("JWT_AUDIENCE", "kalisio")
     issuer = os.environ.get("JWT_ISSUER", "kalisio")
     algorithm = os.environ.get("JWT_ALGORITHM", "HS256")
 
