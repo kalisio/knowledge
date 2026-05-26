@@ -25,9 +25,9 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, PointStruct, VectorParams
 from tqdm import tqdm
 
-ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "src"))
-sys.path.insert(0, str(ROOT / "scripts"))
+_HELPER = Path(__file__).resolve().parents[1] / "experiment_helper"
+sys.path.insert(0, str(_HELPER))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from chunking import WINNER_STRATEGY, chunk_files  # noqa: E402
 from corpus_filter import scan_corpus  # noqa: E402

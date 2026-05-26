@@ -2,8 +2,9 @@ from pathlib import Path
 import sys
 
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "experiments" / "nb06_qdrant_index"))
+_HELPER = Path(__file__).resolve().parents[2] / "experiment_helper"
+sys.path.insert(0, str(_HELPER))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from nb06_helpers import (  # noqa: E402
     breadcrumb_text,

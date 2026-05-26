@@ -46,9 +46,9 @@ from langchain_text_splitters import (
     RecursiveJsonSplitter,
 )
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "src"))
-sys.path.insert(0, str(ROOT / "experiments" / "nb04_chunking_json"))
+_HELPER = Path(__file__).resolve().parents[1] / "experiment_helper"
+sys.path.insert(0, str(_HELPER))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from corpus_filter import scan_corpus  # noqa: E402
 from chunking import chunk_json  # noqa: E402  — production category-aware splitter

@@ -30,9 +30,9 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent.parent
-sys.path.insert(0, str(ROOT / "src"))
-sys.path.insert(0, str(ROOT / "scripts"))
+_HELPER = Path(__file__).resolve().parents[1] / "experiment_helper"
+sys.path.insert(0, str(_HELPER))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from corpus_filter import scan_corpus  # noqa: E402
 

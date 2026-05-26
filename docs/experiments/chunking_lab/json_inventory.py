@@ -22,8 +22,9 @@ _SCHEMA_FILENAME_RE = re.compile(
     r"\.(create|update|get)(?:-[a-z]+)?\.json$", re.IGNORECASE
 )
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "src"))
+_HELPER = Path(__file__).resolve().parents[1] / "experiment_helper"
+sys.path.insert(0, str(_HELPER))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from corpus_filter import scan_corpus, ScanResult  # noqa: E402
 

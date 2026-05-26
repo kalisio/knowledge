@@ -27,8 +27,9 @@ from dotenv import load_dotenv
 from qdrant_client import QdrantClient
 from tqdm import tqdm
 
-ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "src"))
+_HELPER = Path(__file__).resolve().parents[1] / "experiment_helper"
+sys.path.insert(0, str(_HELPER))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from embedding_utils import load_embedding_model  # noqa: E402
 from retrieval_metrics import (  # noqa: E402

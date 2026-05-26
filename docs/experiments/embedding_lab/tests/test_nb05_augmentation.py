@@ -4,8 +4,9 @@ import json
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "experiments" / "nb05_embedding_eval"))
+_HELPER = Path(__file__).resolve().parents[2] / "experiment_helper"
+sys.path.insert(0, str(_HELPER))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from nb05_augment_helpers import LLMTranslator  # noqa: E402
 from nb05_glossary import (  # noqa: E402
