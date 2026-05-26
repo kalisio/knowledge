@@ -19,16 +19,13 @@ get a usable range.
 
 from __future__ import annotations
 
-
 _ANCHOR_LEN = 64
 _SHORT_ANCHOR_LEN = 16
-
 
 def _total_lines(source_text: str) -> int:
     if not source_text:
         return 1
     return max(1, len(source_text.splitlines()))
-
 
 def _strip_prefix(chunk_text: str) -> str:
     """Strip known chunker-injected breadcrumb headers."""
@@ -51,11 +48,9 @@ def _strip_prefix(chunk_text: str) -> str:
 
     return chunk_text
 
-
 def _anchor(text: str) -> str:
     stripped = text.lstrip()
     return stripped[:_ANCHOR_LEN] if stripped else ""
-
 
 def compute_line_range(chunk_text: str, source_text: str) -> tuple[int, int]:
     """Return 1-indexed ``(start_line, end_line)`` for a chunk in source.
