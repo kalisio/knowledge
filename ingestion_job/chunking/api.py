@@ -6,12 +6,15 @@ dispatches each by file extension to the per-type chunker
 """
 
 from __future__ import annotations
+
 from typing import Iterable
+
 from ._line_range import compute_line_range
-from .file_type.js import chunk_js
-from .file_type.json import JSON_INDEXED_CATEGORIES, chunk_json, json_category
-from .file_type.md import DEFAULT_CHUNK_OVERLAP, DEFAULT_CHUNK_SIZE, chunk_markdown
-from .file_type.vue import chunk_vue
+from .js import chunk_js
+from .json_chunking import JSON_INDEXED_CATEGORIES, chunk_json, json_category
+from .markdown import DEFAULT_CHUNK_OVERLAP, DEFAULT_CHUNK_SIZE, MD_WINNER, chunk_markdown
+from .vue import chunk_vue
+
 
 _EXT_DISPATCH = {
     ".md": "markdown",
@@ -21,6 +24,7 @@ _EXT_DISPATCH = {
     ".vue": "vue",
     ".json": "json",
 }
+
 
 def chunk_files(
     files: Iterable,

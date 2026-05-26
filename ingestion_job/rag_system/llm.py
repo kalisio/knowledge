@@ -1,9 +1,13 @@
 """LLM client abstraction used by the API service."""
 
 from __future__ import annotations
+
 from dataclasses import dataclass
+
 from openai import OpenAI
+
 from ingestion_job.rag_system.config import ApiConfig
+
 
 SYSTEM_PROMPT = (
     "You are a retrieval-augmented assistant for the Kalisio codebase.\n"

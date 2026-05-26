@@ -30,17 +30,18 @@ Metadata schema (all file types)::
 
 Internal layout:
 
-- ``md.py``       — MD strategies A/B/C/D, helpers
-- ``js.py``       — JS splitter (D)
-- ``vue.py``      — Vue SFC splitter (D/E)
-- ``json.py``     — JSON chunking helpers
-- ``api.py``      — ``chunk_files`` dispatcher
+- ``markdown.py``       — MD strategies A/B/C/D, helpers
+- ``js.py``             — JS splitter (D)
+- ``vue.py``            — Vue SFC splitter (D/E)
+- ``json_chunking.py``  — JSON chunking helpers
+- ``api.py``            — ``chunk_files`` dispatcher
 """
 
 from __future__ import annotations
+
 from .api import chunk_files
-from .file_type.js import JS_CHUNK_OVERLAP, JS_CHUNK_SIZE, JS_WINNER, chunk_js
-from .file_type.json import (
+from .js import JS_CHUNK_OVERLAP, JS_CHUNK_SIZE, JS_WINNER, chunk_js
+from .json_chunking import (
     JSON_CHUNK_OVERLAP,
     JSON_CHUNK_SIZE,
     JSON_INDEXED_CATEGORIES,
@@ -48,7 +49,7 @@ from .file_type.json import (
     chunk_json,
     json_category,
 )
-from .file_type.md import (
+from .markdown import (
     DEFAULT_CHUNK_OVERLAP,
     DEFAULT_CHUNK_SIZE,
     MD_STRATEGIES,
@@ -62,7 +63,7 @@ from .file_type.md import (
     get_doc_title,
     heading_key,
 )
-from .file_type.vue import VUE_WINNER, chunk_vue
+from .vue import VUE_WINNER, chunk_vue
 
 # Legacy alias kept for compatibility with existing callers.
 STRATEGIES = MD_STRATEGIES
@@ -85,6 +86,11 @@ __all__ = [
     "heading_key",
     "MD_STRATEGIES",
     # strategy names / constants
+    "MD_WINNER",
+    "JS_WINNER",
+    "VUE_WINNER",
+    "JSON_WINNER",
+    "WINNER_STRATEGY",
     "STRATEGIES",
     "DEFAULT_CHUNK_SIZE",
     "DEFAULT_CHUNK_OVERLAP",
