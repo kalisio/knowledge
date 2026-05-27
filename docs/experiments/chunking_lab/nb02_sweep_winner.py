@@ -28,6 +28,7 @@ from tqdm import tqdm
 _HELPER = Path(__file__).resolve().parents[1] / "experiment_helper"
 sys.path.insert(0, str(_HELPER))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+ROOT = _HELPER.parents[2]  # repo root; same regardless of file depth
 
 from chunking import WINNER_STRATEGY, chunk_files  # noqa: E402
 from corpus_filter import scan_corpus  # noqa: E402

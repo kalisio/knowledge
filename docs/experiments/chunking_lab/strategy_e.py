@@ -14,7 +14,7 @@ back to D's original header.
 
 from __future__ import annotations
 
-import vue_splitter_experiment as vuex
+import vue_strategies as vuex
 from paraphrase import component_phrase
 
 

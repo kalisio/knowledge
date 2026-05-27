@@ -16,6 +16,7 @@ import pytest
 _HELPER = Path(__file__).resolve().parents[2] / "experiment_helper"
 sys.path.insert(0, str(_HELPER))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+ROOT = _HELPER.parents[2]  # repo root; same regardless of file depth
 
 from chunking import (  # noqa: E402
     DEFAULT_CHUNK_SIZE,

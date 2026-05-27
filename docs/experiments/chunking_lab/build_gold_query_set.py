@@ -33,6 +33,7 @@ from pathlib import Path
 _HELPER = Path(__file__).resolve().parents[1] / "experiment_helper"
 sys.path.insert(0, str(_HELPER))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+ROOT = _HELPER.parents[2]  # repo root; same regardless of file depth
 
 from corpus_filter import scan_corpus  # noqa: E402
 

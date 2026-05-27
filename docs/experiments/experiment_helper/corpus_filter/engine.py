@@ -21,7 +21,10 @@ def scan_tree(root: Path, config: FilterConfig, profile_name: str) -> ScanResult
     """
     result = ScanResult(root_dir=root, config=config, profile_name=profile_name)
     
-    for dirpath, dirnames, filenames in os.walk(root):
+    for dirpath, dirnames, filenames in os.walk(root, followlinks=True):
+        # followlinks=True so the notebook-style data/ symlinks to kalisio
+        # sibling repos (kdk, kano, etc.) are traversed. Production would
+        # never set this; this is an experiment-side accommodation.
         # In-place modification of dirnames prunes them from os.walk
         dirnames[:] = [d for d in dirnames if d not in config.excluded_dirs]
         

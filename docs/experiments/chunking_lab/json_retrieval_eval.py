@@ -53,11 +53,12 @@ import numpy as np
 _HELPER = Path(__file__).resolve().parents[1] / "experiment_helper"
 sys.path.insert(0, str(_HELPER))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+ROOT = _HELPER.parents[2]  # repo root; same regardless of file depth
 
 from corpus_filter import scan_corpus  # noqa: E402
 from embedding_utils import embed_batch_size, load_embedding_model  # noqa: E402
 
-import json_splitter_experiment as jsonx  # noqa: E402
+import json_strategies as jsonx  # noqa: E402
 from json_inventory import JsonFileView, load_views  # noqa: E402
 from hybrid import bm25_rank, rrf_fuse  # noqa: E402
 

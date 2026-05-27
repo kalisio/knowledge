@@ -16,7 +16,7 @@ LangChain has no Vue splitter. We compare four options:
      for script blocks) to every chunk so retrieval knows which component
      and which block the fragment came from.
 
-Same size metrics as js_splitter_experiment, plus:
+Same size metrics as js_strategies, plus:
   - block_mix_ratio: chunks containing markers from ≥ 2 SFC block types
     (lower is better; C/D are 0 by construction).
 """
@@ -34,6 +34,7 @@ from langchain_text_splitters import Language, RecursiveCharacterTextSplitter
 _HELPER = Path(__file__).resolve().parents[1] / "experiment_helper"
 sys.path.insert(0, str(_HELPER))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+ROOT = _HELPER.parents[2]  # repo root; same regardless of file depth
 
 from corpus_filter import scan_corpus  # noqa: E402
 

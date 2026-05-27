@@ -23,7 +23,7 @@ overall and per-category.
 
 Six strategies are evaluated:
 
-  - A/B/C/D — the four structural strategies from ``vue_splitter_experiment``.
+  - A/B/C/D — the four structural strategies from ``vue_strategies``.
   - E       — D + the expanded component phrase injected into every
               chunk header (see ``strategy_e``). Dense retrieval only.
   - F       — E chunks retrieved by dense + BM25, fused with Reciprocal
@@ -43,12 +43,13 @@ import numpy as np
 _HELPER = Path(__file__).resolve().parents[1] / "experiment_helper"
 sys.path.insert(0, str(_HELPER))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+ROOT = _HELPER.parents[2]  # repo root; same regardless of file depth
 
 from corpus_filter import scan_corpus  # noqa: E402
 from embedding_utils import embed_batch_size, load_embedding_model  # noqa: E402
 from retrieval_metrics import symbol_hit  # noqa: E402
 
-import vue_splitter_experiment as vuex  # noqa: E402
+import vue_strategies as vuex  # noqa: E402
 from paraphrase import camel_phrase  # noqa: E402
 from strategy_e import strategy_e  # noqa: E402
 from hybrid import bm25_rank, rrf_fuse  # noqa: E402

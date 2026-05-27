@@ -1,6 +1,6 @@
 """Deterministic retrieval eval for the JS chunking strategies.
 
-Problem this closes: ``js_splitter_experiment.boundary_quality`` is a
+Problem this closes: ``js_strategies.boundary_quality`` is a
 character-level heuristic. It tells us how often a chunk *starts* at a
 clean JS boundary, not whether retrieval actually returns useful code.
 
@@ -38,12 +38,13 @@ import numpy as np
 _HELPER = Path(__file__).resolve().parents[1] / "experiment_helper"
 sys.path.insert(0, str(_HELPER))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+ROOT = _HELPER.parents[2]  # repo root; same regardless of file depth
 
 from corpus_filter import scan_corpus  # noqa: E402
 from embedding_utils import embed_batch_size, load_embedding_model  # noqa: E402
 from retrieval_metrics import recall_at_k, symbol_hit  # noqa: E402
 
-import js_splitter_experiment as jsx  # noqa: E402
+import js_strategies as jsx  # noqa: E402
 from hybrid import bm25_rank, rrf_fuse  # noqa: E402
 
 DATA = ROOT / "data"

@@ -1,7 +1,7 @@
 """Compare chunking strategies on the JSON slice of the corpus.
 
-Named ``json_splitter_experiment.py`` to mirror nb03's
-``js_splitter_experiment.py`` / ``vue_splitter_experiment.py`` layout —
+Named ``json_strategies.py`` to mirror nb03's
+``js_strategies.py`` / ``vue_strategies.py`` layout —
 one experiment module per file type, driven by the notebook.
 
 Four strategies per JSON category:
@@ -49,6 +49,7 @@ from langchain_text_splitters import (
 _HELPER = Path(__file__).resolve().parents[1] / "experiment_helper"
 sys.path.insert(0, str(_HELPER))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+ROOT = _HELPER.parents[2]  # repo root; same regardless of file depth
 
 from corpus_filter import scan_corpus  # noqa: E402
 from chunking import chunk_json  # noqa: E402  — production category-aware splitter
