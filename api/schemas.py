@@ -1,43 +1,33 @@
-"""API response schemas."""
-
-from __future__ import annotations
-
 from pydantic import BaseModel, Field
 
 
-class AskRequest(BaseModel):
-    question: str = Field(..., min_length=1)
-
-
-class SourceChunk(BaseModel):
+class Chunk(BaseModel):
     source_path: str
-    score: float
-    repository: str = ""
-    chunk_index: int | None = None
+    repository: str
+    start_line: int
+    end_line: int
     breadcrumb: str = ""
-    preview: str = ""
+    chunk_index: int | None = None
+    score: float
+    content: str = ""
+    commit_history: list[str] = []
+
+
+class AskRequest(BaseModel):
+    question: str = Field(..., min_length=1, max_length=2000)
 
 
 class AskResponse(BaseModel):
     answer: str
-    sources: list[SourceChunk]
+    sources: list[Chunk]
     provider: str
     model: str
 
 
 class SearchRequest(BaseModel):
-    query: str = Field(..., min_length=1)
+    query: str = Field(..., min_length=1, max_length=2000)
     top_k: int = Field(default=5, ge=1, le=50)
 
 
-class SearchResultChunk(BaseModel):
-    path: str
-    repo: str
-    lines: str
-    score: float
-    content: str
-    commit_history: list[str] = Field(default_factory=list)
-
-
 class SearchResponse(BaseModel):
-    results: list[SearchResultChunk]
+    results: list[Chunk]
