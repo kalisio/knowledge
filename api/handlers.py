@@ -1,8 +1,8 @@
 import os
 
-import embeddings.service as embeddings
-import vectordb.client as vectordb
-import llm.client as llm
+import utils.embeddings.service as embeddings
+import utils.vectordb.client as vectordb
+import api.llm.client as llm
 
 
 # Tunables read from env
