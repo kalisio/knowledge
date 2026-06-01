@@ -40,7 +40,11 @@ def health_check():
     "/ask",
     response_model=AskResponse,
     summary="Ask a question over the Kalisio corpus",
-    description="Embed the question, retrieve matching code chunks from Qdrant, call the configured LLM, return a natural-language answer with its sources.",
+    description=(
+        "Embed the question, retrieve matching code chunks from Qdrant, "
+        "call the configured LLM, return a natural-language answer "
+        "with its sources."
+    ),
 )
 def ask(request: AskRequest):
     return handlers.answer_question(request.question)
@@ -50,7 +54,11 @@ def ask(request: AskRequest):
     "/search",
     response_model=SearchResponse,
     summary="Retrieve raw chunks from the Kalisio corpus",
-    description="Embed the query, return the top-k matching code chunks from Qdrant without calling the LLM. Intended for agents that compose their own prompt.",
+    description=(
+        "Embed the query, return the top-k matching code chunks from "
+        "Qdrant without calling the LLM. Intended for agents that "
+        "compose their own prompt."
+    ),
 )
 def search(request: SearchRequest):
     return handlers.search_chunks(request.query, request.top_k)

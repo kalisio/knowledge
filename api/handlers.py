@@ -49,7 +49,7 @@ def search_chunks(query, top_k):
     return {"results": chunks}
 
 
-# Concatenate chunks (header + content) while staying under the character budget
+# Concatenate chunks (header + content) while staying under the char budget
 def build_llm_context(chunks, max_chars):
     parts = []
     used = 0

@@ -1,22 +1,22 @@
-"""CLI entry point for the v1 FastAPI service."""
+"""Command-line entry point that starts the knowledge API server."""
 
-from __future__ import annotations
+import os
 
 import uvicorn
 
-from ingestion_job.rag_system.config import ApiConfig
-
 
 def main() -> None:
-    config = ApiConfig()
+    host = os.getenv("HOST", "127.0.0.1")
+    port = int(os.getenv("PORT", "8187"))
+    workers = int(os.getenv("WORKERS_COUNT", "1"))
+
     uvicorn.run(
         "api.app:app",
-        host=config.host,
-        port=config.port,
-        workers=config.workers_count,
+        host=host,
+        port=port,
+        workers=workers,
     )
 
 
 if __name__ == "__main__":
     main()
-
