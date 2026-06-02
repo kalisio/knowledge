@@ -38,6 +38,7 @@ py-modules = ["config"]
 include = ["api*", "ingestion*", "utils*"]
 
 [tool.pytest.ini_options]
+testpaths = ["test"]
 markers = [
     "golden: end-to-end retrieval tests requiring the embedding model and KDK docs",
 ]
