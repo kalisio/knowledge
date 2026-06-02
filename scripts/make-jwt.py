@@ -28,8 +28,14 @@ import jwt
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--days", type=int, default=7, help="Token lifetime in days (default 7)")
-    parser.add_argument("--subject", default="dev", help="JWT 'sub' claim (default: dev)")
+    parser.add_argument(
+        "--days", type=int, default=7,
+        help="Token lifetime in days (default 7)",
+    )
+    parser.add_argument(
+        "--subject", default="dev",
+        help="JWT 'sub' claim (default: dev)",
+    )
     args = parser.parse_args()
 
     secret = os.environ.get("APP_SECRET", "")
@@ -47,8 +53,8 @@ def main() -> int:
 
     if args.days > 30:
         print(
-            f"warning: minting a {args.days}-day token — dev tokens should not "
-            "outlive a single workstation session.",
+            f"warning: minting a {args.days}-day token — dev tokens "
+            "should not outlive a single workstation session.",
             file=sys.stderr,
         )
 

@@ -2,6 +2,8 @@ import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Depends
+from api.auth import verify_jwt
 
 import api.handlers as handlers
 from api.schemas import AskRequest, AskResponse, SearchRequest, SearchResponse
@@ -45,6 +47,7 @@ def health_check():
         "call the configured LLM, return a natural-language answer "
         "with its sources."
     ),
+    dependencies=[Depends(verify_jwt)]
 )
 def ask(request: AskRequest):
     return handlers.answer_question(request.question)
@@ -59,6 +62,7 @@ def ask(request: AskRequest):
         "Qdrant without calling the LLM. Intended for agents that "
         "compose their own prompt."
     ),
+    dependencies=[Depends(verify_jwt)]
 )
 def search(request: SearchRequest):
     return handlers.search_chunks(request.query, request.top_k)
