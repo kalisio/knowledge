@@ -4,8 +4,6 @@ from pydantic import BaseModel, Field
 class Chunk(BaseModel):
     source_path: str
     repository: str
-    start_line: int
-    end_line: int
     breadcrumb: str = ""
     chunk_index: int | None = None
     score: float

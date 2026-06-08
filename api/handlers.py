@@ -71,8 +71,8 @@ def build_llm_context(chunks, max_chars):
 def format_chunk_block(index, chunk):
     return (
         f"[Chunk {index}]\n"
-        f"Source: {chunk.source_path}\n"
-        f"Breadcrumb: {chunk.breadcrumb}\n"
-        f"Score: {chunk.score:.4f}\n"
-        f"Content:\n{chunk.content}"
+        f"Source: {chunk['source_path']}\n"
+        f"Breadcrumb: {chunk['breadcrumb']}\n"
+        f"Score: {chunk['score']:.4f}\n"
+        f"Content:\n{chunk['content']}"
     )
