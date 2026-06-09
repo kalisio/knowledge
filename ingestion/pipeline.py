@@ -5,9 +5,10 @@ collection the API queries. The flow is:
 
     select files  ->  read & chunk  ->  enrich  ->  embed  ->  upsert
 
-Files are selected and chunked, each chunk tagged with its repository, then
-embedded with the configured model and upserted into Qdrant. The caller
-passes the repositories to index. Recent-commit enrichment is still
+Files are selected and chunked, each chunk tagged with its repository and
+whole-file hash, then -- unless that file is already indexed at the same
+hash -- embedded with the configured model and upserted into Qdrant. The
+caller passes the repositories to index. Recent-commit enrichment is still
 deferred, so commit_history stays empty until ingestion.git_history lands.
 """
 
@@ -18,6 +19,7 @@ from ingestion.chunks.md import chunk_markdown
 from ingestion.chunks.js import chunk_js
 from ingestion.chunks.vue import chunk_vue
 from ingestion.chunks.json import chunk_json
+from ingestion import manifest
 import utils.embeddings.service as embeddings
 import utils.vectordb.client as vectordb
 
@@ -35,8 +37,12 @@ CHUNKERS = {
 
 # Run the ingestion job: chunk the repositories, embed every chunk, and
 # upsert the vectors into Qdrant. Returns the number of chunks indexed.
-def run(repo_dirs):
+# With incremental=True, chunks of unchanged files (same file hash as
+# already indexed) are dropped before the expensive embedding step.
+def run(repo_dirs, incremental=True):
     chunks = chunk_repositories(repo_dirs)
+    if incremental:
+        chunks = manifest.select_changed(chunks, manifest.load())
     if not chunks:
         return 0
     vectors = embeddings.encode_batch([chunk["text"] for chunk in chunks])
@@ -63,7 +69,9 @@ def chunk_repo(repo_dir):
             continue
         source_path = str(path.relative_to(repo_dir))
         text = path.read_text(encoding="utf-8", errors="ignore")
+        digest = manifest.file_sha1(text)
         for chunk in chunker(text, source_path):
             chunk["metadata"]["repository"] = repository
+            chunk["metadata"]["file_sha1"] = digest
             chunks.append(chunk)
     return chunks

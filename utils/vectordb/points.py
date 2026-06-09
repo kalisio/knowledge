@@ -33,6 +33,7 @@ def build_payload(chunk):
         "breadcrumb": metadata.get("breadcrumb", ""),
         "commit_history": metadata.get("commit_history", []),
         "text_sha1": _sha1(chunk["text"]),
+        "file_sha1": metadata.get("file_sha1", ""),
     }
 
 

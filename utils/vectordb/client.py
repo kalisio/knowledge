@@ -52,6 +52,25 @@ def search(vector, top_k=5):
     return [points.read_point(hit.payload, hit.score) for hit in hits]
 
 
+# Yield the payload of every stored point, paging through the collection.
+# Used to rebuild the indexed manifest; yields nothing if the collection
+# does not exist yet (first run).
+def iter_payloads(page_size=256):
+    client = _get_client()
+    name = require("QDRANT_COLLECTION")
+    if not client.collection_exists(name):
+        return
+    offset = None
+    while True:
+        records, offset = client.scroll(
+            collection_name=name, with_payload=True, with_vectors=False,
+            limit=page_size, offset=offset)
+        for record in records:
+            yield record.payload
+        if offset is None:
+            break
+
+
 # Build a Qdrant point (id + vector + payload) from a chunk and its vector.
 def _to_point(chunk, vector):
     meta = chunk["metadata"]
