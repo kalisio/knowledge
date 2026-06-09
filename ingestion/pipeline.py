@@ -5,11 +5,10 @@ collection the API queries. The flow is:
 
     select files  ->  read & chunk  ->  enrich  ->  embed  ->  upsert
 
-The front half (select files, read and chunk them, tag each chunk with its
-repository) is implemented here; the caller passes the repositories to
-index. Recent-commit enrichment, embedding and the upsert to Qdrant are
-wired in next, as git history, the embedding model and the vector DB become
-available.
+Files are selected and chunked, each chunk tagged with its repository, then
+embedded with the configured model and upserted into Qdrant. The caller
+passes the repositories to index. Recent-commit enrichment is still
+deferred, so commit_history stays empty until ingestion.git_history lands.
 """
 
 from pathlib import Path
@@ -19,6 +18,8 @@ from ingestion.chunks.md import chunk_markdown
 from ingestion.chunks.js import chunk_js
 from ingestion.chunks.vue import chunk_vue
 from ingestion.chunks.json import chunk_json
+import utils.embeddings.service as embeddings
+import utils.vectordb.client as vectordb
 
 
 # Which chunker handles each indexable file suffix.
@@ -32,16 +33,15 @@ CHUNKERS = {
 }
 
 
-# Run the ingestion job over the given repository directories.
+# Run the ingestion job: chunk the repositories, embed every chunk, and
+# upsert the vectors into Qdrant. Returns the number of chunks indexed.
 def run(repo_dirs):
     chunks = chunk_repositories(repo_dirs)
-
-    # Wired in next, as each piece lands:
-    #   load IngestionConfig for the Qdrant collection and embedding model;
-    #   enrich each chunk with its recent commits (ingestion.git_history);
-    #   vectors = embeddings.encode([c["text"] for c in chunks]);
-    #   vectordb.upsert(collection, chunks, vectors).
-    return chunks
+    if not chunks:
+        return 0
+    vectors = embeddings.encode_batch([chunk["text"] for chunk in chunks])
+    vectordb.ensure_collection(len(vectors[0]))
+    return vectordb.upsert(chunks, vectors)
 
 
 # Chunk every indexable file across several repositories.
