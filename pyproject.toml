@@ -22,9 +22,11 @@ dependencies = [
     "safetensors>=0.4.5",
     "accelerate>=1.0.0",
     "pandas>=2.2.0",
-    "pytest>=8.0.0",
     "uvicorn>=0.30.0",
     "PyJWT>=2.8.0",
+    "pytest>=8.0.0",
+    "pytest-cov>=5.0.0",
+    "ruff>=0.6.0",
 ]
 
 [build-system]
@@ -42,3 +44,8 @@ testpaths = ["test"]
 markers = [
     "golden: end-to-end retrieval tests requiring the embedding model and KDK docs",
 ]
+
+[tool.coverage.run]
+# Whitelist: coverage measures only the production packages. Anything not
+# listed here (docs/experiments, test, scripts) is excluded by omission.
+source = ["api", "ingestion", "utils", "config"]
