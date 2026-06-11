@@ -19,7 +19,6 @@ class ApiConfig(RuntimeConfig):
     llm_model: str = field(default_factory=lambda: require("LLM_MODEL"))
     llm_endpoint: str = field(
         default_factory=lambda: require("LLM_ENDPOINT"))
-    llm_prompt: str = field(default_factory=lambda: require("LLM_PROMPT"))
 
     # Retrieval / generation knobs: sensible defaults, env-overridable.
     top_k: int = field(default_factory=lambda: env_int("TOP_K", 6))
