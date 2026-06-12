@@ -16,7 +16,7 @@ from collections import namedtuple
 
 from openai import OpenAI
 
-from api.config import ApiConfig
+from api.config import get_config
 
 
 # Shape api/handlers.py consumes: response.answer / .provider / .model.
@@ -30,13 +30,12 @@ SYSTEM_PROMPT = (
     "insufficient, say so plainly. Reference the source files you used."
 )
 
-_config = None
 _client = None
 
 
 # Send `prompt` to the configured LLM and return its answer + provenance.
 def ask(prompt):
-    config = _get_config()
+    config = get_config()
     completion = _get_client().chat.completions.create(
         model=config.llm_model,
         messages=[
@@ -68,15 +67,7 @@ def _provider(endpoint):
 def _get_client():
     global _client
     if _client is None:
-        config = _get_config()
+        config = get_config()
         _client = OpenAI(
             base_url=config.llm_endpoint, api_key=config.llm_api_key)
     return _client
-
-
-# Lazily load and cache the API configuration (LLM settings live here).
-def _get_config():
-    global _config
-    if _config is None:
-        _config = ApiConfig()
-    return _config

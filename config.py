@@ -44,3 +44,15 @@ class RuntimeConfig:
         default_factory=lambda: require("EMBEDDING_MODEL"))
     embedding_batch_size: int = field(
         default_factory=lambda: env_int("EMBEDDING_BATCH_SIZE", 8))
+
+
+_runtime_config = None
+
+
+# Lazily build and cache the shared RuntimeConfig. Constructed on first use
+# (not at import), so a module can import this without the env being set yet.
+def get_runtime_config():
+    global _runtime_config
+    if _runtime_config is None:
+        _runtime_config = RuntimeConfig()
+    return _runtime_config

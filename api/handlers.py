@@ -1,13 +1,8 @@
-import os
+import utils.embeddings as embeddings
+import utils.vectordb as vectordb
+import api.llm as llm
+from api.config import get_config
 
-import utils.embeddings.service as embeddings
-import utils.vectordb.client as vectordb
-import api.llm.client as llm
-
-
-# Tunables read from env
-ASK_TOP_K = int(os.getenv("ASK_TOP_K", 5))
-MAX_CONTEXT_CHARS = int(os.getenv("MAX_CONTEXT_CHARS", 8000))
 
 PROMPT_TEMPLATE = """Answer the question based on the context below. \
 If the context does not contain enough information, say so.
@@ -22,14 +17,16 @@ Answer:"""
 
 # Run /ask end-to-end: embed → search → context → LLM → answer
 def answer_question(question):
+    config = get_config()
+
     # 1. Embed the question into a query vector
     vector = embeddings.encode(question)
 
     # 2. Retrieve the top-k most relevant chunks from Qdrant
-    chunks = vectordb.search(vector, top_k=ASK_TOP_K)
+    chunks = vectordb.search(vector, top_k=config.top_k)
 
     # 3. Build the LLM context, respecting the character budget
-    context = build_llm_context(chunks, MAX_CONTEXT_CHARS)
+    context = build_llm_context(chunks, config.max_context_chars)
 
     # 4. Call the LLM and return the answer with its sources
     prompt = PROMPT_TEMPLATE.format(context=context, question=question)

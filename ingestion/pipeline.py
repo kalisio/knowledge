@@ -21,8 +21,8 @@ from ingestion.chunks.vue import chunk_vue
 from ingestion.chunks.json import chunk_json
 from ingestion import manifest
 from ingestion import git_history
-import utils.embeddings.service as embeddings
-import utils.vectordb.client as vectordb
+import utils.embeddings as embeddings
+import utils.vectordb as vectordb
 
 
 # Which chunker handles each indexable file suffix.

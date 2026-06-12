@@ -1,21 +1,13 @@
 """Command-line entry point that starts the knowledge API server."""
 
-import os
-
 import uvicorn
+
+from api.config import get_config
 
 
 def main() -> None:
-    host = os.getenv("HOST", "127.0.0.1")
-    port = int(os.getenv("PORT", "8187"))
-    workers = int(os.getenv("WORKERS_COUNT", "1"))
-
-    uvicorn.run(
-        "api.app:app",
-        host=host,
-        port=port,
-        workers=workers,
-    )
+    config = get_config()
+    uvicorn.run("api.app:app", host=config.host, port=config.port)
 
 
 if __name__ == "__main__":
