@@ -49,13 +49,27 @@ def upsert(chunks, vectors, batch_size=64):
 
 
 # Return the entries nearest a query vector, as read_payload result dicts.
+# Empty list if the collection does not exist yet (corpus never ingested),
+# so callers can surface a "run ingestion" hint instead of a 500.
 def search(vector, top_k=5):
     client = _get_client()
     name = get_runtime_config().qdrant_collection
+    if not client.collection_exists(name):
+        return []
     hits = client.query_points(
         collection_name=name, query=vector, limit=top_k,
         with_payload=True).points
     return [read_payload(hit.payload, hit.score) for hit in hits]
+
+
+# Number of indexed entries, or 0 when the collection does not exist yet.
+# Used to tell "index not built" apart from "query had no match".
+def count():
+    client = _get_client()
+    name = get_runtime_config().qdrant_collection
+    if not client.collection_exists(name):
+        return 0
+    return client.count(collection_name=name).count
 
 
 # Yield the payload of every stored entry, paging through the collection.
