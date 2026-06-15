@@ -32,9 +32,13 @@ class ApiConfig(RuntimeConfig):
     host: str = field(default_factory=lambda: env_str("HOST", "127.0.0.1"))
     port: int = field(default_factory=lambda: env_int("PORT", 8187))
 
-    # JWT auth (mirrors scripts/make-jwt.py). app_secret stays optional so
-    # the service can run with auth off; auth.py fails closed if it is on
-    # while app_secret is missing. Any value but "false" keeps auth enabled.
+    # Logging verbosity for the "knowledge" logger (stderr).
+    log_level: str = field(
+        default_factory=lambda: env_str("LOG_LEVEL", "INFO"))
+
+    # JWT auth. app_secret stays optional so the service can run with auth
+    # off; auth.py fails closed if it is on while app_secret is missing. Any
+    # value but "false" keeps auth enabled.
     auth_enabled: bool = field(
         default_factory=lambda:
         env_str("KNOWLEDGE_AUTH_ENABLED", "true").lower() != "false")
