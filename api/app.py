@@ -1,12 +1,65 @@
+import logging
 import os
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Depends
 from api.auth import verify_jwt
+from api.config import get_config
+from utils import vectordb
+from utils.logging import configure_logging
 
 import api.handlers as handlers
 from api.schemas import AskRequest, AskResponse, SearchRequest, SearchResponse
+
+
+# Startup banner: log the effective configuration, auth state, and index
+# readiness once at boot. Best-effort -- introspection must never stop the
+# server from booting.
+@asynccontextmanager
+async def lifespan(app):
+    try:
+        config = get_config()
+        configure_logging(config.log_level)
+        log = logging.getLogger("knowledge.api")
+        log.info("starting knowledge API on %s:%s", config.host, config.port)
+        log.info("qdrant=%s collection=%s",
+                 config.qdrant_url, config.qdrant_collection)
+        log.info("embedding model=%s", config.embedding_model)
+        log.info("llm model=%s endpoint=%s",
+                 config.llm_model, config.llm_endpoint)
+        log.info("auth %s | secrets: LLM_API_KEY=%s APP_SECRET=%s",
+                 "enabled" if config.auth_enabled else "DISABLED",
+                 _present(config.llm_api_key), _present(config.app_secret))
+        if config.auth_enabled and not config.app_secret:
+            log.warning("auth is ON but APP_SECRET is missing -- "
+                        "authenticated requests will 500")
+        _log_index_status(log, config.qdrant_collection)
+    except Exception as exc:
+        logging.getLogger("knowledge.api").warning(
+            "startup banner skipped: %s", exc)
+    yield
+
+
+# Report a secret as "set" or "missing" without exposing its value.
+def _present(value):
+    return "set" if value else "missing"
+
+
+# Log the indexed-chunk count; warn and name the ingestion command if empty.
+def _log_index_status(log, collection):
+    try:
+        chunks = vectordb.count()
+    except Exception as exc:
+        log.warning("could not reach Qdrant to check the index: %s", exc)
+        return
+    if chunks == 0:
+        log.warning("collection '%s' is EMPTY -- run `python -m "
+                    "ingestion.main` to index the corpus before querying",
+                    collection)
+    else:
+        log.info("collection '%s' has %d indexed chunks", collection, chunks)
 
 
 app = FastAPI(
@@ -18,6 +71,7 @@ app = FastAPI(
         "url": "https://kalisio.xyz",
         "email": "contact@kalisio.xyz",
     },
+    lifespan=lifespan,
 )
 
 app.add_middleware(
