@@ -7,8 +7,8 @@ sidebarDepth: 3
 <!-- TODO: 1-2 paragraphs — what knowledge is, in plain terms. -->
 
 **knowledge** is an AI developer assistant for the Kalisio ecosystem. It indexes the
-entire codebase into a vector database and exposes it to coding agents through an [MCP](https://modelcontextprotocol.io/) server, so that
-agents retrieve only the chunks relevant to a task instead of reading whole files.
+entire codebase into a vector database and serves it to coding agents through a retrieval
+API, so that agents retrieve only the chunks relevant to a task instead of reading whole files.
 
 ## The problem
 
@@ -21,12 +21,12 @@ agents retrieve only the chunks relevant to a task instead of reading whole file
 
 - **Semantic code search** — retrieval over an indexed vector database.
   See [RAG: indexing & retrieval](/architecture/rag).
-- **Git intelligence** — hotspots, co-change, bus factor.
-  See [Git intelligence](/architecture/git-intelligence).
-- **Dependency graph** — import graph and impact analysis.
-  See [Dependency graph](/architecture/dependency-graph).
-- **MCP tools** — the surface agents actually call.
-  See [MCP tools](/architecture/mcp-tools).
+- **Structure-aware ingestion** — per–file-type chunking (Markdown, JS, Vue, JSON), with
+  incremental re-indexing of only what changed. See [Ingestion pipeline](/architecture/ingestion-pipeline).
+- **Commit-history enrichment** — each chunk carries its file's recent commit history, so
+  answers reflect how a file changed. See [Ingestion pipeline](/architecture/ingestion-pipeline).
+- **Retrieval API** — `/ask` (RAG answer) and `/search` (chunks), JWT-secured.
+  See [API endpoints](/architecture/api).
 
 ## How it fits the Kalisio ecosystem
 
@@ -35,6 +35,5 @@ agents retrieve only the chunks relevant to a task instead of reading whole file
 
 ## Next steps
 
-- New here? Read [Understanding knowledge](/guides/understanding).
-- Want to run it? See [Getting started](/guides/getting-started).
 - Curious about the internals? Start with the [Architecture overview](/architecture/introduction).
+- Want the research behind the design? See [Research](/research/introduction) and [Experiments](/experiments/introduction).

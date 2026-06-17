@@ -71,12 +71,7 @@ We rely on [Semantic Versioning](https://semver.org/) for versioning a release. 
 * `MINOR` version when you add functionality in a backwards-compatible manner
 * `PATCH` version when you make backwards-compatible bug fixes.
 
-The command `npm run release:<type>`, where  `<type>` is either `patch`, `minor` or `major`, helps you to do the release. 
-
-It performs the following task for you:
-* increase the package version number in the `package.json` file
-* generate the change log
-* create a tag accordingly in the git repository and push it
+To cut a release: bump the `version` field in `pyproject.toml`, commit it, then create the matching git tag and push it (the published releases are driven by git tags).
 
 ## Contributor Code of Conduct
 
