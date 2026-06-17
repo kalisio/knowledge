@@ -7,8 +7,10 @@ export default withMermaid(
     title: 'knowledge',
     description: 'AI developer assistant for the Kalisio ecosystem',
     ignoreDeadLinks: true,
-    // Python experiment code lives under docs/experiments/ — keep it out of the docs build.
-    srcExclude: ['**/experiments/**'],
+    // docs/experiments/*.md are the experiment write-ups (rendered). The Python code,
+    // notebooks (.ipynb) and the old project README in that tree are not docs pages —
+    // VitePress only builds .md, so we only need to keep the stray old README out.
+    srcExclude: ['experiments/README.md'],
     head: [
       ['link', { href: 'https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css', rel: 'stylesheet' }],
       ['link', { rel: 'icon', href: `/images/favicon.ico` }]
@@ -18,15 +20,15 @@ export default withMermaid(
       socialLinks: [{ icon: 'github', link: 'https://github.com/kalisio/knowledge' }],
       nav: [
         { text: 'About', link: '/about/introduction' },
-        { text: 'Guides', link: '/guides/understanding' },
         { text: 'Architecture', link: '/architecture/introduction' },
-        { text: 'Research', link: '/research/introduction' }
+        { text: 'Research', link: '/research/introduction' },
+        { text: 'Experiments', link: '/experiments/introduction' }
       ],
       sidebar: {
         '/about/': getAboutSidebar(),
-        '/guides/': getGuidesSidebar(),
         '/architecture/': getArchitectureSidebar(),
-        '/research/': getResearchSidebar()
+        '/research/': getResearchSidebar(),
+        '/experiments/': getExperimentsSidebar()
       },
       footer: {
         copyright: 'MIT Licensed | Copyright © 2017-20xx Kalisio'
@@ -57,42 +59,12 @@ function getAboutSidebar () {
   ]
 }
 
-function getGuidesSidebar () {
-  return [
-    { text: 'Understanding knowledge', link: '/guides/understanding' },
-    { text: 'Getting started', link: '/guides/getting-started' },
-    {
-      text: 'Agent configuration',
-      collapsed: true,
-      items: [
-        { text: 'Claude Code', link: '/guides/agent-config/claude-code' },
-        { text: 'Codex', link: '/guides/agent-config/codex' },
-        { text: 'Cursor', link: '/guides/agent-config/cursor' },
-        { text: 'Gemini CLI', link: '/guides/agent-config/geminicli' },
-        { text: 'Vibe', link: '/guides/agent-config/vibe' }
-      ]
-    },
-    {
-      text: 'How-to',
-      collapsed: true,
-      items: [
-        { text: 'Add an LLM provider', link: '/guides/howto/llm-providers' },
-        { text: 'Add a file type', link: '/guides/howto/file-types' },
-        { text: 'Change the embedding model', link: '/guides/howto/embedding-model' }
-      ]
-    }
-  ]
-}
-
 function getArchitectureSidebar () {
   return [
     { text: 'Overview', link: '/architecture/introduction' },
     { text: 'Ingestion pipeline', link: '/architecture/ingestion-pipeline' },
     { text: 'RAG: indexing & retrieval', link: '/architecture/rag' },
-    { text: 'API endpoints', link: '/architecture/api' },
-    { text: 'MCP tools', link: '/architecture/mcp-tools' },
-    { text: 'Git intelligence', link: '/architecture/git-intelligence' },
-    { text: 'Dependency graph', link: '/architecture/dependency-graph' }
+    { text: 'API endpoints', link: '/architecture/api' }
   ]
 }
 
@@ -103,5 +75,17 @@ function getResearchSidebar () {
     { text: 'Chunking strategies', link: '/research/chunking' },
     { text: 'Embedding models benchmark', link: '/research/embedding-models' },
     { text: 'Agent evaluation', link: '/research/agent-eval' }
+  ]
+}
+
+function getExperimentsSidebar () {
+  return [
+    { text: 'Overview', link: '/experiments/introduction' },
+    { text: 'nb01 · Corpus discovery', link: '/experiments/corpus-discovery' },
+    { text: 'nb02 · Markdown chunking', link: '/experiments/markdown-chunking' },
+    { text: 'nb03 · JS & Vue chunking', link: '/experiments/js-vue-chunking' },
+    { text: 'nb04 · JSON chunking', link: '/experiments/json-chunking' },
+    { text: 'nb05 · Embedding evaluation', link: '/experiments/embedding-evaluation' },
+    { text: 'nb06 · Qdrant index & eval', link: '/experiments/qdrant-index-eval' }
   ]
 }

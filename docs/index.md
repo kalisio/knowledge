@@ -16,8 +16,8 @@ hero:
 features:
 - title: Context-aware AI assistant
   details: Indexes the entire Kalisio codebase into a vector database so AI agents retrieve only the relevant chunks
-- title: Git & graph intelligence
-  details: Hotspot detection, co-change analysis, and import dependency graph give agents structural context before they modify any file
+- title: Structure-aware, incremental ingestion
+  details: Per–file-type chunking (Markdown, JS, Vue, JSON) with recent-commit-history enrichment; only changed files are re-indexed
 ---
 
 <ClientOnly>
