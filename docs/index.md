@@ -19,3 +19,7 @@ features:
 - title: Git & graph intelligence
   details: Hotspot detection, co-change analysis, and import dependency graph give agents structural context before they modify any file
 ---
+
+<ClientOnly>
+  <home-footer />
+</ClientOnly>

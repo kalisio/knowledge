@@ -8,8 +8,10 @@
   },
   "devDependencies": {
     "keycloak-js": "^23.0.4",
+    "mermaid": "^10.8.0",
     "quasar": "^2.14.3",
     "vitepress": "^1.0.0-rc.40",
+    "vitepress-plugin-mermaid": "^2.0.16",
     "vitepress-theme-kalisio": "https://github.com/kalisio/vitepress-theme-kalisio"
   },
   "dependencies": {
