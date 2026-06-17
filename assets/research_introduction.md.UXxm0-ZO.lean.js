@@ -1,0 +1,1 @@
+import{_ as t,c as e,o as r}from"./chunks/framework.DyHpG4oK.js";const m=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"research/introduction.md","filePath":"research/introduction.md"}'),o={name:"research/introduction.md"};function a(n,c,s,i,d,p){return r(),e("div")}const f=t(o,[["render",a]]);export{m as __pageData,f as default};

@@ -1,0 +1,1 @@
+import{_ as e,c as t,o}from"./chunks/framework.DyHpG4oK.js";const l=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"guides/howto/file-types.md","filePath":"guides/howto/file-types.md"}'),s={name:"guides/howto/file-types.md"};function a(r,i,c,n,p,d){return o(),t("div")}const _=e(s,[["render",a]]);export{l as __pageData,_ as default};
