@@ -36,4 +36,4 @@ API, so that agents retrieve only the chunks relevant to a task instead of readi
 ## Next steps
 
 - Curious about the internals? Start with the [Architecture overview](/architecture/introduction).
-- Want the research behind the design? See [Research](/research/introduction) and [Experiments](/experiments/introduction).
+- Want the research behind the design? See [Research](/research/introduction).
