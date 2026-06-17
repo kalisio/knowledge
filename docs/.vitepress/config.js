@@ -7,10 +7,9 @@ export default withMermaid(
     title: 'knowledge',
     description: 'AI developer assistant for the Kalisio ecosystem',
     ignoreDeadLinks: true,
-    // docs/experiments/*.md are the experiment write-ups (rendered). The Python code,
-    // notebooks (.ipynb) and the old project README in that tree are not docs pages —
-    // VitePress only builds .md, so we only need to keep the stray old README out.
-    srcExclude: ['experiments/README.md'],
+    // docs/experiments/ holds the Python experiment code, notebooks (.ipynb) and the old
+    // project README — none of it is rendered. The write-ups now live under research/.
+    srcExclude: ['**/experiments/**'],
     head: [
       ['link', { href: 'https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css', rel: 'stylesheet' }],
       ['link', { rel: 'icon', href: `/images/favicon.ico` }]
@@ -21,14 +20,12 @@ export default withMermaid(
       nav: [
         { text: 'About', link: '/about/introduction' },
         { text: 'Architecture', link: '/architecture/introduction' },
-        { text: 'Research', link: '/research/introduction' },
-        { text: 'Experiments', link: '/experiments/introduction' }
+        { text: 'Research', link: '/research/introduction' }
       ],
       sidebar: {
         '/about/': getAboutSidebar(),
         '/architecture/': getArchitectureSidebar(),
-        '/research/': getResearchSidebar(),
-        '/experiments/': getExperimentsSidebar()
+        '/research/': getResearchSidebar()
       },
       footer: {
         copyright: 'MIT Licensed | Copyright © 2017-20xx Kalisio'
@@ -71,21 +68,11 @@ function getArchitectureSidebar () {
 function getResearchSidebar () {
   return [
     { text: 'Overview', link: '/research/introduction' },
-    { text: 'Vector DB benchmark', link: '/research/vector-db' },
-    { text: 'Chunking strategies', link: '/research/chunking' },
-    { text: 'Embedding models benchmark', link: '/research/embedding-models' },
-    { text: 'Agent evaluation', link: '/research/agent-eval' }
-  ]
-}
-
-function getExperimentsSidebar () {
-  return [
-    { text: 'Overview', link: '/experiments/introduction' },
-    { text: 'nb01 · Corpus discovery', link: '/experiments/corpus-discovery' },
-    { text: 'nb02 · Markdown chunking', link: '/experiments/markdown-chunking' },
-    { text: 'nb03 · JS & Vue chunking', link: '/experiments/js-vue-chunking' },
-    { text: 'nb04 · JSON chunking', link: '/experiments/json-chunking' },
-    { text: 'nb05 · Embedding evaluation', link: '/experiments/embedding-evaluation' },
-    { text: 'nb06 · Qdrant index & eval', link: '/experiments/qdrant-index-eval' }
+    { text: 'nb01 · Corpus discovery', link: '/research/corpus-discovery' },
+    { text: 'nb02 · Markdown chunking', link: '/research/markdown-chunking' },
+    { text: 'nb03 · JS & Vue chunking', link: '/research/js-vue-chunking' },
+    { text: 'nb04 · JSON chunking', link: '/research/json-chunking' },
+    { text: 'nb05 · Embedding evaluation', link: '/research/embedding-evaluation' },
+    { text: 'nb06 · Qdrant index & eval', link: '/research/qdrant-index-eval' }
   ]
 }
