@@ -19,11 +19,13 @@ export default withMermaid(
       socialLinks: [{ icon: 'github', link: 'https://github.com/kalisio/knowledge' }],
       nav: [
         { text: 'About', link: '/about/introduction' },
+        { text: 'Guides', link: '/guides/qdrant' },
         { text: 'Architecture', link: '/architecture/introduction' },
         { text: 'Research', link: '/research/introduction' }
       ],
       sidebar: {
         '/about/': getAboutSidebar(),
+        '/guides/': getGuidesSidebar(),
         '/architecture/': getArchitectureSidebar(),
         '/research/': getResearchSidebar()
       },
@@ -53,6 +55,12 @@ function getAboutSidebar () {
     { text: 'Contributing', link: '/about/contributing' },
     { text: 'License', link: '/about/license' },
     { text: 'Contact', link: '/about/contact' }
+  ]
+}
+
+function getGuidesSidebar () {
+  return [
+    { text: 'Qdrant operations', link: '/guides/qdrant' }
   ]
 }
 
