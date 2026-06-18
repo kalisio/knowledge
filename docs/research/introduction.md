@@ -21,7 +21,7 @@ A shared, deterministic method runs across the notebooks so results are comparab
 | # | Topic | Outcome | Status |
 |---|---|---|---|
 | [nb01](/research/corpus-discovery) | Corpus discovery & filtering | Profile-driven file selection for the corpus | done |
-| [nb02](/research/markdown-chunking) | Markdown chunking | Winner: AST-merge + breadcrumb, `chunk_size=500` | done |
+| [nb02](/research/markdown-chunking) | Markdown chunking | Selected: AST-merge + breadcrumb, `chunk_size=500` | done |
 | [nb03](/research/js-vue-chunking) | JS & Vue SFC chunking | Structure-aware chunkers + BM25/RRF hybrid retrieval | done |
 | [nb04](/research/json-chunking) | JSON chunking | Category-aware key splitting | done |
 | [nb05](/research/embedding-evaluation) | Embedding model evaluation | Recommends `Qwen3-Embedding-0.6B` | done |
