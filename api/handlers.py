@@ -9,16 +9,6 @@ from fastapi import HTTPException
 
 log = logging.getLogger("knowledge.api")
 
-PROMPT_TEMPLATE = """Answer the question based on the context below. \
-If the context does not contain enough information, say so.
-
-Context:
-{context}
-
-Question: {question}
-
-Answer:"""
-
 
 # Run /ask end-to-end: embed → search → context → LLM → answer
 def answer_question(question):
@@ -35,7 +25,7 @@ def answer_question(question):
     context = build_llm_context(chunks, config.max_context_chars)
 
     # 4. Call the LLM and return the answer with its sources
-    prompt = PROMPT_TEMPLATE.format(context=context, question=question)
+    prompt = config.prompt_template.format(context=context, question=question)
     response = llm.ask(prompt)
     return {
         "answer": response.answer,

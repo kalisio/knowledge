@@ -6,6 +6,23 @@ from dataclasses import dataclass, field
 from config import RuntimeConfig, env_int, env_str, require
 
 
+DEFAULT_SYSTEM_PROMPT = (
+    "You are a Kalisio code assistant. Answer the question using only the "
+    "provided context from the Kalisio codebase. If the context is "
+    "insufficient, say so plainly. Reference the source files you used."
+)
+
+DEFAULT_PROMPT_TEMPLATE = """Answer the question based on the context below. \
+If the context does not contain enough information, say so.
+
+Context:
+{context}
+
+Question: {question}
+
+Answer:"""
+
+
 @dataclass(frozen=True)
 class ApiConfig(RuntimeConfig):
     """Configuration for the /ask and /search API service.
@@ -27,6 +44,11 @@ class ApiConfig(RuntimeConfig):
         default_factory=lambda: env_int("MAX_CONTEXT_CHARS", 14000))
     max_answer_tokens: int = field(
         default_factory=lambda: env_int("MAX_ANSWER_TOKENS", 1024))
+
+    # LLM prompts (defaults above). prompt_template must contain the
+    # {context} and {question} placeholders.
+    system_prompt: str = field(default=DEFAULT_SYSTEM_PROMPT)
+    prompt_template: str = field(default=DEFAULT_PROMPT_TEMPLATE)
 
     # Service binding: 8187 is knowledge's port (team Bruno collection).
     host: str = field(default_factory=lambda: env_str("HOST", "127.0.0.1"))

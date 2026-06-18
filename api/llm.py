@@ -2,9 +2,9 @@
 
 Speaks to any OpenAI-compatible endpoint (LLM_ENDPOINT): a local server
 (Ollama, llama.cpp, LM Studio, ...) or a hosted provider — switching
-between them is only a matter of configuration, not code. ask() sends a
-fixed system instruction (SYSTEM_PROMPT below) telling the model to answer
-only from the provided Kalisio context, plus the retrieval-built user
+between them is only a matter of configuration, not code. ask() sends the
+configured system instruction (config.system_prompt) telling the model to
+answer only from the provided Kalisio context, plus the retrieval-built user
 prompt, and returns the answer with the provider and model used.
 
 Config (ApiConfig) and the client are loaded lazily, so importing this
@@ -22,14 +22,6 @@ from api.config import get_config
 # Shape api/handlers.py consumes: response.answer / .provider / .model.
 LLMResponse = namedtuple("LLMResponse", ["answer", "provider", "model"])
 
-# System instruction sent with every answer. The prompt is application
-# behaviour, so it lives in code -- not in the (secret) environment.
-SYSTEM_PROMPT = (
-    "You are a Kalisio code assistant. Answer the question using only the "
-    "provided context from the Kalisio codebase. If the context is "
-    "insufficient, say so plainly. Reference the source files you used."
-)
-
 _client = None
 
 
@@ -39,7 +31,7 @@ def ask(prompt):
     completion = _get_client().chat.completions.create(
         model=config.llm_model,
         messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "system", "content": config.system_prompt},
             {"role": "user", "content": prompt},
         ],
         max_tokens=config.max_answer_tokens,
