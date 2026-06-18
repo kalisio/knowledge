@@ -25,7 +25,7 @@ A shared, deterministic method runs across the notebooks so results are comparab
 | [nb03](/research/js-vue-chunking) | JS & Vue SFC chunking | Structure-aware chunkers + BM25/RRF hybrid retrieval | done |
 | [nb04](/research/json-chunking) | JSON chunking | Category-aware key splitting | done |
 | [nb05](/research/embedding-evaluation) | Embedding model evaluation | Recommends `Qwen3-Embedding-0.6B` | done |
-| [nb06](/research/qdrant-index-eval) | Qdrant index & evaluation | Production-scale dense / hybrid / reranked retrieval | in progress |
+| [nb06](/research/qdrant-index-eval) | Qdrant index & evaluation | Real Qdrant index, verified against nb05; Qdrant / Chroma / LanceDB comparison | done |
 
 ## How the findings feed production
 
