@@ -19,10 +19,20 @@ from api.schemas import AskRequest, AskResponse, SearchRequest, SearchResponse
 # server from booting.
 @asynccontextmanager
 async def lifespan(app):
+    config = get_config()
+    configure_logging(config.log_level)
+    log = logging.getLogger("knowledge.api")
+
+    # Fail fast: auth on without APP_SECRET means no token can be verified,
+    # so every authenticated request would 500. Refuse to start rather than
+    # serve in that broken state.
+    if config.auth_enabled and not config.app_secret:
+        raise RuntimeError(
+            "APP_SECRET is required when auth is enabled -- set APP_SECRET "
+            "or disable auth with KNOWLEDGE_AUTH_ENABLED=false")
+
+    # Best-effort startup banner -- introspection must never stop the server.
     try:
-        config = get_config()
-        configure_logging(config.log_level)
-        log = logging.getLogger("knowledge.api")
         log.info("starting knowledge API on %s:%s", config.host, config.port)
         log.info("qdrant=%s collection=%s",
                  config.qdrant_url, config.qdrant_collection)
@@ -32,13 +42,9 @@ async def lifespan(app):
         log.info("auth %s | secrets: LLM_API_KEY=%s APP_SECRET=%s",
                  "enabled" if config.auth_enabled else "DISABLED",
                  _present(config.llm_api_key), _present(config.app_secret))
-        if config.auth_enabled and not config.app_secret:
-            log.warning("auth is ON but APP_SECRET is missing -- "
-                        "authenticated requests will 500")
         _log_index_status(log, config.qdrant_collection)
     except Exception as exc:
-        logging.getLogger("knowledge.api").warning(
-            "startup banner skipped: %s", exc)
+        log.warning("startup banner skipped: %s", exc)
     yield
 
 

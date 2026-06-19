@@ -7,6 +7,7 @@ import jwt
 import pytest
 from fastapi.testclient import TestClient
 
+import api.app as app_module
 import api.auth as auth
 from api.app import app
 
@@ -91,3 +92,15 @@ def test_auth_disabled_allows_no_token(monkeypatch):
     monkeypatch.setattr(auth, "get_config", lambda: fake_config(enabled=False))
     response = client.post("/ask", json={"question": "hi"})
     assert response.status_code == 200
+
+
+# With auth ON but APP_SECRET missing, the service refuses to start: the
+# lifespan raises, so entering the TestClient (which runs startup) errors out
+# instead of booting into a state where every authenticated request 500s.
+def test_startup_fails_when_auth_on_without_secret(monkeypatch):
+    broken = SimpleNamespace(
+        log_level="INFO", auth_enabled=True, app_secret=None)
+    monkeypatch.setattr(app_module, "get_config", lambda: broken)
+    with pytest.raises(RuntimeError, match="APP_SECRET"):
+        with TestClient(app):
+            pass
