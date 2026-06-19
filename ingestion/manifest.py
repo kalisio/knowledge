@@ -40,6 +40,11 @@ def select_changed(chunks, indexed):
     return [chunk for chunk in chunks if _changed(chunk["metadata"], indexed)]
 
 
+# ---------------------------------------------------------------------------
+# UTILS
+# ---------------------------------------------------------------------------
+
+
 # A file is unchanged only if its (repository, source_path) is indexed at
 # the exact same file hash; anything else (new, edited) counts as changed.
 def _changed(metadata, indexed):

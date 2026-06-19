@@ -60,6 +60,11 @@ def chunk_js(text, source_path, chunk_size=CHUNK_SIZE,
     return chunks
 
 
+# ---------------------------------------------------------------------------
+# UTILS
+# ---------------------------------------------------------------------------
+
+
 # Name of the last top-level symbol declared at or before `offset`.
 def _nearest_symbol(text, offset):
     symbol = ""

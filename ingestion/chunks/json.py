@@ -60,6 +60,11 @@ def chunk_json(text, source_path):
     ]
 
 
+# ---------------------------------------------------------------------------
+# UTILS
+# ---------------------------------------------------------------------------
+
+
 # Infer the file's role from its path and name.
 def _category(source_path):
     parts = source_path.replace("\\", "/").lower().split("/")

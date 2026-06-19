@@ -82,7 +82,7 @@ def main(argv=None):
     #   - Insérer les embeddings et les métadonnées
     #     dans la base vectorielle.
 
-    repo_dirs = discover_repos(root)
+    repo_dirs = _discover_repos(root)
 
     print(f"indexing {len(repo_dirs)} repo(s): "
           f"{', '.join(d.name for d in repo_dirs)}")
@@ -91,8 +91,13 @@ def main(argv=None):
     return 0
 
 
+# ---------------------------------------------------------------------------
+# UTILS
+# ---------------------------------------------------------------------------
+
+
 # Every git repository directly under `root`, minus SKIP_REPOS.
-def discover_repos(root):
+def _discover_repos(root):
     return [
         path for path in sorted(root.iterdir())
         if path.name not in SKIP_REPOS and (path / ".git").exists()

@@ -47,13 +47,18 @@ def scan(root):
         dirnames[:] = [d for d in dirnames if d not in IGNORED_DIRS]
         for filename in filenames:
             path = Path(dirpath) / filename
-            if is_indexed(path):
+            if _is_indexed(path):
                 kept.append(path)
     return kept
 
 
+# ---------------------------------------------------------------------------
+# UTILS
+# ---------------------------------------------------------------------------
+
+
 # True when `path` passes the suffix, filename, pattern, and size checks.
-def is_indexed(path):
+def _is_indexed(path):
     if path.suffix.lower() not in INDEXED_SUFFIXES:
         return False
     if path.name in IGNORED_FILENAMES:

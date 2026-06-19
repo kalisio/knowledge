@@ -33,6 +33,11 @@ def recent_commits(repo_dir, source_path, limit=MAX_COMMITS):
     return kept[:limit]
 
 
+# ---------------------------------------------------------------------------
+# UTILS
+# ---------------------------------------------------------------------------
+
+
 # True if a commit subject carries real meaning (non-empty, not noise).
 def _is_meaningful(subject):
     subject = subject.strip()

@@ -49,6 +49,11 @@ def chunk_markdown(text, source_path, chunk_size=CHUNK_SIZE):
     return chunks
 
 
+# ---------------------------------------------------------------------------
+# UTILS
+# ---------------------------------------------------------------------------
+
+
 # Return the file's first top-level heading ("# Title"), or the fallback.
 def _doc_title(text, fallback):
     for line in text.splitlines():

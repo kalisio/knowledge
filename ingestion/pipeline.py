@@ -41,7 +41,7 @@ CHUNKERS = {
 # With incremental=True, chunks of unchanged files (same file hash as
 # already indexed) are dropped before the expensive embedding step.
 def run(repo_dirs, incremental=True):
-    chunks = chunk_repositories(repo_dirs)
+    chunks = _chunk_repositories(repo_dirs)
     if incremental:
         chunks = manifest.select_changed(chunks, manifest.load())
     if not chunks:
@@ -50,6 +50,11 @@ def run(repo_dirs, incremental=True):
     vectors = embeddings.encode_batch([chunk["text"] for chunk in chunks])
     vectordb.ensure_collection(len(vectors[0]))
     return vectordb.upsert(chunks, vectors)
+
+
+# ---------------------------------------------------------------------------
+# UTILS
+# ---------------------------------------------------------------------------
 
 
 # Attach each file's recent commit subjects to its chunks. Cached per file
@@ -70,15 +75,15 @@ def _enrich_commits(chunks, repo_dirs):
 
 
 # Chunk every indexable file across several repositories.
-def chunk_repositories(repo_dirs):
+def _chunk_repositories(repo_dirs):
     chunks = []
     for repo_dir in repo_dirs:
-        chunks.extend(chunk_repo(repo_dir))
+        chunks.extend(_chunk_repo(repo_dir))
     return chunks
 
 
 # Chunk every indexable file in one repository, tagging chunks with its name.
-def chunk_repo(repo_dir):
+def _chunk_repo(repo_dir):
     repo_dir = Path(repo_dir)
     repository = repo_dir.name
     chunks = []

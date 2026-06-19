@@ -131,6 +131,11 @@ def read_payload(payload, score):
     }
 
 
+# ---------------------------------------------------------------------------
+# UTILS
+# ---------------------------------------------------------------------------
+
+
 # Assemble the id + vector + payload into the PointStruct we upsert.
 def _to_record(chunk, vector):
     meta = chunk["metadata"]

@@ -50,6 +50,11 @@ def encode_batch(texts):
     return [vector.tolist() for vector in vectors]
 
 
+# ---------------------------------------------------------------------------
+# UTILS
+# ---------------------------------------------------------------------------
+
+
 # Load and cache the configured model, on CUDA when available else CPU.
 def _get_model():
     global _model
