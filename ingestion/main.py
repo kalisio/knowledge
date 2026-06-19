@@ -33,22 +33,56 @@ SKIP_REPOS = {"knowledge", "qdrant_data"}
 
 
 def main(argv=None):
-    args = sys.argv[1:] if argv is None else argv
     config = IngestionConfig()
     root = Path(config.repos_dir)
 
-    if args:
-        repo_dirs = [root / name for name in args]
-        missing = [str(d) for d in repo_dirs if not d.is_dir()]
-        if missing:
-            print("not a repository directory: " + ", ".join(missing),
-                  file=sys.stderr)
-            return 1
-    else:
-        repo_dirs = discover_repos(root)
-        if not repo_dirs:
-            print(f"no repositories found under {root}", file=sys.stderr)
-            return 1
+    # TODO incremental ingestion plan:
+    #
+    # 1. Clone repos via k-clone:
+    #    k-clone config.kli_organization config.kli_workspace => k-clone <organization> <workspace|all>
+    #
+    # 2. Déterminer les fichiers à indexer
+
+    # is_first_ingestion ?
+    # ├─ Oui :
+    # │    Sélectionner tous les fichiers de DEVELOPMENT_DIR
+    # │    dont l'extension appartient à SUPPORTED_EXTENSIONS.
+    # │
+    # └─ Non :
+    #      Identifier les fichiers ajoutés ou modifiés au cours
+    #      des dernières 24 heures.
+    #
+    #      Exemple :
+    #      git log --since="24 hours ago" --name-only --pretty=format: | sort -u
+    #      (à valider)
+    #
+    # Résultat :
+    #   files_to_index = liste des fichiers à (ré)indexer
+    #
+    # 3. Synchroniser la base vectorielle
+
+    # is_first_ingestion ?
+    # ├─ Oui :
+    # │    Aucune vérification nécessaire.
+    # │
+    # └─ Non :
+    #      Pour chaque fichier de files_to_index :
+    #        - Vérifier s'il existe déjà dans la base vectorielle.
+    #        - Si présent :
+    #              supprimer les embeddings associés afin d'éviter
+    #              les doublons ou les versions obsolètes.
+    #        - Sinon :
+    #              ne rien faire.
+    #
+    # 4. Indexation
+
+    # Pour chaque fichier de files_to_index :
+    #   - Extraire le contenu.
+    #   - Générer les embeddings.
+    #   - Insérer les embeddings et les métadonnées
+    #     dans la base vectorielle.
+
+    repo_dirs = discover_repos(root)
 
     print(f"indexing {len(repo_dirs)} repo(s): "
           f"{', '.join(d.name for d in repo_dirs)}")

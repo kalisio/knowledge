@@ -13,7 +13,6 @@ from utils.logging import configure_logging
 import api.handlers as handlers
 from api.schemas import AskRequest, AskResponse, SearchRequest, SearchResponse
 
-
 # Startup banner: log the effective configuration, auth state, and index
 # readiness once at boot. Best-effort -- introspection must never stop the
 # server from booting.
@@ -46,26 +45,6 @@ async def lifespan(app):
     except Exception as exc:
         log.warning("startup banner skipped: %s", exc)
     yield
-
-
-# Report a secret as "set" or "missing" without exposing its value.
-def _present(value):
-    return "set" if value else "missing"
-
-
-# Log the indexed-chunk count; warn and name the ingestion command if empty.
-def _log_index_status(log, collection):
-    try:
-        chunks = vectordb.count()
-    except Exception as exc:
-        log.warning("could not reach Qdrant to check the index: %s", exc)
-        return
-    if chunks == 0:
-        log.warning("collection '%s' is EMPTY -- run `python -m "
-                    "ingestion.main` to index the corpus before querying",
-                    collection)
-    else:
-        log.info("collection '%s' has %d indexed chunks", collection, chunks)
 
 
 app = FastAPI(
@@ -126,3 +105,27 @@ def ask(request: AskRequest):
 )
 def search(request: SearchRequest):
     return handlers.search_chunks(request.query, request.top_k)
+
+
+# ---------------------------------------------------------------------------
+# UTILS
+# ---------------------------------------------------------------------------
+
+# Report a secret as "set" or "missing" without exposing its value.
+def _present(value):
+    return "set" if value else "missing"
+
+
+# Log the indexed-chunk count; warn and name the ingestion command if empty.
+def _log_index_status(log, collection):
+    try:
+        chunks = vectordb.count()
+    except Exception as exc:
+        log.warning("could not reach Qdrant to check the index: %s", exc)
+        return
+    if chunks == 0:
+        log.warning("collection '%s' is EMPTY -- run `python -m "
+                    "ingestion.main` to index the corpus before querying",
+                    collection)
+    else:
+        log.info("collection '%s' has %d indexed chunks", collection, chunks)

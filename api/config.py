@@ -37,18 +37,17 @@ class ApiConfig(RuntimeConfig):
     llm_model: str = field(default_factory=lambda: require("LLM_MODEL"))
     llm_endpoint: str = field(
         default_factory=lambda: require("LLM_ENDPOINT"))
-
+    # LLM prompts (defaults above). prompt_template must contain the
+    # {context} and {question} placeholders.
+    system_prompt: str = field(default=DEFAULT_SYSTEM_PROMPT)
+    prompt_template: str = field(default=DEFAULT_PROMPT_TEMPLATE)
+  
     # Retrieval / generation knobs: sensible defaults, env-overridable.
     top_k: int = field(default_factory=lambda: env_int("TOP_K", 6))
     max_context_chars: int = field(
         default_factory=lambda: env_int("MAX_CONTEXT_CHARS", 14000))
     max_answer_tokens: int = field(
         default_factory=lambda: env_int("MAX_ANSWER_TOKENS", 1024))
-
-    # LLM prompts (defaults above). prompt_template must contain the
-    # {context} and {question} placeholders.
-    system_prompt: str = field(default=DEFAULT_SYSTEM_PROMPT)
-    prompt_template: str = field(default=DEFAULT_PROMPT_TEMPLATE)
 
     # Service binding: 8187 is knowledge's port (team Bruno collection).
     host: str = field(default_factory=lambda: env_str("HOST", "127.0.0.1"))

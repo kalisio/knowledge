@@ -56,13 +56,18 @@ def verify_jwt(
         )
     except jwt.PyJWTError as exc:
         log.warning("auth rejected: %s", exc)
-        raise_unauthorized("invalid_token")
+        _raise_unauthorized("invalid_token")
     log.debug("auth ok (sub=%s)", claims.get("sub", "?"))
     return claims
 
 
+# ---------------------------------------------------------------------------
+# UTILS
+# ---------------------------------------------------------------------------
+
+
 # Build a 401 carrying the Bearer challenge header.
-def raise_unauthorized(detail="invalid_token"):
+def _raise_unauthorized(detail="invalid_token"):
     raise HTTPException(
         status_code=401,
         detail=detail,

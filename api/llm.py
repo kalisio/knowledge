@@ -44,6 +44,10 @@ def ask(prompt):
     )
 
 
+# ---------------------------------------------------------------------------
+# UTILS
+# ---------------------------------------------------------------------------
+
 # Label the provider from the endpoint host, for the response metadata.
 def _provider(endpoint):
     host = endpoint.lower()

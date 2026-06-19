@@ -2,22 +2,17 @@
 
 from dataclasses import dataclass, field
 
-from config import RuntimeConfig, require
+from config import RuntimeConfig, env_int, env_str, require
 
 
 @dataclass(frozen=True)
 class IngestionConfig(RuntimeConfig):
-    """Configuration for the repository indexing job.
 
-    Inherits the shared vector-store and embedding settings so the job
-    writes to the same Qdrant collection and uses the same model the API
-    reads with. Further knobs (which repos to index, chunk sizes,
-    incremental mode) are added as the pipeline is built and their
-    variables are provisioned — not ported wholesale from the experiment.
-    """
+    kli_organization: str = field(
+        default_factory=lambda: env_str("KLI_ORGANIZATION", "kalisio"))
+    kli_workspace: str = field(
+        default_factory=lambda: env_str("KLI_WORKSPACE", "apps"))
+    
+    supported_extensions: str = field(
+        default_factory=lambda: env_str("SUPPORTED_EXTENSIONS", "{".md", ".js", ".mjs", ".cjs", ".vue", ".json"}"))
 
-    # Root holding the local Kalisio repos to index. Comes from the
-    # workspace env (KALISIO_DEVELOPMENT_DIR, set by k-dev / services.sh),
-    # not from knowledge.enc.env. Required: can't scan without it.
-    repos_dir: str = field(
-        default_factory=lambda: require("KALISIO_DEVELOPMENT_DIR"))

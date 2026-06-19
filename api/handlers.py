@@ -22,7 +22,7 @@ def answer_question(question):
     _ensure_indexed(chunks)
 
     # 3. Build the LLM context, respecting the character budget
-    context = build_llm_context(chunks, config.max_context_chars)
+    context = _build_llm_context(chunks, config.max_context_chars)
 
     # 4. Call the LLM and return the answer with its sources
     prompt = config.prompt_template.format(context=context, question=question)
@@ -43,6 +43,11 @@ def search_chunks(query, top_k):
     return {"results": chunks}
 
 
+# ---------------------------------------------------------------------------
+# UTILS
+# ---------------------------------------------------------------------------
+
+
 # Guard against querying before ingestion has run. Empty results plus an empty
 # collection means the corpus was never indexed -- surface an actionable hint
 # (503) instead of silently returning nothing. A non-empty collection with no
@@ -59,12 +64,12 @@ def _ensure_indexed(chunks):
 
 
 # Concatenate chunks (header + content) while staying under the char budget
-def build_llm_context(chunks, max_chars):
+def _build_llm_context(chunks, max_chars):
     parts = []
     used = 0
 
     for index, chunk in enumerate(chunks, start=1):
-        block = format_chunk_block(index, chunk)
+        block = _format_chunk_block(index, chunk)
 
         # Stop before the next block would exceed the budget
         if used + len(block) > max_chars:
@@ -77,7 +82,7 @@ def build_llm_context(chunks, max_chars):
 
 
 # Format a single chunk's metadata header followed by its content
-def format_chunk_block(index, chunk):
+def _format_chunk_block(index, chunk):
     return (
         f"[Chunk {index}]\n"
         f"Source: {chunk['source_path']}\n"
