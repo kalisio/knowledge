@@ -34,7 +34,7 @@ def verify_jwt(
     # 2. A Bearer token must be present.
     if credentials is None or credentials.scheme.lower() != "bearer":
         log.warning("auth rejected: no bearer token")
-        raise_unauthorized("missing_bearer_token")
+        _raise_unauthorized("missing_bearer_token")
 
     # 3. Fail closed: with auth on but no secret, refuse rather than run open.
     if config.app_secret is None:
