@@ -38,49 +38,66 @@ def main(argv=None):
 
     # TODO incremental ingestion plan:
     #
-    # 1. Clone repos via k-clone:
-    #    k-clone config.kli_organization config.kli_workspace => k-clone <organization> <workspace|all>
+    # 1. Clone / update repos via k-clone if needed:
+    #    k-clone <organization> <workspace|all>
     #
-    # 2. Déterminer les fichiers à indexer
-
-    # is_first_ingestion ?
-    # ├─ Oui :
-    # │    Sélectionner tous les fichiers de DEVELOPMENT_DIR
-    # │    dont l'extension appartient à SUPPORTED_EXTENSIONS.
+    # 2. Recover the last successful ingestion timestamp
+    #
+    # Store it in a dedicated metadata collection, separate from the code
+    # collection, with a single record such as:
+    #   {
+    #     "id": "collection_metadata",
+    #     "payload": {"last_ingestion": "2026-06-19T10:35:00Z"}
+    #   }
+    #
+    # Dates should be stored and read in ISO 8601 format. Read this value at
+    # the beginning of each run. On the first ingestion, the metadata record
+    # does not exist yet.
+    #
+    # 3. Build the candidate file list
+    #
+    # first_ingestion ?
+    # ├─ Yes:
+    # │    Scan every supported file in the selected repositories.
     # │
-    # └─ Non :
-    #      Identifier les fichiers ajoutés ou modifiés au cours
-    #      des dernières 24 heures.
+    # └─ No:
+    #      Use last_ingestion only as a recovery cursor to identify files that
+    #      may have changed since the previous successful run.
+    #      Example candidate source:
+    #          git log --since=<last_ingestion_iso8601> --name-only
+    #                  --pretty=format:
     #
-    #      Exemple :
-    #      git log --since="24 hours ago" --name-only --pretty=format: | sort -u
-    #      (à valider)
+    # Result:
+    #   candidate_files = files that may need reindexation
     #
-    # Résultat :
-    #   files_to_index = liste des fichiers à (ré)indexer
+    # 4. Confirm actual content changes with file_sha1
     #
-    # 3. Synchroniser la base vectorielle
-
-    # is_first_ingestion ?
-    # ├─ Oui :
-    # │    Aucune vérification nécessaire.
-    # │
-    # └─ Non :
-    #      Pour chaque fichier de files_to_index :
-    #        - Vérifier s'il existe déjà dans la base vectorielle.
-    #        - Si présent :
-    #              supprimer les embeddings associés afin d'éviter
-    #              les doublons ou les versions obsolètes.
-    #        - Sinon :
-    #              ne rien faire.
+    # For each candidate file:
+    #   - Read the current file content.
+    #   - Compute file_sha1 from the file content itself.
+    #   - Compare it with the file_sha1 already stored in Qdrant for the same
+    #     (repository, source_path).
+    #   - If the hash is unchanged, skip the file.
+    #   - If the hash changed, mark the file for reindexation.
     #
-    # 4. Indexation
-
-    # Pour chaque fichier de files_to_index :
-    #   - Extraire le contenu.
-    #   - Générer les embeddings.
-    #   - Insérer les embeddings et les métadonnées
-    #     dans la base vectorielle.
+    # The final reindexation decision should rely on file_sha1, not on git log:
+    # git history is useful to reduce the scan perimeter and to enrich
+    # commit_history, but the hash is the reliable state-based check.
+    #
+    # 5. Synchronize the vector store
+    #
+    # For each file marked for reindexation:
+    #   - Delete the existing chunks for (repository, source_path) to avoid
+    #     stale versions remaining in the collection.
+    #   - Re-chunk the current file content.
+    #   - Recompute embeddings.
+    #   - Upsert the new chunks and metadata into the code collection.
+    #
+    # 6. Persist ingestion metadata
+    #
+    # Only after a successful run, update the metadata collection with the new
+    # last_ingestion timestamp. Do not update it at job start, otherwise a
+    # failed run could move the recovery cursor forward and miss files.
 
     repo_dirs = _discover_repos(root)
 
