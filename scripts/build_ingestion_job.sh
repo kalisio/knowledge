@@ -38,7 +38,6 @@ VERSION=$(get_toml_value "$ROOT_DIR/pyproject.toml" 'project.version')
 echo "About to build $NAME v$VERSION ..."
 
 load_env_files "$WORKSPACE_DIR/development/common/kalisio_dockerhub.enc.env"
-load_value_files "$WORKSPACE_DIR/development/common/KALISIO_DOCKERHUB_PASSWORD.enc.value"
 
 ## Build container
 ##
@@ -48,7 +47,8 @@ IMAGE_TAG=latest
 
 begin_group "Building container $IMAGE_NAME:$IMAGE_TAG ..."
 
-docker login --username "$KALISIO_DOCKERHUB_USERNAME" --password-stdin "$KALISIO_DOCKERHUB_URL" < "$KALISIO_DOCKERHUB_PASSWORD"
+decrypt_stdout "$WORKSPACE_DIR/development/common/KALISIO_DOCKERHUB_PASSWORD.enc.value" | docker login --username "$KALISIO_DOCKERHUB_USERNAME" --password-stdin "$KALISIO_DOCKERHUB_URL"
+
 # DOCKER_BUILDKIT is here to be able to use Dockerfile specific dockerginore (app.Dockerfile.dockerignore)
 DOCKER_BUILDKIT=1 docker build \
     -f job.Dockerfile \
