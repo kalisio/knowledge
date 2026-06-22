@@ -1,4 +1,5 @@
 # ── Version control
+.git
 .github
 .gitignore
 .dockerignore
@@ -24,6 +25,7 @@ experiments/
 .env
 .env.*
 *.log
+logs
 
 # ── Dependencies & lock files
 uv.lock
