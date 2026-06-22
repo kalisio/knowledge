@@ -12,7 +12,18 @@ class IngestionConfig(RuntimeConfig):
         default_factory=lambda: env_str("KLI_ORGANIZATION", "kalisio"))
     kli_workspace: str = field(
         default_factory=lambda: env_str("KLI_WORKSPACE", "apps"))
-    
-    supported_extensions: str = field(
-        default_factory=lambda: env_str("SUPPORTED_EXTENSIONS", "{".md", ".js", ".mjs", ".cjs", ".vue", ".json"}"))
+
+    log_level: str = field(
+        default_factory=lambda: env_str("LOG_LEVEL", "INFO"))
+
+    qdrant_collection_code: str = field(
+        default_factory=lambda: require("QDRANT_COLLECTION_CODE"))
+    qdrant_collection_metadata: str = field(
+        default_factory=lambda: require("QDRANT_COLLECTION_METADATA"))
+
+    git_history_limit: int = field(
+        default_factory=lambda: env_int("GIT_HISTORY_LIMIT", 10))
+
+    # supported_extensions: str = field(
+    #     default_factory=lambda: env_str("SUPPORTED_EXTENSIONS", "{".md", ".js", ".mjs", ".cjs", ".vue", ".json"}"))
 
