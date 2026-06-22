@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "AI developer assistant for the Kalisio ecosystem"
 
 [tool.pytest.ini_options]
+testpaths = ["test"]
 markers = [
   "General: General tests for the API",
 ]
