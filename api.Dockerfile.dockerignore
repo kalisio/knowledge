@@ -1,0 +1,48 @@
+# ── Version control
+.git
+.github
+.gitignore
+.gitmodules
+.dockerignore
+
+# ── Python artifacts
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.ipynb_checkpoints
+
+# ── Data & ML artifacts
+data/
+qdrant_data/
+vector_db/
+outputs/
+notebooks/
+experiments/
+
+# ── Secrets & environment
+.env
+.env.*
+*.log
+logs
+
+# ── Dependencies & lock files
+uv.lock
+
+# ── IDE & tooling
+.claude
+.vscode
+.idea
+
+# ── Non-runtime project content
+test/
+docs/
+scripts/
+*.md
+LICENSE
+sonar-project.properties
+
+# ── Other image's code (not needed for the api image)
+ingestion/

@@ -2,6 +2,7 @@
 .git
 .github
 .gitignore
+.gitmodules
 .dockerignore
 
 # ── Python artifacts
@@ -34,3 +35,14 @@ uv.lock
 .claude
 .vscode
 .idea
+
+# ── Non-runtime project content
+test/
+docs/
+scripts/
+*.md
+LICENSE
+sonar-project.properties
+
+# ── Other image's code (not needed for the job image)
+api/
