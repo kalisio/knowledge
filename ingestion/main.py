@@ -18,11 +18,12 @@ collection the API queries. IngestionConfig is built first so a misconfigured
 run fails fast before any embedding work.
 """
 
+import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 from ingestion.config import IngestionConfig
-from ingestion.pipeline import run
 
 
 # Directories under the workspace root that are not part of the indexed
@@ -33,6 +34,10 @@ SKIP_REPOS = {"knowledge", "qdrant_data"}
 
 
 def main(argv=None):
+    argv = list(sys.argv[1:] if argv is None else argv)
+    from ingestion.pipeline import run
+    import utils.vectordb as vectordb
+
     config = IngestionConfig()
     root = Path(config.repos_dir)
 
@@ -99,11 +104,16 @@ def main(argv=None):
     # last_ingestion timestamp. Do not update it at job start, otherwise a
     # failed run could move the recovery cursor forward and miss files.
 
-    repo_dirs = _discover_repos(root)
+    repo_dirs = _discover_repos(root, argv)
+    last_ingestion = vectordb.get_last_ingestion()
+    candidate_files = _candidate_files(repo_dirs, last_ingestion)
 
     print(f"indexing {len(repo_dirs)} repo(s): "
           f"{', '.join(d.name for d in repo_dirs)}")
-    count = run(repo_dirs)
+    if last_ingestion:
+        print(f"last successful ingestion: {last_ingestion}")
+    count = run(repo_dirs, candidate_files=candidate_files)
+    vectordb.set_last_ingestion(_utc_now_iso8601())
     print(f"indexed {count} chunks into '{config.qdrant_collection}'")
     return 0
 
@@ -113,12 +123,59 @@ def main(argv=None):
 # ---------------------------------------------------------------------------
 
 
-# Every git repository directly under `root`, minus SKIP_REPOS.
-def _discover_repos(root):
-    return [
+# Every git repository directly under `root`, minus SKIP_REPOS; when names
+# are provided, keep only those repositories.
+def _discover_repos(root, names=None):
+    repo_dirs = [
         path for path in sorted(root.iterdir())
         if path.name not in SKIP_REPOS and (path / ".git").exists()
     ]
+    if not names:
+        return repo_dirs
+    selected = set(names)
+    return [path for path in repo_dirs if path.name in selected]
+
+
+# Build repo -> repo-relative file-path candidates from the last successful
+# ingestion timestamp. None means "first run, full scan"; an empty mapping
+# means "no git activity since last ingestion".
+def _candidate_files(repo_dirs, last_ingestion):
+    if not last_ingestion:
+        return None
+    candidates = {}
+    for repo_dir in repo_dirs:
+        changed = _git_changed_files_since(repo_dir, last_ingestion)
+        if changed:
+            candidates[Path(repo_dir).name] = changed
+    return candidates
+
+
+# Repo-relative file paths touched since `since` (ISO 8601), newest activity
+# first in git history but returned here as a deduplicated set.
+def _git_changed_files_since(repo_dir, since):
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(repo_dir), "log", f"--since={since}",
+             "--name-only", "--pretty=format:"],
+            capture_output=True, text=True, check=False, timeout=15)
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return set()
+    if result.returncode != 0:
+        return set()
+    return {
+        line.strip().replace("\\", "/")
+        for line in result.stdout.splitlines()
+        if line.strip()
+    }
+
+
+# Current UTC timestamp in compact ISO 8601 form used by the metadata
+# collection, e.g. "2026-06-19T10:35:00Z".
+def _utc_now_iso8601():
+    return (datetime.now(timezone.utc)
+            .replace(microsecond=0)
+            .isoformat()
+            .replace("+00:00", "Z"))
 
 
 if __name__ == "__main__":

@@ -40,12 +40,13 @@ CHUNKERS = {
 # upsert the vectors into Qdrant. Returns the number of chunks indexed.
 # With incremental=True, chunks of unchanged files (same file hash as
 # already indexed) are dropped before the expensive embedding step.
-def run(repo_dirs, incremental=True):
-    chunks = _chunk_repositories(repo_dirs)
+def run(repo_dirs, incremental=True, candidate_files=None):
+    chunks = _chunk_repositories(repo_dirs, candidate_files=candidate_files)
     if incremental:
         chunks = manifest.select_changed(chunks, manifest.load())
     if not chunks:
         return 0
+    _delete_existing(chunks)
     _enrich_commits(chunks, repo_dirs)
     vectors = embeddings.encode_batch([chunk["text"] for chunk in chunks])
     vectordb.ensure_collection(len(vectors[0]))
@@ -75,15 +76,19 @@ def _enrich_commits(chunks, repo_dirs):
 
 
 # Chunk every indexable file across several repositories.
-def _chunk_repositories(repo_dirs):
+def _chunk_repositories(repo_dirs, candidate_files=None):
     chunks = []
     for repo_dir in repo_dirs:
-        chunks.extend(_chunk_repo(repo_dir))
+        repo_dir = Path(repo_dir)
+        selected = None
+        if candidate_files is not None:
+            selected = candidate_files.get(repo_dir.name, set())
+        chunks.extend(_chunk_repo(repo_dir, candidate_files=selected))
     return chunks
 
 
 # Chunk every indexable file in one repository, tagging chunks with its name.
-def _chunk_repo(repo_dir):
+def _chunk_repo(repo_dir, candidate_files=None):
     repo_dir = Path(repo_dir)
     repository = repo_dir.name
     chunks = []
@@ -92,6 +97,8 @@ def _chunk_repo(repo_dir):
         if chunker is None:
             continue
         source_path = str(path.relative_to(repo_dir))
+        if candidate_files is not None and source_path not in candidate_files:
+            continue
         text = path.read_text(encoding="utf-8", errors="ignore")
         digest = manifest.file_sha1(text)
         for chunk in chunker(text, source_path):
@@ -99,3 +106,16 @@ def _chunk_repo(repo_dir):
             chunk["metadata"]["file_sha1"] = digest
             chunks.append(chunk)
     return chunks
+
+
+# Delete all existing chunks for the files about to be reindexed so changed
+# files do not leave stale chunks behind when the chunk content/count changes.
+def _delete_existing(chunks):
+    seen = set()
+    for chunk in chunks:
+        meta = chunk["metadata"]
+        key = (meta["repository"], meta["source_path"])
+        if key in seen:
+            continue
+        vectordb.delete_file(*key)
+        seen.add(key)

@@ -10,16 +10,27 @@ overwrites its entry instead of duplicating it.
 """
 
 import hashlib
+import os
 import uuid
 from pathlib import Path
 
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, PointStruct, VectorParams
+from qdrant_client.models import (
+    Distance,
+    FieldCondition,
+    Filter,
+    FilterSelector,
+    MatchValue,
+    PointStruct,
+    VectorParams,
+)
 
 from config import get_runtime_config
 
 
 _client = None
+_METADATA_POINT_ID = "collection_metadata"
+_LAST_INGESTION_KEY = "last_ingestion"
 
 
 # Create the collection (cosine distance) if it does not exist yet.
@@ -89,6 +100,67 @@ def iter_payloads(page_size=256):
             yield record.payload
         if offset is None:
             break
+
+
+# Read the ISO 8601 timestamp of the last successful ingestion from the
+# dedicated metadata collection. Returns None on first run or when missing.
+def get_last_ingestion():
+    client = _get_client()
+    name = _metadata_collection_name()
+    if not client.collection_exists(name):
+        return None
+    records, _ = client.scroll(
+        collection_name=name,
+        limit=1,
+        with_payload=[_LAST_INGESTION_KEY],
+        with_vectors=False,
+    )
+    if not records:
+        return None
+    value = records[0].payload.get(_LAST_INGESTION_KEY)
+    return str(value) if value else None
+
+
+# Persist the ISO 8601 timestamp of the last successful ingestion in the
+# dedicated metadata collection.
+def set_last_ingestion(timestamp):
+    client = _get_client()
+    name = _metadata_collection_name()
+    if not client.collection_exists(name):
+        client.create_collection(
+            collection_name=name,
+            vectors_config=VectorParams(size=1, distance=Distance.COSINE),
+        )
+    client.upsert(
+        collection_name=name,
+        points=[PointStruct(
+            id=_METADATA_POINT_ID,
+            vector=[0.0],
+            payload={_LAST_INGESTION_KEY: timestamp},
+        )],
+    )
+
+
+# Delete all indexed chunks for one repo-relative file so a reindex does not
+# leave stale chunks behind when the file content or chunk count changed.
+def delete_file(repository, source_path):
+    client = _get_client()
+    name = get_runtime_config().qdrant_collection
+    if not client.collection_exists(name):
+        return
+    client.delete(
+        collection_name=name,
+        points_selector=FilterSelector(filter=Filter(must=[
+            FieldCondition(
+                key="repository",
+                match=MatchValue(value=repository),
+            ),
+            FieldCondition(
+                key="source_path",
+                match=MatchValue(value=source_path),
+            ),
+        ])),
+    )
 
 
 # Deterministic id for a chunk's stored entry: same chunk -> same id
@@ -162,3 +234,11 @@ def _file_type(source_path):
 # Hex SHA-1 of a text, used in the entry id and for change detection.
 def _sha1(text):
     return hashlib.sha1(text.encode("utf-8")).hexdigest()
+
+
+# Name of the metadata collection storing job-level ingestion cursors.
+def _metadata_collection_name():
+    configured = os.getenv("QDRANT_METADATA_COLLECTION")
+    if configured:
+        return configured
+    return f"{get_runtime_config().qdrant_collection}_metadata"
