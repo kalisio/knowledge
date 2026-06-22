@@ -1,5 +1,6 @@
 """API tests: /health is open; /ask and /search require a valid JWT."""
 
+import os
 import time
 from types import SimpleNamespace
 
@@ -15,6 +16,11 @@ from api.app import app
 client = TestClient(app)
 
 TEST_SECRET = "test-secret-please-use-32-plus-bytes"
+
+requires_services = pytest.mark.skipif(
+    not os.getenv("QDRANT_URL"),
+    reason="needs the service env (QDRANT_URL) + live Qdrant/model/LLM",
+)
 
 
 # Mint a token the way scripts/make-jwt.py does, signed with TEST_SECRET.
@@ -68,6 +74,7 @@ def test_ask_with_wrong_audience_is_rejected(auth_on):
 
 
 # /ask with a valid token returns an answer and its sources.
+@requires_services
 def test_ask_with_valid_token_is_accepted(auth_on):
     headers = {"Authorization": f"Bearer {make_token()}"}
     response = client.post("/ask", json={"question": "hi"}, headers=headers)
@@ -78,6 +85,7 @@ def test_ask_with_valid_token_is_accepted(auth_on):
 
 
 # /search with a valid token returns results.
+@requires_services
 def test_search_with_valid_token_is_accepted(auth_on):
     headers = {"Authorization": f"Bearer {make_token()}"}
     response = client.post(
@@ -88,6 +96,7 @@ def test_search_with_valid_token_is_accepted(auth_on):
 
 
 # When auth is disabled, /ask works without any token.
+@requires_services
 def test_auth_disabled_allows_no_token(monkeypatch):
     monkeypatch.setattr(auth, "get_config", lambda: fake_config(enabled=False))
     response = client.post("/ask", json={"question": "hi"})
