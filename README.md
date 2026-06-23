@@ -2,6 +2,9 @@
 
 [![Latest Release](https://img.shields.io/github/v/tag/kalisio/knowledge?sort=semver&label=latest)](https://github.com/kalisio/knowledge/releases)
 [![CI](https://github.com/kalisio/knowledge/actions/workflows/main.yml/badge.svg)](https://github.com/kalisio/knowledge/actions/workflows/main.yml)
+[![Quality Gate Status](https://sonar.portal.kalisio.com/api/project_badges/measure?project=kalisio-knowledge&metric=alert_status&token=sqb_34e142203b01ef86476be23f08b776aa79fcd82a)](https://sonar.portal.kalisio.com/dashboard?id=kalisio-knowledge)
+[![Maintainability Issues](https://sonar.portal.kalisio.com/api/project_badges/measure?project=kalisio-knowledge&metric=software_quality_maintainability_issues&token=sqb_34e142203b01ef86476be23f08b776aa79fcd82a)](https://sonar.portal.kalisio.com/dashboard?id=kalisio-knowledge)
+[![Coverage](https://sonar.portal.kalisio.com/api/project_badges/measure?project=kalisio-knowledge&metric=coverage&token=sqb_34e142203b01ef86476be23f08b776aa79fcd82a)](https://sonar.portal.kalisio.com/dashboard?id=kalisio-knowledge)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 _AI developer assistant for the Kalisio ecosystem_
