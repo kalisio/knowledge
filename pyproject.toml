@@ -9,5 +9,8 @@ markers = [
   "General: General tests for the API",
 ]
 
+[tool.ruff]
+exclude = ["docs/experiments"]
+
 [tool.coverage.run]
 patch = ["subprocess"]
