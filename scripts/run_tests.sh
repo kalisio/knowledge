@@ -35,6 +35,11 @@ done
 
 . "$WORKSPACE_DIR/development/workspaces/services/services.sh" knowledge
 
+## Start Qdrant
+##
+
+"$WORKSPACE_DIR/development/scripts/k-qdrant"
+
 ## Setup micromamba env
 ##
 
