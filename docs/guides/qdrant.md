@@ -12,23 +12,26 @@ In the commands below, `$QDRANT_URL` and `$QDRANT_COLLECTION` refer to those val
 
 ## Run Qdrant
 
-Qdrant runs as a Docker container. The project starts it with Docker Compose, persisting data to
+Qdrant runs as a Docker container. The project's tooling starts it with the `k-qdrant` script from
+the Kalisio `development` workspace (`scripts/run_tests.sh` calls it), persisting data to
 `./qdrant_data/`:
 
 ```bash
-docker compose up -d qdrant
+k-qdrant
 ```
 
-Equivalent standalone command (image pinned to the version the project uses):
+`k-qdrant` is a thin wrapper over the standalone command below. The image version defaults to
+`v1.18.0` (override with `QDRANT_VERSION`) and the data directory to `./qdrant_data` (override with
+`QDRANT_DATA_DIR`):
 
 ```bash
-docker run -d --name qdrant \
-  -p 6333:6333 \
+docker run -d --rm --name qdrant \
+  -p 6333:6333 -p 6334:6334 \
   -v "$(pwd)/qdrant_data:/qdrant/storage" \
-  qdrant/qdrant:v1.13.4
+  qdrant/qdrant:v1.18.0
 ```
 
-REST is on port `6333`. Check it is up:
+REST is on port `6333` (gRPC on `6334`). Check it is up:
 
 ```bash
 curl -s http://localhost:6333/healthz
@@ -150,10 +153,13 @@ After running the ingestion job (`python -m ingestion.main`):
 
 3. **Confirm a specific file** — replace the filter key with `source_path`.
 
-4. **Check retrieval end to end** — query the API and inspect the returned sources and scores:
+4. **Check retrieval end to end** — query the API and inspect the returned sources and scores.
+   `/search` requires a JWT when auth is enabled (the default), so send a bearer token — or run the
+   API with `KNOWLEDGE_AUTH_ENABLED=false` for a local check:
 
    ```bash
    curl -s -X POST http://localhost:8187/search \
+     -H 'Authorization: Bearer <token>' \
      -H 'Content-Type: application/json' -d '{"query": "how to add a layer", "top_k": 5}' | jq
    ```
 

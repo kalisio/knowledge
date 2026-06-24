@@ -31,7 +31,8 @@ Requires a valid JWT.
 | --- | --- | --- | --- |
 | `question` | string | yes | The natural-language question |
 
-Returns `{ "answer": "…", "sources": [ … ] }`.
+Returns `{ "answer": "…", "sources": [ … ], "provider": "…", "model": "…" }`. `provider` and
+`model` identify the LLM that produced the answer.
 
 ### `POST /search`
 
@@ -40,6 +41,6 @@ Semantic search only (no LLM) — returns the top matching chunks. Requires a va
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
 | `query` | string | yes | The search query |
-| `top_k` | integer | no | How many chunks to return |
+| `top_k` | integer | no | How many chunks to return (default `5`) |
 
 Returns `{ "results": [ … ] }`.

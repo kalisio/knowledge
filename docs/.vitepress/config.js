@@ -19,7 +19,7 @@ export default withMermaid(
       socialLinks: [{ icon: 'github', link: 'https://github.com/kalisio/knowledge' }],
       nav: [
         { text: 'About', link: '/about/introduction' },
-        { text: 'Guides', link: '/guides/qdrant' },
+        { text: 'Guides', link: '/guides/understanding' },
         { text: 'Architecture', link: '/architecture/introduction' },
         { text: 'Research', link: '/research/introduction' }
       ],
@@ -60,7 +60,29 @@ function getAboutSidebar () {
 
 function getGuidesSidebar () {
   return [
-    { text: 'Qdrant operations', link: '/guides/qdrant' }
+    { text: 'Understanding knowledge', link: '/guides/understanding' },
+    { text: 'Getting started', link: '/guides/getting-started' },
+    { text: 'Qdrant operations', link: '/guides/qdrant' },
+    {
+      text: 'Agent configuration',
+      collapsed: true,
+      items: [
+        { text: 'Claude Code', link: '/guides/agent-config/claude-code' },
+        { text: 'Codex', link: '/guides/agent-config/codex' },
+        { text: 'Cursor', link: '/guides/agent-config/cursor' },
+        { text: 'Gemini CLI', link: '/guides/agent-config/geminicli' },
+        { text: 'Vibe', link: '/guides/agent-config/vibe' }
+      ]
+    },
+    {
+      text: 'How-to',
+      collapsed: true,
+      items: [
+        { text: 'Add an LLM provider', link: '/guides/howto/llm-providers' },
+        { text: 'Add a file type', link: '/guides/howto/file-types' },
+        { text: 'Change the embedding model', link: '/guides/howto/embedding-model' }
+      ]
+    }
   ]
 }
 
