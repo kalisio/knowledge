@@ -24,6 +24,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from ingestion.config import IngestionConfig
+from ingestion import git_changes
 
 
 # Directories under the workspace root that are not part of the indexed
@@ -106,12 +107,14 @@ def main(argv=None):
 
     repo_dirs = _ensure_repos(root, config, argv)
     last_ingestion = vectordb.get_last_ingestion()
-    candidate_files = _candidate_files(repo_dirs, last_ingestion)
+    candidate_files, stale_files = git_changes.candidate_file_changes(
+        repo_dirs, last_ingestion)
 
     print(f"indexing {len(repo_dirs)} repo(s): "
           f"{', '.join(d.name for d in repo_dirs)}")
     if last_ingestion:
         print(f"last successful ingestion: {last_ingestion}")
+    _delete_stale_files(stale_files, vectordb)
     count = run(repo_dirs, candidate_files=candidate_files)
     vectordb.set_last_ingestion(_utc_now_iso8601())
     print(f"indexed {count} chunks into '{config.qdrant_collection}'")
@@ -129,9 +132,6 @@ def main(argv=None):
 def _ensure_repos(root, config, names=None):
     root.mkdir(parents=True, exist_ok=True)
     _ensure_development(root, config.development_repo_url)
-    repo_dirs = _discover_repos(root, names)
-    if repo_dirs:
-        return repo_dirs
     _run_k_clone(root, config.kli_organization, config.kli_workspace)
     repo_dirs = _discover_repos(root, names)
     if not repo_dirs:
@@ -190,23 +190,19 @@ def _candidate_files(repo_dirs, last_ingestion):
     return candidates
 
 
+# Delete vector-store chunks for files that disappeared from git history
+# (deleted files, or the old side of renames).
+def _delete_stale_files(stale_files, vectordb):
+    for repository, source_paths in stale_files.items():
+        for source_path in source_paths:
+            vectordb.delete_file(repository, source_path)
+
+
 # Repo-relative file paths touched since `since` (ISO 8601), newest activity
 # first in git history but returned here as a deduplicated set.
 def _git_changed_files_since(repo_dir, since):
-    try:
-        result = subprocess.run(
-            ["git", "-C", str(repo_dir), "log", f"--since={since}",
-             "--name-only", "--pretty=format:"],
-            capture_output=True, text=True, check=False, timeout=15)
-    except (FileNotFoundError, subprocess.TimeoutExpired):
-        return set()
-    if result.returncode != 0:
-        return set()
-    return {
-        line.strip().replace("\\", "/")
-        for line in result.stdout.splitlines()
-        if line.strip()
-    }
+    candidates, _ = git_changes.candidate_file_changes([repo_dir], since)
+    return candidates.get(Path(repo_dir).name, set())
 
 
 # Current UTC timestamp in compact ISO 8601 form used by the metadata
