@@ -30,7 +30,7 @@ from ingestion.config import IngestionConfig
 # corpus: the Qdrant storage dir, and this service itself (its
 # docs/experiments would pollute the corpus). Provisional -- the canonical
 # production set is still a team decision; adjust this set to change it.
-SKIP_REPOS = {"knowledge", "qdrant_data"}
+SKIP_REPOS = {"development", "kli", "knowledge", "qdrant_data"}
 
 
 def main(argv=None):
@@ -104,7 +104,7 @@ def main(argv=None):
     # last_ingestion timestamp. Do not update it at job start, otherwise a
     # failed run could move the recovery cursor forward and miss files.
 
-    repo_dirs = _discover_repos(root, argv)
+    repo_dirs = _ensure_repos(root, config, argv)
     last_ingestion = vectordb.get_last_ingestion()
     candidate_files = _candidate_files(repo_dirs, last_ingestion)
 
@@ -121,6 +121,46 @@ def main(argv=None):
 # ---------------------------------------------------------------------------
 # UTILS
 # ---------------------------------------------------------------------------
+
+
+# Ensure the workspace has the development tooling and at least one selected
+# target repository. A completely fresh workspace needs development first
+# (k-clone and workspace manifests), then k-clone can fetch the real corpus.
+def _ensure_repos(root, config, names=None):
+    root.mkdir(parents=True, exist_ok=True)
+    _ensure_development(root, config.development_repo_url)
+    repo_dirs = _discover_repos(root, names)
+    if repo_dirs:
+        return repo_dirs
+    _run_k_clone(root, config.kli_organization, config.kli_workspace)
+    repo_dirs = _discover_repos(root, names)
+    if not repo_dirs:
+        selected = ", ".join(names) if names else "any indexable repository"
+        raise RuntimeError(
+            f"k-clone completed but did not provide {selected} under {root}")
+    return repo_dirs
+
+
+# Ensure root/development exists; it carries development/scripts/k-clone and
+# development/workspaces/<workspace>/<workspace>.js, which k-clone needs.
+def _ensure_development(root, repo_url):
+    development_dir = root / "development"
+    k_clone = development_dir / "scripts" / "k-clone"
+    if k_clone.exists():
+        return
+    subprocess.run(
+        ["git", "clone", "--depth", "1", repo_url, str(development_dir)],
+        check=True)
+
+
+# Run k-clone from its scripts directory because the script sources its
+# sibling .kalisio file using a relative path.
+def _run_k_clone(root, organization, workspace):
+    scripts_dir = root / "development" / "scripts"
+    subprocess.run(
+        ["bash", "k-clone", organization, workspace],
+        cwd=scripts_dir,
+        check=True)
 
 
 # Every git repository directly under `root`, minus SKIP_REPOS; when names

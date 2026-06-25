@@ -8,6 +8,13 @@ from config import RuntimeConfig, env_int, env_str, require
 @dataclass(frozen=True)
 class IngestionConfig(RuntimeConfig):
 
+    repos_dir: str = field(
+        default_factory=lambda: require("KALISIO_DEVELOPMENT_DIR"))
+    development_repo_url: str = field(
+        default_factory=lambda: env_str(
+            "KALISIO_DEVELOPMENT_REPO",
+            "https://github.com/kalisio/development.git"))
+
     kli_organization: str = field(
         default_factory=lambda: env_str("KLI_ORGANIZATION", "kalisio"))
     kli_workspace: str = field(
@@ -26,4 +33,3 @@ class IngestionConfig(RuntimeConfig):
 
     # supported_extensions: str = field(
     #     default_factory=lambda: env_str("SUPPORTED_EXTENSIONS", "{".md", ".js", ".mjs", ".cjs", ".vue", ".json"}"))
-
