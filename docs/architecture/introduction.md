@@ -1,23 +1,9 @@
 # Architecture overview
 
-<!-- TODO: one paragraph framing the whole system, then the global diagram. -->
+knowledge is built around three pieces that each do one job : 
+
+- **[Ingestion job](/architecture/ingestion)**: builds and updates the knowledge base by collecting and processing the source data.
+- **[API](/architecture/api)**: exposes the knowledge base through a API
+- **[MCP server](/architecture/mcp)**: makes the knowledge available to coding agents through the Model Context Protocol (MCP).
 
 ![full architecture](/images/full-architecture.png)
-
-## Global architecture
-
-<!-- TODO: how the pieces run together — CI, dev machine, Kubernetes. -->
-
-```mermaid
-flowchart LR
-  repos[Kalisio repos] --> ingest[Ingestion job] --> qdrant[(Qdrant)]
-  qdrant --> api["FastAPI: /ask, /search"] --> agent[Coding agent]
-```
-
-## How the system fits together
-
-This section is split per concern:
-
-- [Ingestion pipeline](/architecture/ingestion-pipeline) — how repos become indexed chunks.
-- [RAG: indexing & retrieval](/architecture/rag) — how a question becomes relevant chunks.
-- [API endpoints](/architecture/api) — the HTTP surface (`/ask`, `/search`, `/health`).

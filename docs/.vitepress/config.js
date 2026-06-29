@@ -92,9 +92,9 @@ function getGuidesSidebar () {
 function getArchitectureSidebar () {
   return [
     { text: 'Overview', link: '/architecture/introduction' },
-    { text: 'Ingestion pipeline', link: '/architecture/ingestion-pipeline' },
-    { text: 'RAG: indexing & retrieval', link: '/architecture/rag' },
-    { text: 'API endpoints', link: '/architecture/api' }
+    { text: 'Ingestion job', link: '/architecture/ingestion' },
+    { text: 'API', link: '/architecture/api' },
+    { text: 'MCP server', link: '/architecture/mcp' }
   ]
 }
 
