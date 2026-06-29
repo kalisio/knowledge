@@ -1,3 +1,2 @@
-# Add a file type
+# Add a supported extensions
 
-🚧 *To be written.*

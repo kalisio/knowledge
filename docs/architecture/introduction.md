@@ -2,6 +2,8 @@
 
 <!-- TODO: one paragraph framing the whole system, then the global diagram. -->
 
+![full architecture](../images/full-architecture.png)
+
 ## Global architecture
 
 <!-- TODO: how the pieces run together — CI, dev machine, Kubernetes. -->

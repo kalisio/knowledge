@@ -62,7 +62,9 @@ function getGuidesSidebar () {
   return [
     { text: 'Understanding knowledge', link: '/guides/understanding' },
     { text: 'Getting started', link: '/guides/getting-started' },
-    { text: 'Qdrant operations', link: '/guides/qdrant' },
+    { text: 'Semantic code search', link: '/guides/semantic-search' },
+    { text: 'Git intelligence', link: '/guides/git-intelligence' },
+    { text: 'Dependency graph', link: '/guides/dependency-graph' },
     {
       text: 'Agent configuration',
       collapsed: true,
@@ -79,8 +81,9 @@ function getGuidesSidebar () {
       collapsed: true,
       items: [
         { text: 'Add an LLM provider', link: '/guides/howto/llm-providers' },
-        { text: 'Add a file type', link: '/guides/howto/file-types' },
-        { text: 'Change the embedding model', link: '/guides/howto/embedding-model' }
+        { text: 'Add a file extension', link: '/guides/howto/file-types' },
+        { text: 'Change the embedding model', link: '/guides/howto/embedding-model' },
+        { text: 'Manage Qdrant collections', link: '/guides/howto/qdrant' }
       ]
     }
   ]

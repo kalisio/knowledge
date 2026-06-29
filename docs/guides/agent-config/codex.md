@@ -1,3 +1,1 @@
 # Codex
-
-🚧 *To be written.*
