@@ -23,19 +23,35 @@ from pathlib import Path
 from ingestion.config import IngestionConfig
 from ingestion import git_file_changes
 from ingestion import repository_sync
+from ingestion.indexing_pipeline import run
+import utils.vectordb as vectordb
 
-
-def main(argv=None):
-    argv = list(sys.argv[1:] if argv is None else argv)
-    from ingestion.indexing_pipeline import run
-    import utils.vectordb as vectordb
-
+def main():
     config = IngestionConfig()
-    root = Path(config.repos_dir)
+
+    # Check & crete qdrant collection
+    qdrant_collection_metadata_existing = _check_qdfran_collection(config.qdrant_collection_metadata)
+    qdrant_collection_code_existing = _check_qdfran_collection(config.qdrant_collection_code)
+    if (!qdrant_collection_metadata_existing) _create_qdfran_collection(config.qdrant_collection_metadata)
+    if (!qdrant_collection_code_existing) _create_qdfran_collection(config.qdrant_collection_code)
+
+    # Clone all reposiroe 
+    subprocess.run([ k-clone config.kli_organization config.kli_worspace])
+
+    # check if is first ingestion
+    is_first_ingestion = _is_collection_empty(config.qdrant_collection_code) && _is_collection_empty(config.qdrant_collection_metadata)
+
+    # get last_ingetsion date+
+    last_ingestyion_date = null
+    if (!is_first_ingestion) last_ingestyion_date =  _get_last_ingestion_date(config.qdrant_collection_metadata)
+    log error(need to have last ingestion date if its not first ingestion)
+
 
     # TODO incremental ingestion plan:
-    #
-    # 1. Clone / update repos via k-clone if needed:
+    # 
+    # 1. verifier que les collection matadta et code de qdrant existe check_qdfran_collection & creteqdrantcolelction
+    #2. si elle n'existe pas les créer 
+    # 3. Clone / update repos via k-clone if needed:
     #    k-clone <organization> <workspace|all>
     #
     # 2. Recover the last successful ingestion timestamp
