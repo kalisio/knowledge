@@ -36,7 +36,7 @@ _LAST_INGESTION_KEY = "last_ingestion"
 # Create the collection (cosine distance) if it does not exist yet.
 def ensure_collection(vector_size, recreate=False):
     client = _get_client()
-    name = get_runtime_config().qdrant_collection
+    name = get_runtime_config().qdrant_collection_code
     if recreate and client.collection_exists(name):
         client.delete_collection(name)
     if not client.collection_exists(name):
@@ -51,7 +51,7 @@ def ensure_collection(vector_size, recreate=False):
 # overwrites its entry instead of creating a duplicate.
 def upsert(chunks, vectors, batch_size=64):
     client = _get_client()
-    name = get_runtime_config().qdrant_collection
+    name = get_runtime_config().qdrant_collection_code
     records = [_to_record(c, v) for c, v in zip(chunks, vectors)]
     for start in range(0, len(records), batch_size):
         client.upsert(
@@ -64,7 +64,7 @@ def upsert(chunks, vectors, batch_size=64):
 # so callers can surface a "run ingestion" hint instead of a 500.
 def search(vector, top_k=5):
     client = _get_client()
-    name = get_runtime_config().qdrant_collection
+    name = get_runtime_config().qdrant_collection_code
     if not client.collection_exists(name):
         return []
     hits = client.query_points(
@@ -77,7 +77,7 @@ def search(vector, top_k=5):
 # Used to tell "index not built" apart from "query had no match".
 def count():
     client = _get_client()
-    name = get_runtime_config().qdrant_collection
+    name = get_runtime_config().qdrant_collection_code
     if not client.collection_exists(name):
         return 0
     return client.count(collection_name=name).count
@@ -88,7 +88,7 @@ def count():
 # does not exist yet (first run).
 def iter_payloads(page_size=256):
     client = _get_client()
-    name = get_runtime_config().qdrant_collection
+    name = get_runtime_config().qdrant_collection_code
     if not client.collection_exists(name):
         return
     offset = None
@@ -145,7 +145,7 @@ def set_last_ingestion(timestamp):
 # leave stale chunks behind when the file content or chunk count changed.
 def delete_file(repository, source_path):
     client = _get_client()
-    name = get_runtime_config().qdrant_collection
+    name = get_runtime_config().qdrant_collection_code
     if not client.collection_exists(name):
         return
     client.delete(
@@ -241,4 +241,4 @@ def _metadata_collection_name():
     configured = os.getenv("QDRANT_METADATA_COLLECTION")
     if configured:
         return configured
-    return f"{get_runtime_config().qdrant_collection}_metadata"
+    return f"{get_runtime_config().qdrant_collection_code}_metadata"

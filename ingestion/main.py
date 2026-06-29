@@ -117,7 +117,7 @@ def main(argv=None):
     _delete_stale_files(stale_files, vectordb)
     count = run(repo_dirs, candidate_files=candidate_files)
     vectordb.set_last_ingestion(_utc_now_iso8601())
-    print(f"indexed {count} chunks into '{config.qdrant_collection}'")
+    print(f"indexed {count} chunks into '{config.qdrant_collection_code}'")
     return 0
 
 

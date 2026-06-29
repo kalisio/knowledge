@@ -23,8 +23,6 @@ class IngestionConfig(RuntimeConfig):
     log_level: str = field(
         default_factory=lambda: env_str("LOG_LEVEL", "INFO"))
 
-    qdrant_collection_code: str = field(
-        default_factory=lambda: require("QDRANT_COLLECTION_CODE"))
     qdrant_collection_metadata: str = field(
         default_factory=lambda: require("QDRANT_COLLECTION_METADATA"))
 

@@ -34,14 +34,14 @@ async def lifespan(app):
     try:
         log.info("starting knowledge API on %s:%s", config.host, config.port)
         log.info("qdrant=%s collection=%s",
-                 config.qdrant_url, config.qdrant_collection)
+                 config.qdrant_url, config.qdrant_collection_code)
         log.info("embedding model=%s", config.embedding_model)
         log.info("llm model=%s endpoint=%s",
                  config.llm_model, config.llm_endpoint)
         log.info("auth %s | secrets: LLM_API_KEY=%s APP_SECRET=%s",
                  "enabled" if config.auth_enabled else "DISABLED",
                  _present(config.llm_api_key), _present(config.app_secret))
-        _log_index_status(log, config.qdrant_collection)
+        _log_index_status(log, config.qdrant_collection_code)
     except Exception as exc:
         log.warning("startup banner skipped: %s", exc)
     yield

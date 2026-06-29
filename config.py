@@ -38,8 +38,8 @@ class RuntimeConfig:
     """
 
     qdrant_url: str = field(default_factory=lambda: require("QDRANT_URL"))
-    qdrant_collection: str = field(
-        default_factory=lambda: require("QDRANT_COLLECTION"))
+    qdrant_collection_code: str = field(
+        default_factory=lambda: require("QDRANT_COLLECTION_CODE"))
     embedding_model: str = field(
         default_factory=lambda: require("EMBEDDING_MODEL"))
     embedding_batch_size: int = field(

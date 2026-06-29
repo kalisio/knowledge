@@ -69,7 +69,7 @@ class TestApi:
     def seeded_qdrant(self, monkeypatch):
         cfg = SimpleNamespace(
             qdrant_url=os.environ["QDRANT_URL"],
-            qdrant_collection=TEST_COLLECTION,
+            qdrant_collection_code=TEST_COLLECTION,
             embedding_model="test", embedding_batch_size=8)
         monkeypatch.setattr(vectordb, "get_runtime_config", lambda: cfg)
         vector = [1.0, 0.0, 0.0, 0.0]
