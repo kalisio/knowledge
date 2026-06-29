@@ -1,7 +1,7 @@
 """Scan the local Kalisio repositories for files to ingest.
 
 Walk a repository, skip noise (VCS, dependencies, build output, caches),
-and keep only the file types we have chunkers for (see ingestion/chunks/),
+and keep only the file types we have chunkers for (see ingestion/chunkers/),
 dropping minified bundles, lock/metadata files, and oversized files. Rules
 are adapted from the file-filtering experiment (corpus_filter/), pared down
 to what production needs.
@@ -12,7 +12,7 @@ import re
 from pathlib import Path
 
 
-# File types we index — one per chunker in ingestion/chunks/.
+# File types we index — one per chunker in ingestion/chunkers/.
 INDEXED_SUFFIXES = {".md", ".js", ".mjs", ".cjs", ".vue", ".json"}
 
 # Directory names to skip entirely (VCS, deps, build output, caches, IDE).
@@ -40,7 +40,7 @@ MAX_FILE_SIZE = 100_000
 
 
 # Walk `root` (skipping IGNORED_DIRS) and return the files we want to index.
-def scan(root):
+def scan_indexable_files(root):
     kept = []
     for dirpath, dirnames, filenames in os.walk(root):
         # Prune in place so os.walk does not descend into ignored dirs.

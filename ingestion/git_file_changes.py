@@ -14,7 +14,7 @@ from pathlib import Path
 # Build repo -> repo-relative current candidates and stale paths from git
 # history. None candidates means "first run, full scan"; stale paths are files
 # deleted or renamed away since the last successful ingestion.
-def candidate_file_changes(repo_dirs, last_ingestion):
+def find_file_changes(repo_dirs, last_ingestion):
     if not last_ingestion:
         return None, {}
     candidates = {}

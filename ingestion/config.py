@@ -28,6 +28,3 @@ class IngestionConfig(RuntimeConfig):
 
     git_history_limit: int = field(
         default_factory=lambda: env_int("GIT_HISTORY_LIMIT", 10))
-
-    # supported_extensions: str = field(
-    #     default_factory=lambda: env_str("SUPPORTED_EXTENSIONS", "{".md", ".js", ".mjs", ".cjs", ".vue", ".json"}"))

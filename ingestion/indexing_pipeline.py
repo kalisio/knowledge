@@ -14,13 +14,13 @@ passes the repositories to index.
 
 from pathlib import Path
 
-from ingestion.parser import scan
-from ingestion.chunks.md import chunk_markdown
-from ingestion.chunks.js import chunk_js
-from ingestion.chunks.vue import chunk_vue
-from ingestion.chunks.json import chunk_json
-from ingestion import manifest
-from ingestion import git_history
+from ingestion.file_scanner import scan_indexable_files
+from ingestion.chunkers.markdown import chunk_markdown
+from ingestion.chunkers.javascript import chunk_js
+from ingestion.chunkers.vue import chunk_vue
+from ingestion.chunkers.json import chunk_json
+from ingestion import indexed_file_state
+from ingestion import file_commit_history
 import utils.embeddings as embeddings
 import utils.vectordb as vectordb
 
@@ -43,7 +43,8 @@ CHUNKERS = {
 def run(repo_dirs, incremental=True, candidate_files=None):
     chunks = _chunk_repositories(repo_dirs, candidate_files=candidate_files)
     if incremental:
-        chunks = manifest.select_changed(chunks, manifest.load())
+        chunks = indexed_file_state.select_changed_chunks(
+            chunks, indexed_file_state.load_indexed_file_hashes())
     if not chunks:
         return 0
     _delete_existing(chunks)
@@ -70,7 +71,8 @@ def _enrich_commits(chunks, repo_dirs):
         if key not in history:
             repo_dir = repo_paths.get(meta["repository"])
             history[key] = (
-                git_history.recent_commits(repo_dir, meta["source_path"])
+                file_commit_history.get_recent_commits(
+                    repo_dir, meta["source_path"])
                 if repo_dir else [])
         meta["commit_history"] = history[key]
 
@@ -92,7 +94,7 @@ def _chunk_repo(repo_dir, candidate_files=None):
     repo_dir = Path(repo_dir)
     repository = repo_dir.name
     chunks = []
-    for path in scan(repo_dir):
+    for path in scan_indexable_files(repo_dir):
         chunker = CHUNKERS.get(path.suffix.lower())
         if chunker is None:
             continue
@@ -100,7 +102,7 @@ def _chunk_repo(repo_dir, candidate_files=None):
         if candidate_files is not None and source_path not in candidate_files:
             continue
         text = path.read_text(encoding="utf-8", errors="ignore")
-        digest = manifest.file_sha1(text)
+        digest = indexed_file_state.compute_file_sha1(text)
         for chunk in chunker(text, source_path):
             chunk["metadata"]["repository"] = repository
             chunk["metadata"]["file_sha1"] = digest

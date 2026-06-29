@@ -25,7 +25,7 @@ MAX_COMMITS = 5
 
 # Recent meaningful commit subjects touching `source_path` (repo-relative),
 # newest first. Empty list if git is missing or anything goes wrong.
-def recent_commits(repo_dir, source_path, limit=MAX_COMMITS):
+def get_recent_commits(repo_dir, source_path, limit=MAX_COMMITS):
     if limit <= 0:
         return []
     kept = [s for s in _git_log_subjects(repo_dir, source_path)

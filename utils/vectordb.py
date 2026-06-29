@@ -1,7 +1,7 @@
 """Qdrant access plus the shared payload schema for ingest and search.
 
 Talks to the Qdrant instance at QDRANT_URL on the collection named by
-QDRANT_COLLECTION: create the collection, upsert, search, and scroll it.
+QDRANT_COLLECTION_CODE: create the collection, upsert, search, and scroll it.
 The payload (the fields stored alongside each vector) and the deterministic
 id are defined here too -- build_payload / read_payload / payload_id -- so
 the ingestion job (writer) and the API (reader) share one shape and one id
@@ -10,7 +10,6 @@ overwrites its entry instead of duplicating it.
 """
 
 import hashlib
-import os
 import uuid
 from pathlib import Path
 
@@ -84,7 +83,7 @@ def count():
 
 
 # Yield the payload of every stored entry, paging through the collection.
-# Used to rebuild the indexed manifest; yields nothing if the collection
+# Used to rebuild the indexed-file state; yields nothing if the collection
 # does not exist yet (first run).
 def iter_payloads(page_size=256):
     client = _get_client()
@@ -104,9 +103,9 @@ def iter_payloads(page_size=256):
 
 # Read the ISO 8601 timestamp of the last successful ingestion from the
 # dedicated metadata collection. Returns None on first run or when missing.
-def get_last_ingestion():
+def get_last_ingestion(collection_name):
     client = _get_client()
-    name = _metadata_collection_name()
+    name = collection_name
     if not client.collection_exists(name):
         return None
     records, _ = client.scroll(
@@ -123,9 +122,9 @@ def get_last_ingestion():
 
 # Persist the ISO 8601 timestamp of the last successful ingestion in the
 # dedicated metadata collection.
-def set_last_ingestion(timestamp):
+def set_last_ingestion(collection_name, timestamp):
     client = _get_client()
-    name = _metadata_collection_name()
+    name = collection_name
     if not client.collection_exists(name):
         client.create_collection(
             collection_name=name,
@@ -234,11 +233,3 @@ def _file_type(source_path):
 # Hex SHA-1 of a text, used in the entry id and for change detection.
 def _sha1(text):
     return hashlib.sha1(text.encode("utf-8")).hexdigest()
-
-
-# Name of the metadata collection storing job-level ingestion cursors.
-def _metadata_collection_name():
-    configured = os.getenv("QDRANT_METADATA_COLLECTION")
-    if configured:
-        return configured
-    return f"{get_runtime_config().qdrant_collection_code}_metadata"

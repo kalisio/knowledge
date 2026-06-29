@@ -1,9 +1,9 @@
-"""Unit tests for candidate-file filtering in ingestion.pipeline."""
+"""Unit tests for candidate-file filtering in indexing_pipeline."""
 
 import pytest
 
 
-pipeline = pytest.importorskip("ingestion.pipeline")
+pipeline = pytest.importorskip("ingestion.indexing_pipeline")
 
 
 def test_chunk_repo_respects_candidate_files(tmp_path, monkeypatch):
@@ -14,7 +14,8 @@ def test_chunk_repo_respects_candidate_files(tmp_path, monkeypatch):
     first.write_text("const a = 1\n", encoding="utf-8")
     second.write_text("const b = 2\n", encoding="utf-8")
 
-    monkeypatch.setattr(pipeline, "scan", lambda root: [first, second])
+    monkeypatch.setattr(
+        pipeline, "scan_indexable_files", lambda root: [first, second])
     monkeypatch.setattr(
         pipeline, "CHUNKERS",
         {".js": lambda text, source_path: [{
