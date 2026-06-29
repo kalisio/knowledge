@@ -2,7 +2,7 @@
 
 <!-- TODO: one paragraph framing the whole system, then the global diagram. -->
 
-![full architecture](../images/full-architecture.png)
+![full architecture](/images/full-architecture.png)
 
 ## Global architecture
 
