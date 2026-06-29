@@ -14,10 +14,12 @@ hero:
       text: Architecture
       link: /architecture/introduction
 features:
-- title: Context-aware AI assistant
-  details: Indexes the entire Kalisio codebase into a vector database so AI agents retrieve only the relevant chunks
-- title: Structure-aware, incremental ingestion
-  details: Per–file-type chunking (Markdown, JS, Vue, JSON) with recent-commit-history enrichment; only changed files are re-indexed
+  - title: Semantic code search
+    details: The Kalisio codebase is chunked and embedded into Qdrant
+  - title: Git intelligence
+    details: Commit history is parsed into hotspot scores, co-change patterns & bus-factor risk
+  - title: Dependency graph
+    details: Static AST analysis maps every import to know what depends on what
 ---
 
 <ClientOnly>
