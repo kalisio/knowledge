@@ -1,12 +1,3 @@
-"""Application logging setup (stdlib logging).
-
-A single entry point that attaches the "knowledge" logger to stderr at the
-configured level. Library code does NOT configure anything -- it just logs
-via logging.getLogger("knowledge.<area>") (e.g. "knowledge.api",
-"knowledge.auth") and inherits this sink. Call configure_logging once at
-startup; it is idempotent.
-"""
-
 import logging
 import sys
 

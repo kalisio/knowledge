@@ -1,44 +1,24 @@
-"""Ingestion-job configuration (extends the shared RuntimeConfig)."""
-
 from dataclasses import dataclass, field
-
-from config import RuntimeConfig, env_str, require
-
+from config import RuntimeConfig, require, env_str
 
 @dataclass(frozen=True)
 class IngestionConfig(RuntimeConfig):
-    """Configuration for the repository indexing job.
+    # See https://github.com/kalisio/development#installation - use for k-clone
+    development_dir: str = field(default_factory=lambda: require("DEVELOPMENT_DIR"))
+    kli_organization: str = field(default_factory=lambda: env_str("KLI_ORGANIZATION", "kalisio"))
+    kli_workspace: str = field(default_factory=lambda: env_str("KLI_WORKSPACE", "apps"))
 
-    Adds the workspace location, the k-clone target and the logging level on
-    top of RuntimeConfig (which pins Qdrant and the embedding model). Built
-    lazily via get_ingestion_config(), so importing a module does not read the
-    env at import time.
-    """
+    # Logging
+    log_level: str = field(default_factory=lambda: env_str("LOG_LEVEL", "INFO"))
 
-    # Workspace root: where the repositories to index are cloned (k-clone).
-    repos_dir: str = field(
-        default_factory=lambda: require("KALISIO_DEVELOPMENT_DIR"))
-
-    # k-clone target: which organization/workspace to clone and index.
-    kli_organization: str = field(
-        default_factory=lambda: env_str("KLI_ORGANIZATION", "kalisio"))
-    kli_workspace: str = field(
-        default_factory=lambda: env_str("KLI_WORKSPACE", "apps"))
-
-    # Qdrant collection holding the ingestion metadata (last-ingestion cursor).
-    qdrant_collection_metadata: str = field(
-        default_factory=lambda: require("QDRANT_COLLECTION_METADATA"))
-
-    # Logging verbosity for the "knowledge" logger (stderr).
-    log_level: str = field(
-        default_factory=lambda: env_str("LOG_LEVEL", "INFO"))
-
+    # XXXXXXXXXXXX
+    supported_file_extensions: str = field(default_factory=lambda: env_str("vue, js, md, etc."))
+ 
 
 _config = None
 
 
-# Lazily build and cache the ingestion configuration. Constructed on first use
-# (not at import), so importing a module does not require the env to be set yet.
+# XXXXXXXXXXXX
 def get_ingestion_config():
     global _config
     if _config is None:

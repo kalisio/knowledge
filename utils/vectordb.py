@@ -1,15 +1,6 @@
-"""Qdrant access plus the shared payload schema for ingest and search.
-
-Talks to the Qdrant instance at QDRANT_URL on the collection named by
-QDRANT_COLLECTION_CODE: create the collection, upsert, search, and scroll it.
-The payload (the fields stored alongside each vector) and the deterministic
-id are defined here too -- build_payload / read_payload / payload_id -- so
-the ingestion job (writer) and the API (reader) share one shape and one id
-scheme. The id is derived from the chunk, so re-indexing the same chunk
-overwrites its entry instead of duplicating it.
-"""
-
 import hashlib
+import logging
+import sys
 import uuid
 from pathlib import Path
 
@@ -28,13 +19,94 @@ from config import get_runtime_config
 
 
 _client = None
-_METADATA_POINT_ID = "last_ingestion"
-_LAST_INGESTION_KEY = "last_ingestion"
+
+# Verify if qdrant collection exist
+def check_collection_exists(name):
+    return _get_qdrant_client().collection_exists(name)
+
+# Create a Qdrant collection
+def create_collection(name, vector_size):
+    _get_qdrant_client().create_collection(
+        collection_name=name,
+        vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE),
+    )
+
+# Remove a Qdrant collection
+def remove_collection(name):
+    _get_qdrant_client().delete_collection(name)
+
+
+# Return the number of indexed points in the code collection
+def get_code_collection_length():
+    client = _get_qdrant_client()
+    collection_name = get_runtime_config().qdrant_collection_code
+    return client.count(collection_name=collection_name).count
+
+# Get last ingestion timestamp from the metadata collection
+def get_last_ingestion():
+    client = _get_qdrant_client()
+    collection_name = get_runtime_config().qdrant_collection_metadata
+
+    records, _ = client.scroll(
+        collection_name=collection_name,
+        limit=1,
+        with_payload=[get_runtime_config().qdrant_last_ingestion_key],
+        with_vectors=False,
+    )
+
+    value = records[0].payload.get(get_runtime_config().qdrant_last_ingestion_key) if records else None
+    return str(value) if value else None
+
+
+# ---------------------------------------------------------------------------
+# UTILS
+# ---------------------------------------------------------------------------
+
+# Create & cache the qdrant client
+def _get_qdrant_client():
+    global _client
+    if _client is None:
+        url = get_runtime_config().qdrant_url
+        client = QdrantClient(url=url)
+        try:
+            client.get_collections()
+        except Exception as e:
+            logging.getLogger("knowledge.vectordb").error(
+                "cannot reach Qdrant at %s: %s", url, e)
+            sys.exit(1)
+        _client = client
+    return _client
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # Create the collection (cosine distance) if it does not exist yet.
 def ensure_collection(vector_size, recreate=False):
-    client = _get_client()
+    client = _get_qdrant_client()
     name = get_runtime_config().qdrant_collection_code
     if recreate and client.collection_exists(name):
         client.delete_collection(name)
@@ -49,7 +121,7 @@ def ensure_collection(vector_size, recreate=False):
 # Upsert chunks with their vectors. Same chunk -> same id, so a re-run
 # overwrites its entry instead of creating a duplicate.
 def upsert(chunks, vectors, batch_size=64):
-    client = _get_client()
+    client = _get_qdrant_client()
     name = get_runtime_config().qdrant_collection_code
     records = [_to_record(c, v) for c, v in zip(chunks, vectors)]
     for start in range(0, len(records), batch_size):
@@ -62,7 +134,7 @@ def upsert(chunks, vectors, batch_size=64):
 # Empty list if the collection does not exist yet (corpus never ingested),
 # so callers can surface a "run ingestion" hint instead of a 500.
 def search(vector, top_k=5):
-    client = _get_client()
+    client = _get_qdrant_client()
     name = get_runtime_config().qdrant_collection_code
     if not client.collection_exists(name):
         return []
@@ -72,21 +144,14 @@ def search(vector, top_k=5):
     return [read_payload(hit.payload, hit.score) for hit in hits]
 
 
-# Number of indexed entries, or 0 when the collection does not exist yet.
-# Used to tell "index not built" apart from "query had no match".
-def count():
-    client = _get_client()
-    name = get_runtime_config().qdrant_collection_code
-    if not client.collection_exists(name):
-        return 0
-    return client.count(collection_name=name).count
+
 
 
 # Yield the payload of every stored entry, paging through the collection.
 # Used to rebuild the indexed-file state; yields nothing if the collection
 # does not exist yet (first run).
 def iter_payloads(page_size=256):
-    client = _get_client()
+    client = _get_qdrant_client()
     name = get_runtime_config().qdrant_collection_code
     if not client.collection_exists(name):
         return
@@ -104,7 +169,7 @@ def iter_payloads(page_size=256):
 # Create the metadata collection (a tiny side collection that stores the
 # last-ingestion timestamp) if it does not exist yet. 
 def ensure_metadata_collection(collection_name):
-    client = _get_client()
+    client = _get_qdrant_client()
     if not client.collection_exists(collection_name):
         client.create_collection(
             collection_name=collection_name,
@@ -112,35 +177,18 @@ def ensure_metadata_collection(collection_name):
         )
 
 
-# Read the ISO 8601 timestamp of the last successful ingestion from the
-# dedicated metadata collection. Returns None on first run or when missing.
-def get_last_ingestion(collection_name):
-    client = _get_client()
-    name = collection_name
-    if not client.collection_exists(name):
-        return None
-    records, _ = client.scroll(
-        collection_name=name,
-        limit=1,
-        with_payload=[_LAST_INGESTION_KEY],
-        with_vectors=False,
-    )
-    if not records:
-        return None
-    value = records[0].payload.get(_LAST_INGESTION_KEY)
-    return str(value) if value else None
 
 
 # Persist the ISO 8601 timestamp of the last successful ingestion in the
 # dedicated metadata collection.
 def set_last_ingestion(collection_name, timestamp):
     ensure_metadata_collection(collection_name)
-    _get_client().upsert(
+    _get_qdrant_client().upsert(
         collection_name=collection_name,
         points=[PointStruct(
-            id=_METADATA_POINT_ID,
+            id=get_runtime_config().qdrant_last_ingestion_key,
             vector=[0.0],
-            payload={_LAST_INGESTION_KEY: timestamp},
+            payload={get_runtime_config().qdrant_last_ingestion_key: timestamp},
         )],
     )
 
@@ -148,7 +196,7 @@ def set_last_ingestion(collection_name, timestamp):
 # Delete all indexed chunks for one repo-relative file so a reindex does not
 # leave stale chunks behind when the file content or chunk count changed.
 def delete_file(repository, source_path):
-    client = _get_client()
+    client = _get_qdrant_client()
     name = get_runtime_config().qdrant_collection_code
     if not client.collection_exists(name):
         return
@@ -222,12 +270,7 @@ def _to_record(chunk, vector):
         id=entry_id, vector=vector, payload=build_payload(chunk))
 
 
-# Lazily create and cache the Qdrant client.
-def _get_client():
-    global _client
-    if _client is None:
-        _client = QdrantClient(url=get_runtime_config().qdrant_url)
-    return _client
+
 
 
 # The file extension without the dot, e.g. "map/x.vue" -> "vue".

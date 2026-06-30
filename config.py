@@ -1,10 +1,3 @@
-"""Environment-driven configuration shared across the knowledge service.
-
-Values come from the environment (provisioned via the encrypted service
-env, sourced by services.sh). Required settings raise when missing, so a
-misconfigured deployment fails fast instead of running against fallbacks.
-"""
-
 import os
 from dataclasses import dataclass, field
 
@@ -31,26 +24,23 @@ def env_int(name, default):
 
 @dataclass(frozen=True)
 class RuntimeConfig:
-    """Settings shared by the API service and the ingestion job.
-
-    These pin the vector store and embedding model, which the ingestion
-    job (writer) and the API (reader) must agree on for retrieval to work.
-    """
-
+    # Qdrant
     qdrant_url: str = field(default_factory=lambda: require("QDRANT_URL"))
-    qdrant_collection_code: str = field(
-        default_factory=lambda: require("QDRANT_COLLECTION_CODE"))
-    embedding_model: str = field(
-        default_factory=lambda: require("EMBEDDING_MODEL"))
-    embedding_batch_size: int = field(
-        default_factory=lambda: env_int("EMBEDDING_BATCH_SIZE", 8))
+    qdrant_collection_code: str = field(default_factory=lambda: require("QDRANT_COLLECTION_CODE"))
+    qdrant_vector_size_collection_code: int = field(default_factory=lambda: env_int("QDRANT_VECTOR_SIZE_COLLECTION_CODE", 1024))
+    qdrant_vector_size_collection_metadata: int = field(default_factory=lambda: env_int("QDRANT_VECTOR_COLLECTION_METADATA", 1))
+    qdrant_collection_metadata: str = field(default_factory=lambda: require("QDRANT_COLLECTION_METADATA"))
+    qdrant_last_ingestion_key: str = field(default_factory=lambda: env_str("QDRANT_LAST_INGESTION_KEY", "last_ingestion"))
+
+    # embedding
+    embedding_model: str = field(default_factory=lambda: require("EMBEDDING_MODEL"))
+    embedding_batch_size: int = field(default_factory=lambda: env_int("EMBEDDING_BATCH_SIZE", 8))
 
 
 _runtime_config = None
 
 
-# Lazily build and cache the shared RuntimeConfig. Constructed on first use
-# (not at import), so a module can import this without the env being set yet.
+# XXXXXXXXXXXXXXxx
 def get_runtime_config():
     global _runtime_config
     if _runtime_config is None:
