@@ -1,56 +1,47 @@
 """Command-line entry point for the repository indexing job.
 
-Usage:
-    python -m ingestion.main                 # index the whole corpus
-    python -m ingestion.main <repo> [...]    # index only the named repos
-
-With no arguments, every selected git repository directly under
-KALISIO_DEVELOPMENT_DIR is indexed. Repository preparation and corpus
-selection are handled by ingestion.repository_sync.
-
-With arguments, only the named repos (directory names under the same root)
-are indexed -- handy for (re)indexing one repo at a time.
-
-The selected repositories are chunked, embedded and upserted into the Qdrant
-collection the API queries. IngestionConfig is built first so a misconfigured
-run fails fast before any embedding work.
+The selected repositories under KALISIO_DEVELOPMENT_DIR are chunked, embedded
+and upserted into the Qdrant collection the API queries. IngestionConfig is
+built first so a misconfigured run fails fast before any embedding work.
 """
 
+import logging
+import subprocess
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 
-from ingestion.config import IngestionConfig
-from ingestion import git_file_changes
-from ingestion import repository_sync
-from ingestion.indexing_pipeline import run
+from ingestion.config import get_ingestion_config
+from utils.logging import configure_logging
 import utils.vectordb as vectordb
 
+
 def main():
-    config = IngestionConfig()
+    config = get_ingestion_config()
+    configure_logging(config.log_level)
+    log = logging.getLogger("knowledge.ingestion")
 
     # Check & crete qdrant collection
-    qdrant_collection_metadata_existing = _check_qdfran_collection(config.qdrant_collection_metadata)
-    qdrant_collection_code_existing = _check_qdfran_collection(config.qdrant_collection_code)
-    if (!qdrant_collection_metadata_existing) _create_qdfran_collection(config.qdrant_collection_metadata)
-    if (!qdrant_collection_code_existing) _create_qdfran_collection(config.qdrant_collection_code)
+    vectordb.ensure_metadata_collection(config.qdrant_collection_metadata)
 
-    # Clone all reposiroe 
-    subprocess.run([ k-clone config.kli_organization config.kli_worspace])
+    # Clone all reposiroe
+    _clone_repositories(config)
 
     # check if is first ingestion
-    is_first_ingestion = _is_collection_empty(config.qdrant_collection_code) && _is_collection_empty(config.qdrant_collection_metadata)
+    last_ingestion = vectordb.get_last_ingestion(
+        config.qdrant_collection_metadata)
+    is_first_ingestion = last_ingestion is None
 
     # get last_ingetsion date+
-    last_ingestyion_date = null
-    if (!is_first_ingestion) last_ingestyion_date =  _get_last_ingestion_date(config.qdrant_collection_metadata)
-    log error(need to have last ingestion date if its not first ingestion)
-
+    if is_first_ingestion:
+        log.info("first ingestion: indexing the whole corpus")
+    else:
+        log.info("incremental ingestion since %s", last_ingestion)
 
     # TODO incremental ingestion plan:
-    # 
-    # 1. verifier que les collection matadta et code de qdrant existe check_qdfran_collection & creteqdrantcolelction
-    #2. si elle n'existe pas les créer 
+    #
+    # 1. verifier que les collection matadta et code de qdrant existe 
+    # check_qdfran_collection & creteqdrantcolelction
+    # 2. si elle n'existe pas les créer
     # 3. Clone / update repos via k-clone if needed:
     #    k-clone <organization> <workspace|all>
     #
@@ -111,22 +102,6 @@ def main():
     # Only after a successful run, update the metadata collection with the new
     # last_ingestion timestamp. Do not update it at job start, otherwise a
     # failed run could move the recovery cursor forward and miss files.
-
-    repo_dirs = repository_sync.ensure_repositories(root, config, argv)
-    last_ingestion = vectordb.get_last_ingestion(
-        config.qdrant_collection_metadata)
-    candidate_files, stale_files = git_file_changes.find_file_changes(
-        repo_dirs, last_ingestion)
-
-    print(f"indexing {len(repo_dirs)} repo(s): "
-          f"{', '.join(d.name for d in repo_dirs)}")
-    if last_ingestion:
-        print(f"last successful ingestion: {last_ingestion}")
-    _delete_stale_files(stale_files, vectordb)
-    count = run(repo_dirs, candidate_files=candidate_files)
-    vectordb.set_last_ingestion(
-        config.qdrant_collection_metadata, _utc_now_iso8601())
-    print(f"indexed {count} chunks into '{config.qdrant_collection_code}'")
     return 0
 
 
@@ -135,20 +110,15 @@ def main():
 # ---------------------------------------------------------------------------
 
 
-# Delete vector-store chunks for files that disappeared from git history
-# (deleted files, or the old side of renames).
-def _delete_stale_files(stale_files, vectordb):
-    for repository, source_paths in stale_files.items():
-        for source_path in source_paths:
-            vectordb.delete_file(repository, source_path)
-
-# Current UTC timestamp in compact ISO 8601 form used by the metadata
-# collection, e.g. "2026-06-19T10:35:00Z".
-def _utc_now_iso8601():
-    return (datetime.now(timezone.utc)
-            .replace(microsecond=0)
-            .isoformat()
-            .replace("+00:00", "Z"))
+# Clone the repositories to index via k-clone, run from development/scripts
+# because k-clone sources its sibling .kalisio with a relative path.
+def _clone_repositories(config):
+    scripts_dir = Path(config.repos_dir) / "development" / "scripts"
+    subprocess.run(
+        ["bash", "k-clone", config.kli_organization, config.kli_workspace],
+        cwd=scripts_dir,
+        check=True,
+    )
 
 
 if __name__ == "__main__":
