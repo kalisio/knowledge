@@ -28,7 +28,7 @@ from config import get_runtime_config
 
 
 _client = None
-_METADATA_POINT_ID = "collection_metadata"
+_METADATA_POINT_ID = "last_ingestion"
 _LAST_INGESTION_KEY = "last_ingestion"
 
 
@@ -101,6 +101,17 @@ def iter_payloads(page_size=256):
             break
 
 
+# Create the metadata collection (a tiny side collection that stores the
+# last-ingestion timestamp) if it does not exist yet. 
+def ensure_metadata_collection(collection_name):
+    client = _get_client()
+    if not client.collection_exists(collection_name):
+        client.create_collection(
+            collection_name=collection_name,
+            vectors_config=VectorParams(size=1, distance=Distance.COSINE),
+        )
+
+
 # Read the ISO 8601 timestamp of the last successful ingestion from the
 # dedicated metadata collection. Returns None on first run or when missing.
 def get_last_ingestion(collection_name):
@@ -123,15 +134,9 @@ def get_last_ingestion(collection_name):
 # Persist the ISO 8601 timestamp of the last successful ingestion in the
 # dedicated metadata collection.
 def set_last_ingestion(collection_name, timestamp):
-    client = _get_client()
-    name = collection_name
-    if not client.collection_exists(name):
-        client.create_collection(
-            collection_name=name,
-            vectors_config=VectorParams(size=1, distance=Distance.COSINE),
-        )
-    client.upsert(
-        collection_name=name,
+    ensure_metadata_collection(collection_name)
+    _get_client().upsert(
+        collection_name=collection_name,
         points=[PointStruct(
             id=_METADATA_POINT_ID,
             vector=[0.0],
