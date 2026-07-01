@@ -4,6 +4,8 @@ import sys
 from pathlib import Path
 
 from ingestion.config import get_ingestion_config
+from ingestion.file_scanner import scan_indexable_files
+from ingestion.git_file_changes import find_file_changes
 from utils.logging import configure_logging
 import utils.vectordb as vectordb
 
@@ -63,8 +65,11 @@ def main():
 
 
 	# Step 4: Get files to process
-	
-    files_to_process = TODO
+    if is_first_ingestion:
+        files_to_process = scan_indexable_files(config.development_dir)
+    else:
+        files_to_process = find_file_changes(config.development_dir, last_ingestion)
+    log.info("files to process: %d", len(files_to_process))
     
     # is_first_ingestion ?
     # ├─ Yes:
