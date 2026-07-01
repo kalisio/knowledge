@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from config import RuntimeConfig, require, env_str
+from config import RuntimeConfig, require, env_str, env_int
 
 @dataclass(frozen=True)
 class IngestionConfig(RuntimeConfig):
@@ -11,8 +11,14 @@ class IngestionConfig(RuntimeConfig):
     # Logging
     log_level: str = field(default_factory=lambda: env_str("LOG_LEVEL", "INFO"))
 
-    # XXXXXXXXXXXX
-    supported_file_extensions: str = field(default_factory=lambda: env_str("vue, js, md, etc."))
+    # File extensions to index
+    supported_file_extensions: str = field(default_factory=lambda: env_str("SUPPORTED_FILE_EXTENSIONS", "md,js,mjs,cjs,vue,json"))
+
+    # File scanning filters
+    max_file_size: int = field(default_factory=lambda: env_int("MAX_FILE_SIZE", 100_000))
+    ignored_directories: str = field(default_factory=lambda: env_str("IGNORED_DIRECTORIES", ".git,.svn,.hg,node_modules,bower_components,.yarn,.pnpm-store,dist,build,.output,.next,.nuxt,.vite,coverage,.nyc_output,.c8,__pycache__,.cache,.parcel-cache,.turbo,.github,.gitlab,.vscode,.idea"))
+    ignored_filenames: str = field(default_factory=lambda: env_str("IGNORED_FILENAMES", "package.json,package-lock.json,CHANGELOG.md,changelog.md,CHANGES.md,LICENSE.md"))
+    ignored_file_pattern: str = field(default_factory=lambda: env_str("IGNORED_FILE_PATTERN", r"\.(min|bundle|chunk)\.\w+$|-lock\.json$"))
  
 
 _config = None
