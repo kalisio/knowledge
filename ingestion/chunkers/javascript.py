@@ -1,29 +1,12 @@
-"""Split a JavaScript file into chunks for indexing.
-
-The file is split at JavaScript boundaries (functions, classes, blocks) into
-pieces of about CHUNK_SIZE characters, with a small overlap so a definition
-that straddles a cut is not lost. Each chunk's text starts with a comment
-line naming the file and the nearest top-level symbol, e.g.
-``// path/to/file.js :: functionName``, so the chunk is self-describing once
-embedded and later shown to the model.
-
-Returns a list of ``{"text", "metadata"}`` dicts: ``text`` is the content to
-embed (with that comment prefix); ``metadata`` repeats the location as
-separate fields. Repository and commit info is added later, before the chunk
-is stored in the vector database.
-"""
-
 import re
 
 from langchain_text_splitters import Language, RecursiveCharacterTextSplitter
 
-
-# Target chunk length and overlap, in characters.
+# Target chunk length and overlap in characters.
 CHUNK_SIZE = 800
 CHUNK_OVERLAP = 120
 
-# A top-level declaration ("export default function foo", "class Bar",
-# "const baz" …); the captured group is the symbol name.
+# A top-level declaration; the captured group is the symbol name.
 _TOP_LEVEL_SYMBOL = re.compile(
     r"^\s*(?:export\s+(?:default\s+)?)?"
     r"(?:async\s+)?"
@@ -32,17 +15,13 @@ _TOP_LEVEL_SYMBOL = re.compile(
 )
 
 
-# Split one JavaScript file into chunks, each tagged with its nearest symbol.
-def chunk_js(text, source_path, chunk_size=CHUNK_SIZE,
-             chunk_overlap=CHUNK_OVERLAP):
+# Chunk one JavaScript file: split at JS boundaries, tag each with its symbol.
+def chunk_javascript(text, source_path):
     splitter = RecursiveCharacterTextSplitter.from_language(
-        language=Language.JS,
-        chunk_size=chunk_size,
-        chunk_overlap=chunk_overlap,
-    )
+        language=Language.JS, chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
     chunks = []
     cursor = 0
-    for index, piece in enumerate(splitter.split_text(text)):
+    for chunk_index, piece in enumerate(splitter.split_text(text)):
         offset = text.find(piece[:32], cursor) if piece else -1
         if offset < 0:
             offset = cursor
@@ -52,20 +31,15 @@ def chunk_js(text, source_path, chunk_size=CHUNK_SIZE,
             "text": header + "\n" + piece,
             "metadata": {
                 "source_path": source_path,
+                "chunk_index": chunk_index,
                 "breadcrumb": symbol,
-                "chunk_index": index,
             },
         })
         cursor = offset + len(piece)
     return chunks
 
 
-# ---------------------------------------------------------------------------
-# UTILS
-# ---------------------------------------------------------------------------
-
-
-# Name of the last top-level symbol declared at or before `offset`.
+# Get the last top-level symbol declared at or before `offset`.
 def _nearest_symbol(text, offset):
     symbol = ""
     for match in _TOP_LEVEL_SYMBOL.finditer(text):
