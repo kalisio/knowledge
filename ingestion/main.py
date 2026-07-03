@@ -1,12 +1,15 @@
 import logging
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 from ingestion.config import get_ingestion_config
 from ingestion.file_scanner import scan_indexable_files
 from ingestion.git_file_changes import find_file_changes
+import ingestion.pipeline as pipeline
 from utils.logging import configure_logging
+import utils.embeddings as embeddings
 import utils.vectordb as vectordb
 
 
@@ -53,6 +56,9 @@ def main():
         log.info("creating collection '%s' (vector_size=%d)", config.qdrant_collection_code, config.qdrant_vector_size_collection_code)
         vectordb.create_collection(config.qdrant_collection_code, config.qdrant_vector_size_collection_code)
 
+    # Capture the recovery cursor before cloning; persisted only on success
+    ingestion_started = datetime.now(timezone.utc).isoformat()
+
     # Step 3: Clone repositories via k-clone
     try:
         subprocess.run(
@@ -70,54 +76,18 @@ def main():
     else:
         files_to_process = find_file_changes(config.development_dir, last_ingestion)
     log.info("files to process: %d", len(files_to_process))
-    
-    # is_first_ingestion ?
-    # ├─ Yes:
-    # │    Take every config.supported_file_extensions in config.development_dir
-    # │
-    # └─ No:
-    #      Use last_ingestion only as a recovery cursor to identify files that
-    #      may have changed since the previous successful run.
-    #      Example candidate source:
-    #          git log --since=<last_ingestion_iso8601> --name-only
-    #                  --pretty=format:
-    #
-    # Result:
-    #   files_to_process = files that may need reindexation
-    
 
+    # Step 5: Chunk, embed and index the files
+    chunks = pipeline.chunk_files(files_to_process, Path(config.development_dir))
+    log.info("chunks to index: %d", len(chunks))
+    if chunks:
+        vectors = embeddings.encode_batch([chunk["text"] for chunk in chunks])
+        vectordb.upsert(chunks, vectors)
+    # TODO incremental: skip unchanged files by file_sha1, delete their old
+    # chunks before re-upsert, and enrich chunks with commit_history.
 
-
-
-	
-    # 4. Confirm actual content changes with file_sha1
-    #
-    # For each candidate file:
-    #   - Read the current file content.
-    #   - Compute file_sha1 from the file content itself.
-    #   - Compare it with the file_sha1 already stored in Qdrant for the same
-    #     (repository, source_path).
-    #   - If the hash is unchanged, skip the file.
-    #   - If the hash changed, mark the file for reindexation.
-    #
-    # The final reindexation decision should rely on file_sha1, not on git log:
-    # git history is useful to reduce the scan perimeter and to enrich
-    # commit_history, but the hash is the reliable state-based check.
-    #
-    # 5. Synchronize the vector store
-    #
-    # For each file marked for reindexation:
-    #   - Delete the existing chunks for (repository, source_path) to avoid
-    #     stale versions remaining in the collection.
-    #   - Re-chunk the current file content.
-    #   - Recompute embeddings.
-    #   - Upsert the new chunks and metadata into the code collection.
-    #
-    # 6. Persist ingestion metadata
-    #
-    # Only after a successful run, update the metadata collection with the new
-    # last_ingestion timestamp. Do not update it at job start, otherwise a
-    # failed run could move the recovery cursor forward and miss files.
+    # Step 6: Persist the ingestion timestamp only after a successful run
+    vectordb.set_last_ingestion(config.qdrant_collection_metadata, ingestion_started)
     return 0
 
 
