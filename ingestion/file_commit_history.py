@@ -1,16 +1,3 @@
-"""Recent commit history for a file, feeding the chunk payload's
-commit_history.
-
-Runs `git log` on one file and keeps the meaningful commit subjects,
-dropping mechanical noise (merges, chore/bump/release, formatting). The
-ingestion pipeline attaches the result to a file's chunks so /search and
-the LLM context can show how the file recently changed.
-
-Returns an empty list whenever git or the file's history is unavailable
-(not a git work tree, untracked file, timeout), so enrichment can never
-break ingestion.
-"""
-
 import re
 import subprocess
 

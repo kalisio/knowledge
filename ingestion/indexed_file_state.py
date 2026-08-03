@@ -1,16 +1,3 @@
-"""Incremental indexing: skip files already indexed at the same content.
-
-Re-running the pipeline re-embeds every file it is given, which is wasteful
-when most files are unchanged -- embedding is the expensive step. This
-module reconstructs, from the Qdrant payloads, which (repository,
-source_path) is already indexed and at what whole-file hash, so the
-pipeline can drop chunks whose file is unchanged before embedding them.
-
-The indexed-file state is not stored separately: every entry already carries
-repository, source_path and file_sha1 in its payload (see utils/vectordb.py),
-so scrolling the collection rebuilds it.
-"""
-
 import hashlib
 
 import utils.vectordb as vectordb
