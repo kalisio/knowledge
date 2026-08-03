@@ -24,7 +24,7 @@ class IngestionConfig(RuntimeConfig):
 _config = None
 
 
-# XXXXXXXXXXXX
+# Create & cache the ingestion config
 def get_ingestion_config():
     global _config
     if _config is None:

@@ -40,7 +40,7 @@ class RuntimeConfig:
 _runtime_config = None
 
 
-# XXXXXXXXXXXXXXxx
+# Create & cache the runtime config
 def get_runtime_config():
     global _runtime_config
     if _runtime_config is None:
