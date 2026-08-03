@@ -7,6 +7,7 @@ from pathlib import Path
 from ingestion.config import get_ingestion_config
 from ingestion.file_scanner import scan_indexable_files
 from ingestion.git_file_changes import find_file_changes
+from ingestion.indexed_file_state import load_indexed_file_hashes, select_changed_chunks
 import ingestion.pipeline as pipeline
 from utils.logging import configure_logging
 import utils.embeddings as embeddings
@@ -79,12 +80,16 @@ def main():
 
     # Step 5: Chunk, embed and index the files
     chunks = pipeline.chunk_files(files_to_process, Path(config.development_dir))
+    indexed_file_hashes = load_indexed_file_hashes()
+    chunks = select_changed_chunks(chunks, indexed_file_hashes)
     log.info("chunks to index: %d", len(chunks))
     if chunks:
+        changed_files = {(chunk["metadata"].get("repository", ""), chunk["metadata"]["source_path"]) for chunk in chunks}
+        for repository, source_path in changed_files:
+            vectordb.delete_file(repository, source_path)
         vectors = embeddings.encode_batch([chunk["text"] for chunk in chunks])
         vectordb.upsert(chunks, vectors)
-    # TODO incremental: skip unchanged files by file_sha1, delete their old
-    # chunks before re-upsert, and enrich chunks with commit_history.
+    # TODO incremental: enrich chunks with commit_history.
 
     # Step 6: Persist the ingestion timestamp only after a successful run
     vectordb.set_last_ingestion(config.qdrant_collection_metadata, ingestion_started)
