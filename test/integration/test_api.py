@@ -86,7 +86,7 @@ class TestApi:
         monkeypatch.setattr(handlers.llm, "ask", lambda prompt: SimpleNamespace(
             answer="stub answer", provider="stub", model="stub-model"))
         yield
-        vectordb._get_client().delete_collection(TEST_COLLECTION)
+        vectordb.remove_collection(TEST_COLLECTION)
 
     # /health needs no auth and returns ok.
     def test_health_is_open(self):
