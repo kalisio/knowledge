@@ -2,6 +2,10 @@
 __pycache__/
 *.pyc
 *.egg-info/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
 
 # ── Data & ML artifacts
 data/
