@@ -6,8 +6,8 @@ from pathlib import Path
 
 from ingestion.config import get_ingestion_config
 from ingestion.file_scanner import scan_indexable_files
-from ingestion.git_file_changes import find_file_changes
-from ingestion.indexed_file_state import load_indexed_file_hashes, select_changed_chunks
+from ingestion.indexed_file_state import (
+    find_deleted_files, load_indexed_file_hashes, select_changed_chunks)
 import ingestion.pipeline as pipeline
 from utils.logging import configure_logging
 import utils.embeddings as embeddings
@@ -71,28 +71,47 @@ def main():
         return 1
 
 
-	# Step 4: Get files to process
-    if is_first_ingestion:
-        files_to_process = scan_indexable_files(config.development_dir)
-    else:
-        files_to_process = find_file_changes(config.development_dir, last_ingestion)
+	# Step 4: Scan the corpus and compare it against what's indexed
+    files_to_process = scan_indexable_files(config.development_dir)
     log.info("files to process: %d", len(files_to_process))
 
-    # Step 5: Chunk, embed and index the files
     chunks = pipeline.chunk_files(files_to_process, Path(config.development_dir))
+    current_files = {(chunk["metadata"]["repository"], chunk["metadata"]["source_path"])
+                      for chunk in chunks}
     indexed_file_hashes = load_indexed_file_hashes()
-    chunks = select_changed_chunks(chunks, indexed_file_hashes)
-    log.info("chunks to index: %d", len(chunks))
-    if chunks:
-        changed_files = {(chunk["metadata"].get("repository", ""), chunk["metadata"]["source_path"]) for chunk in chunks}
+
+    deleted_files = find_deleted_files(indexed_file_hashes, current_files)
+    for repository, source_path in deleted_files:
+        vectordb.delete_file(repository, source_path)
+    log.info("files deleted: %d", len(deleted_files))
+
+    indexed_config = vectordb.get_indexed_config()
+    current_config = {
+        "embedding_model": config.embedding_model,
+        "chunking_version": pipeline.CHUNKING_VERSION,
+    }
+    config_changed = indexed_config is not None and indexed_config != current_config
+    if config_changed:
+        log.info("indexing config changed (%s -> %s), reindexing every file",
+                 indexed_config, current_config)
+
+    # Step 5: Chunk, embed and index the files that changed
+    chunks_to_index = (
+        chunks if config_changed else select_changed_chunks(chunks, indexed_file_hashes))
+    log.info("chunks to index: %d", len(chunks_to_index))
+    if chunks_to_index:
+        vectors = embeddings.encode_batch([chunk["text"] for chunk in chunks_to_index])
+        changed_files = {(chunk["metadata"].get("repository", ""), chunk["metadata"]["source_path"])
+                          for chunk in chunks_to_index}
         for repository, source_path in changed_files:
             vectordb.delete_file(repository, source_path)
-        vectors = embeddings.encode_batch([chunk["text"] for chunk in chunks])
-        vectordb.upsert(chunks, vectors)
+        vectordb.upsert(chunks_to_index, vectors)
     # TODO incremental: enrich chunks with commit_history.
 
-    # Step 6: Persist the ingestion timestamp only after a successful run
-    vectordb.set_last_ingestion(config.qdrant_collection_metadata, ingestion_started)
+    # Step 6: Persist the indexing state only after a successful run
+    vectordb.set_last_ingestion(
+        config.qdrant_collection_metadata, ingestion_started,
+        config.embedding_model, pipeline.CHUNKING_VERSION)
     return 0
 
 

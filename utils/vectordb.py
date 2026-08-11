@@ -58,6 +58,25 @@ def get_last_ingestion():
     return str(value) if value else None
 
 
+# Read the stored embedding model and chunking version, or None if unset.
+def get_indexed_config():
+    client = _get_qdrant_client()
+    collection_name = get_runtime_config().qdrant_collection_metadata
+
+    records, _ = client.scroll(
+        collection_name=collection_name,
+        limit=1,
+        with_payload=["embedding_model", "chunking_version"],
+        with_vectors=False,
+    )
+    if not records or "embedding_model" not in records[0].payload:
+        return None
+    return {
+        "embedding_model": records[0].payload.get("embedding_model"),
+        "chunking_version": records[0].payload.get("chunking_version"),
+    }
+
+
 # ---------------------------------------------------------------------------
 # UTILS
 # ---------------------------------------------------------------------------
@@ -179,16 +198,19 @@ def ensure_metadata_collection(collection_name):
 
 
 
-# Persist the ISO 8601 timestamp of the last successful ingestion in the
-# dedicated metadata collection.
-def set_last_ingestion(collection_name, timestamp):
+# Persist the last-ingestion timestamp and the indexing config used.
+def set_last_ingestion(collection_name, timestamp, embedding_model, chunking_version):
     ensure_metadata_collection(collection_name)
     _get_qdrant_client().upsert(
         collection_name=collection_name,
         points=[PointStruct(
-            id=get_runtime_config().qdrant_last_ingestion_key,
+            id=str(uuid.uuid5(uuid.NAMESPACE_URL, "indexing_state")),
             vector=[0.0],
-            payload={get_runtime_config().qdrant_last_ingestion_key: timestamp},
+            payload={
+                get_runtime_config().qdrant_last_ingestion_key: timestamp,
+                "embedding_model": embedding_model,
+                "chunking_version": chunking_version,
+            },
         )],
     )
 

@@ -4,6 +4,9 @@ from ingestion.chunkers.vue import chunk_vue
 from ingestion.chunkers.json import chunk_json
 from ingestion.indexed_file_state import compute_file_sha1
 
+# Bump by hand when a chunker's splitting behaviour changes.
+CHUNKING_VERSION = 1
+
 # Which chunker handles each file extension.
 _CHUNKERS = {
     ".md": chunk_markdown,

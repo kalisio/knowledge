@@ -27,6 +27,11 @@ def select_changed_chunks(chunks, indexed):
     return [chunk for chunk in chunks if _changed(chunk["metadata"], indexed)]
 
 
+# (repository, source_path) pairs indexed but no longer scanned.
+def find_deleted_files(indexed, current_files):
+    return set(indexed) - set(current_files)
+
+
 # ---------------------------------------------------------------------------
 # UTILS
 # ---------------------------------------------------------------------------
