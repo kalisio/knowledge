@@ -4,11 +4,11 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+import ingestion.chunking as chunking
 from ingestion.config import get_ingestion_config
 from ingestion.file_scanner import scan_indexable_files
 from ingestion.indexed_file_state import (
     find_deleted_files, load_indexed_file_hashes, select_changed_chunks)
-import ingestion.pipeline as pipeline
 from utils.logging import configure_logging
 import utils.embeddings as embeddings
 import utils.vectordb as vectordb
@@ -75,7 +75,7 @@ def main():
     files_to_process = scan_indexable_files(config.development_dir)
     log.info("files to process: %d", len(files_to_process))
 
-    chunks = pipeline.chunk_files(files_to_process, Path(config.development_dir))
+    chunks = chunking.chunk_files(files_to_process, Path(config.development_dir))
     current_files = {(chunk["metadata"]["repository"], chunk["metadata"]["source_path"])
                       for chunk in chunks}
     indexed_file_hashes = load_indexed_file_hashes()
@@ -88,7 +88,7 @@ def main():
     indexed_config = vectordb.get_indexed_config()
     current_config = {
         "embedding_model": config.embedding_model,
-        "chunking_version": pipeline.CHUNKING_VERSION,
+        "chunking_version": chunking.CHUNKING_VERSION,
     }
     config_changed = indexed_config is not None and indexed_config != current_config
     if config_changed:
@@ -111,7 +111,7 @@ def main():
     # Step 6: Persist the indexing state only after a successful run
     vectordb.set_last_ingestion(
         config.qdrant_collection_metadata, ingestion_started,
-        config.embedding_model, pipeline.CHUNKING_VERSION)
+        config.embedding_model, chunking.CHUNKING_VERSION)
     return 0
 
 

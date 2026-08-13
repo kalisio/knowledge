@@ -22,7 +22,7 @@ CHUNKERS = [
 ]
 
 
-# --- the contract every chunker owes the pipeline -------------------------
+# --- the contract every chunker owes chunk_files --------------------------
 
 @pytest.mark.parametrize("chunker, source_path, text", CHUNKERS)
 def test_chunker_produces_chunks(chunker, source_path, text):
@@ -61,7 +61,7 @@ def test_chunker_never_emits_blank_text(chunker, source_path, text):
 
 
 @pytest.mark.parametrize("chunker, source_path, text", CHUNKERS)
-def test_chunker_leaves_the_file_wide_metadata_to_the_pipeline(
+def test_chunker_leaves_the_file_wide_metadata_to_chunk_files(
         chunker, source_path, text):
     # repository and file_sha1 are stamped by chunk_files(); a chunker filling
     # them in would give the same key two sources of truth.

@@ -3,6 +3,7 @@ import subprocess
 
 import pytest
 
+import config as runtime_config
 import ingestion.config as ingestion_config
 
 
@@ -29,15 +30,18 @@ def repo(tmp_path):
     return repository
 
 
-# Build an IngestionConfig from a known environment. The module cache is reset
-# first, so a test gets its own config rather than the first one built in the
-# session; monkeypatch restores both the environment and the cache afterwards.
+# Build an IngestionConfig from a known environment. Both module caches are
+# reset first (IngestionConfig wraps RuntimeConfig, but get_runtime_config()
+# caches its own separate instance), so a test gets config built fresh from
+# its own env rather than a stale instance from an earlier test; monkeypatch
+# restores the environment and both caches afterwards.
 @pytest.fixture
 def ingestion_env(monkeypatch):
     def build(**overrides):
         for name, value in {**_BASE_ENV, **overrides}.items():
             monkeypatch.setenv(name, str(value))
         monkeypatch.setattr(ingestion_config, "_config", None)
+        monkeypatch.setattr(runtime_config, "_runtime_config", None)
         return ingestion_config.get_ingestion_config()
     return build
 
