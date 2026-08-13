@@ -8,7 +8,8 @@ import ingestion.chunking as chunking
 from ingestion.config import get_ingestion_config
 from ingestion.file_scanner import scan_indexable_files
 from ingestion.indexed_file_state import (
-    find_deleted_files, load_indexed_file_hashes, select_changed_chunks)
+    file_key, find_deleted_files, hash_files, load_indexed_file_hashes,
+    select_changed_files)
 from utils.logging import configure_logging
 import utils.embeddings as embeddings
 import utils.vectordb as vectordb
@@ -75,9 +76,9 @@ def main():
     files_to_process = scan_indexable_files(config.development_dir)
     log.info("files to process: %d", len(files_to_process))
 
-    chunks = chunking.chunk_files(files_to_process, Path(config.development_dir))
-    current_files = {(chunk["metadata"]["repository"], chunk["metadata"]["source_path"])
-                      for chunk in chunks}
+    workspace = Path(config.development_dir)
+    current_files = {file_key(path, workspace) for path in files_to_process}
+    current_file_hashes = hash_files(files_to_process)
     indexed_file_hashes = load_indexed_file_hashes()
 
     deleted_files = find_deleted_files(indexed_file_hashes, current_files)
@@ -96,16 +97,21 @@ def main():
                  indexed_config, current_config)
 
     # Step 5: Chunk, embed and index the files that changed
-    chunks_to_index = (
-        chunks if config_changed else select_changed_chunks(chunks, indexed_file_hashes))
-    log.info("chunks to index: %d", len(chunks_to_index))
-    if chunks_to_index:
-        vectors = embeddings.encode_batch([chunk["text"] for chunk in chunks_to_index])
-        changed_files = {(chunk["metadata"].get("repository", ""), chunk["metadata"]["source_path"])
-                          for chunk in chunks_to_index}
-        for repository, source_path in changed_files:
+    files_to_index = (
+        files_to_process if config_changed
+        else select_changed_files(current_file_hashes, workspace, indexed_file_hashes))
+    chunks_to_index = chunking.chunk_files(files_to_index, workspace)
+    log.info("files to index: %d (chunks: %d)", len(files_to_index), len(chunks_to_index))
+    if files_to_index:
+        vectors = (embeddings.encode_batch([chunk["text"] for chunk in chunks_to_index])
+                   if chunks_to_index else [])
+        # Drop every reindexed file's chunks, including the files that now
+        # yield none, so emptied files leave nothing stale behind.
+        for path in files_to_index:
+            repository, source_path = file_key(path, workspace)
             vectordb.delete_file(repository, source_path)
-        vectordb.upsert(chunks_to_index, vectors)
+        if chunks_to_index:
+            vectordb.upsert(chunks_to_index, vectors)
     # TODO incremental: enrich chunks with commit_history.
 
     # Step 6: Persist the indexing state only after a successful run

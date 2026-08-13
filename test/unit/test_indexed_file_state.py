@@ -61,43 +61,107 @@ def test_load_indexed_file_hashes_is_empty_on_the_first_run(monkeypatch):
     assert indexed_file_state.load_indexed_file_hashes() == {}
 
 
-# --- select_changed_chunks: drop chunks whose file is unchanged -----------
+# --- file_key: the identity the whole index is keyed on -------------------
 
-def test_select_changed_chunks_keeps_a_file_that_is_not_indexed_yet():
-    chunk = {"metadata": {
-        "repository": "kdk", "source_path": "map/x.js", "file_sha1": "aaa"}}
-    assert indexed_file_state.select_changed_chunks([chunk], {}) == [chunk]
+def test_file_key_splits_the_repository_from_the_source_path(tmp_path):
+    path = tmp_path / "kdk" / "map" / "mixin.base-map.js"
 
-
-def test_select_changed_chunks_drops_a_file_indexed_at_the_same_digest():
-    chunk = {"metadata": {
-        "repository": "kdk", "source_path": "map/x.js", "file_sha1": "aaa"}}
-    indexed = {("kdk", "map/x.js"): "aaa"}
-    assert indexed_file_state.select_changed_chunks([chunk], indexed) == []
+    assert indexed_file_state.file_key(path, tmp_path) == (
+        "kdk", "map/mixin.base-map.js")
 
 
-def test_select_changed_chunks_keeps_a_file_whose_content_changed():
-    chunk = {"metadata": {
-        "repository": "kdk", "source_path": "map/x.js", "file_sha1": "bbb"}}
-    indexed = {("kdk", "map/x.js"): "aaa"}
-    assert indexed_file_state.select_changed_chunks([chunk], indexed) == [chunk]
+def test_file_key_keeps_the_source_path_repository_relative(tmp_path):
+    path = tmp_path / "kdk" / "packages" / "core" / "src" / "deep.js"
+
+    assert indexed_file_state.file_key(path, tmp_path) == (
+        "kdk", "packages/core/src/deep.js")
 
 
-def test_select_changed_chunks_distinguishes_repositories():
+def test_file_key_distinguishes_the_same_path_in_two_repositories(tmp_path):
     # source_path is repo-relative, so the same path in another repo must not
     # be mistaken for an already indexed file.
-    chunk = {"metadata": {
-        "repository": "kano", "source_path": "map/x.js", "file_sha1": "aaa"}}
-    indexed = {("kdk", "map/x.js"): "aaa"}
-    assert indexed_file_state.select_changed_chunks([chunk], indexed) == [chunk]
+    assert (indexed_file_state.file_key(tmp_path / "kdk/map/x.js", tmp_path)
+            != indexed_file_state.file_key(tmp_path / "kano/map/x.js",
+                                           tmp_path))
 
 
-def test_select_changed_chunks_keeps_every_chunk_of_a_changed_file():
-    chunks = [
-        {"metadata": {"repository": "kdk", "source_path": "map/x.js",
-                      "file_sha1": "bbb", "chunk_index": 0}},
-        {"metadata": {"repository": "kdk", "source_path": "map/x.js",
-                      "file_sha1": "bbb", "chunk_index": 1}},
-    ]
+# --- hash_files: read once, hash once, never chunk to find out ------------
+
+def test_hash_files_digests_every_scanned_file(tmp_path):
+    first = _write(tmp_path, "kdk/map/x.js", "const a = 1")
+    second = _write(tmp_path, "kdk/map/y.js", "const b = 2")
+
+    assert indexed_file_state.hash_files([first, second]) == {
+        first: indexed_file_state.compute_file_sha1("const a = 1"),
+        second: indexed_file_state.compute_file_sha1("const b = 2"),
+    }
+
+
+def test_hash_files_digests_a_file_a_chunker_would_skip(tmp_path):
+    # The digest comes from the raw text, so a file no chunker handles still
+    # gets one; nothing here depends on the file being chunkable.
+    path = _write(tmp_path, "kdk/scripts/deploy.py", "print('hi')")
+
+    assert indexed_file_state.hash_files([path]) == {
+        path: indexed_file_state.compute_file_sha1("print('hi')")}
+
+
+def test_hash_files_returns_nothing_for_no_files():
+    assert indexed_file_state.hash_files([]) == {}
+
+
+# --- select_changed_files: the gate that keeps embedding incremental ------
+
+def test_select_changed_files_keeps_a_file_that_is_not_indexed_yet(tmp_path):
+    path = tmp_path / "kdk" / "map" / "x.js"
+
+    assert indexed_file_state.select_changed_files(
+        {path: "aaa"}, tmp_path, {}) == [path]
+
+
+def test_select_changed_files_drops_a_file_indexed_at_the_same_digest(
+        tmp_path):
+    path = tmp_path / "kdk" / "map" / "x.js"
     indexed = {("kdk", "map/x.js"): "aaa"}
-    assert indexed_file_state.select_changed_chunks(chunks, indexed) == chunks
+
+    assert indexed_file_state.select_changed_files(
+        {path: "aaa"}, tmp_path, indexed) == []
+
+
+def test_select_changed_files_keeps_a_file_whose_content_changed(tmp_path):
+    path = tmp_path / "kdk" / "map" / "x.js"
+    indexed = {("kdk", "map/x.js"): "aaa"}
+
+    assert indexed_file_state.select_changed_files(
+        {path: "bbb"}, tmp_path, indexed) == [path]
+
+
+def test_select_changed_files_distinguishes_repositories(tmp_path):
+    path = tmp_path / "kano" / "map" / "x.js"
+    indexed = {("kdk", "map/x.js"): "aaa"}
+
+    assert indexed_file_state.select_changed_files(
+        {path: "aaa"}, tmp_path, indexed) == [path]
+
+
+def test_select_changed_files_keeps_everything_on_the_first_run(tmp_path):
+    # Nothing indexed yet, so every lookup misses and the whole corpus is
+    # selected -- a full rebuild needs no branch of its own.
+    file_hashes = {tmp_path / "kdk" / "map" / f"x{i}.js": "aaa"
+                   for i in range(3)}
+
+    assert (indexed_file_state.select_changed_files(file_hashes, tmp_path, {})
+            == list(file_hashes))
+
+
+# ---------------------------------------------------------------------------
+# UTILS
+# ---------------------------------------------------------------------------
+
+
+# Write a workspace-relative file, creating parent directories as needed.
+def _write(root, relative, text):
+    path = root / relative
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text)
+    return path
