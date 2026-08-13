@@ -7,11 +7,12 @@ ENV HF_HOME=/tmp/huggingface
 ENV XDG_CACHE_HOME=/tmp/.cache
 ENV SENTENCE_TRANSFORMERS_HOME=/tmp/sentence-transformers
 
-# Kalisio dev tooling (k-clone, k-dev, k-pull, ...): KALISIO_DEVELOPMENT_DIR
-# is expected to be bind-mounted at /workspace at `docker run` time (see
+# Kalisio dev tooling (k-clone, k-dev, k-pull, ...): DEVELOPMENT_DIR is
+# expected to be bind-mounted at /workspace at `docker run` time (see
 # the knowledge window in services.yaml), same layout as on a dev workstation.
-ENV KALISIO_DEVELOPMENT_DIR=/workspace
-ENV PATH="${PATH}:/workspace/development/scripts"
+ENV DEVELOPMENT_DIR=/workspace
+ENV KALISIO_DEVELOPMENT_DIR=/workspace/kalisio
+ENV PATH="${PATH}:/workspace/kalisio/development/scripts"
 
 USER root
 RUN apt-get update \
@@ -33,4 +34,4 @@ USER mambauser
 RUN micromamba install -y -n base -f environment.yml \
     && micromamba clean --all --yes
 
-CMD ["micromamba", "run", "-n", "base", "python", "-m", "ingestion_job"]
+CMD ["micromamba", "run", "-n", "base", "python", "-m", "ingestion.main"]
