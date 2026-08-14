@@ -27,41 +27,22 @@ def main():
     qdrant_collection_code_existing = vectordb.check_collection_exists(config.qdrant_collection_code)
     code_collection_length = vectordb.get_code_collection_length() if qdrant_collection_code_existing else 0
     last_ingestion = vectordb.get_last_ingestion() if qdrant_collection_metadata_existing else None # TODO : NEED TO TEST
-    is_first_ingestion = ( # TODO : NEED TO TEST
-        not qdrant_collection_metadata_existing
-        or not qdrant_collection_code_existing
-        or last_ingestion is None
-        or code_collection_length == 0
-    )
-    log.info("qdrant=%s  model=%s  org=%s  workspace=%s  last_ingestion=%s  first_ingestion=%s",
+    log.info("qdrant=%s  model=%s  org=%s  workspace=%s  last_ingestion=%s",
              config.qdrant_url, config.embedding_model, config.kli_organization, config.kli_workspace,
-             last_ingestion or "none", is_first_ingestion)
+             last_ingestion or "none")
     log.info("metadata collection '%s': %s", config.qdrant_collection_metadata, "exists" if qdrant_collection_metadata_existing else "not found")
     log.info("code collection '%s': %s (%d indexed points)", config.qdrant_collection_code, "exists" if qdrant_collection_code_existing else "not found", code_collection_length)
 
-    # Step 1: Reset collections on first ingestion
-    if is_first_ingestion:
-        if qdrant_collection_metadata_existing:
-            log.info("resetting collection '%s'", config.qdrant_collection_metadata)
-            vectordb.remove_collection(config.qdrant_collection_metadata)
-        if qdrant_collection_code_existing:
-            log.info("resetting collection '%s'", config.qdrant_collection_code)
-            vectordb.remove_collection(config.qdrant_collection_code)
-
-    # Step 2: Create Qdrant collections if needed
-    qdrant_collection_metadata_existing = vectordb.check_collection_exists(config.qdrant_collection_metadata)
-    qdrant_collection_code_existing = vectordb.check_collection_exists(config.qdrant_collection_code)
-    if not qdrant_collection_metadata_existing:
-        log.info("creating collection '%s' (vector_size=%d)", config.qdrant_collection_metadata, config.qdrant_vector_size_collection_metadata)
-        vectordb.create_collection(config.qdrant_collection_metadata, config.qdrant_vector_size_collection_metadata)
-    if not qdrant_collection_code_existing:
-        log.info("creating collection '%s' (vector_size=%d)", config.qdrant_collection_code, config.qdrant_vector_size_collection_code)
-        vectordb.create_collection(config.qdrant_collection_code, config.qdrant_vector_size_collection_code)
+    # Step 1: Create Qdrant collections if needed
+    vectordb.ensure_collection(config.qdrant_collection_metadata,
+                               config.qdrant_vector_size_collection_metadata)
+    vectordb.ensure_collection(config.qdrant_collection_code,
+                               config.qdrant_vector_size_collection_code)
 
     # Capture the recovery cursor before cloning; persisted only on success
     ingestion_started = datetime.now(timezone.utc).isoformat()
 
-    # Step 3: Clone repositories via k-clone
+    # Step 2: Clone repositories via k-clone
     try:
         subprocess.run(
             ["bash", "k-clone", config.kli_organization, config.kli_workspace],
@@ -72,49 +53,50 @@ def main():
         return 1
 
 
-	# Step 4: Scan the corpus and compare it against what's indexed
-    files_to_process = scan_indexable_files(config.development_dir)
-    log.info("files to process: %d", len(files_to_process))
+    # Step 3: Scan the files and compare them with the existing index
+    indexable_files = scan_indexable_files(config.development_dir)
+    log.info("files to process: %d", len(indexable_files))
 
-    workspace = Path(config.development_dir)
-    current_files = {file_key(path, workspace) for path in files_to_process}
-    current_file_hashes = hash_files(files_to_process)
+    workspace_root = Path(config.development_dir)
+    scanned_file_keys = {file_key(path, workspace_root) for path in indexable_files}
+    scanned_file_hashes = hash_files(indexable_files)
     indexed_file_hashes = load_indexed_file_hashes()
 
-    deleted_files = find_deleted_files(indexed_file_hashes, current_files)
-    for repository, source_path in deleted_files:
+    deleted_file_keys = find_deleted_files(indexed_file_hashes, scanned_file_keys)
+    for repository, source_path in deleted_file_keys:
         vectordb.delete_file(repository, source_path)
-    log.info("files deleted: %d", len(deleted_files))
+    log.info("files deleted: %d", len(deleted_file_keys))
 
-    indexed_config = vectordb.get_indexed_config()
-    current_config = {
+    previous_index_config = vectordb.get_indexed_config()
+    current_index_config = {
         "embedding_model": config.embedding_model,
         "chunking_version": chunking.CHUNKING_VERSION,
     }
-    config_changed = indexed_config is not None and indexed_config != current_config
-    if config_changed:
+    index_config_changed = (previous_index_config is not None
+                            and previous_index_config != current_index_config)
+    if index_config_changed:
         log.info("indexing config changed (%s -> %s), reindexing every file",
-                 indexed_config, current_config)
+                 previous_index_config, current_index_config)
 
-    # Step 5: Chunk, embed and index the files that changed
+    # Step 4: Chunk, embed and index the files that changed
     files_to_index = (
-        files_to_process if config_changed
-        else select_changed_files(current_file_hashes, workspace, indexed_file_hashes))
-    chunks_to_index = chunking.chunk_files(files_to_index, workspace)
+        indexable_files if index_config_changed
+        else select_changed_files(scanned_file_hashes, workspace_root, indexed_file_hashes))
+    chunks_to_index = chunking.chunk_files(files_to_index, workspace_root)
     log.info("files to index: %d (chunks: %d)", len(files_to_index), len(chunks_to_index))
     if files_to_index:
-        vectors = (embeddings.encode_batch([chunk["text"] for chunk in chunks_to_index])
-                   if chunks_to_index else [])
+        chunk_vectors = (embeddings.encode_batch([chunk["text"] for chunk in chunks_to_index])
+                         if chunks_to_index else [])
         # Drop every reindexed file's chunks, including the files that now
         # yield none, so emptied files leave nothing stale behind.
         for path in files_to_index:
-            repository, source_path = file_key(path, workspace)
+            repository, source_path = file_key(path, workspace_root)
             vectordb.delete_file(repository, source_path)
         if chunks_to_index:
-            vectordb.upsert(chunks_to_index, vectors)
+            vectordb.upsert(chunks_to_index, chunk_vectors)
     # TODO incremental: enrich chunks with commit_history.
 
-    # Step 6: Persist the indexing state only after a successful run
+    # Step 5: Persist the indexing state only after a successful run
     vectordb.set_last_ingestion(
         config.qdrant_collection_metadata, ingestion_started,
         config.embedding_model, chunking.CHUNKING_VERSION)

@@ -77,7 +77,7 @@ class TestApi:
             "source_path": "kano/store/layers.js", "repository": "kano",
             "breadcrumb": "layers > base", "chunk_index": 0,
             "file_sha1": "test"}}
-        vectordb.ensure_collection(len(vector), recreate=True)
+        vectordb.ensure_collection(TEST_COLLECTION, len(vector), recreate=True)
         vectordb.upsert([chunk], [vector])
         monkeypatch.setattr(handlers, "get_config", lambda: SimpleNamespace(
             top_k=5, max_context_chars=14000,

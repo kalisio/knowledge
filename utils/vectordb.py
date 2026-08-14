@@ -24,6 +24,13 @@ _client = None
 def check_collection_exists(name):
     return _get_qdrant_client().collection_exists(name)
 
+# Vector size the collection was created with, or None when it does not exist
+def get_collection_vector_size(name):
+    client = _get_qdrant_client()
+    if not client.collection_exists(name):
+        return None
+    return client.get_collection(name).config.params.vectors.size
+
 # Create a Qdrant collection
 def create_collection(name, vector_size):
     _get_qdrant_client().create_collection(
@@ -77,64 +84,20 @@ def get_indexed_config():
     }
 
 
-# ---------------------------------------------------------------------------
-# UTILS
-# ---------------------------------------------------------------------------
-
-# Create & cache the qdrant client
-def _get_qdrant_client():
-    global _client
-    if _client is None:
-        url = get_runtime_config().qdrant_url
-        client = QdrantClient(url=url)
-        try:
-            client.get_collections()
-        except Exception as e:
-            logging.getLogger("knowledge.vectordb").error(
-                "cannot reach Qdrant at %s: %s", url, e)
-            sys.exit(1)
-        _client = client
-    return _client
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Create the collection (cosine distance) if it does not exist yet.
-def ensure_collection(vector_size, recreate=False):
-    client = _get_qdrant_client()
-    name = get_runtime_config().qdrant_collection_code
-    if recreate and client.collection_exists(name):
-        client.delete_collection(name)
-    if not client.collection_exists(name):
-        client.create_collection(
-            collection_name=name,
-            vectors_config=VectorParams(
-                size=vector_size, distance=Distance.COSINE),
-        )
+# Create the collection (cosine distance) if it does not exist yet. An
+# existing collection is dropped first when `recreate` is set, or when its
+# vector size no longer matches: vectors of another dimension cannot be
+# upserted into it.
+def ensure_collection(name, vector_size, recreate=False):
+    indexed_vector_size = get_collection_vector_size(name)
+    if indexed_vector_size == vector_size and not recreate:
+        return
+    if indexed_vector_size is not None:
+        logging.getLogger("knowledge.vectordb").info(
+            "recreating collection '%s' (vector_size %s -> %d)",
+            name, indexed_vector_size, vector_size)
+        remove_collection(name)
+    create_collection(name, vector_size)
 
 
 # Upsert chunks with their vectors. Same chunk -> same id, so a re-run
@@ -163,9 +126,6 @@ def search(vector, top_k=5):
     return [read_payload(hit.payload, hit.score) for hit in hits]
 
 
-
-
-
 # Yield the payload of every stored entry, paging through the collection.
 # Used to rebuild the indexed-file state; yields nothing if the collection
 # does not exist yet (first run).
@@ -185,22 +145,9 @@ def iter_payloads(page_size=256):
             break
 
 
-# Create the metadata collection (a tiny side collection that stores the
-# last-ingestion timestamp) if it does not exist yet. 
-def ensure_metadata_collection(collection_name):
-    client = _get_qdrant_client()
-    if not client.collection_exists(collection_name):
-        client.create_collection(
-            collection_name=collection_name,
-            vectors_config=VectorParams(size=1, distance=Distance.COSINE),
-        )
-
-
-
-
 # Persist the last-ingestion timestamp and the indexing config used.
 def set_last_ingestion(collection_name, timestamp, embedding_model, chunking_version):
-    ensure_metadata_collection(collection_name)
+    ensure_collection(collection_name, get_runtime_config().qdrant_vector_size_collection_metadata)
     _get_qdrant_client().upsert(
         collection_name=collection_name,
         points=[PointStruct(
@@ -282,6 +229,22 @@ def read_payload(payload, score):
 # ---------------------------------------------------------------------------
 
 
+# Create & cache the qdrant client
+def _get_qdrant_client():
+    global _client
+    if _client is None:
+        url = get_runtime_config().qdrant_url
+        client = QdrantClient(url=url)
+        try:
+            client.get_collections()
+        except Exception as e:
+            logging.getLogger("knowledge.vectordb").error(
+                "cannot reach Qdrant at %s: %s", url, e)
+            sys.exit(1)
+        _client = client
+    return _client
+
+
 # Assemble the id + vector + payload into the PointStruct we upsert.
 def _to_record(chunk, vector):
     meta = chunk["metadata"]
@@ -290,9 +253,6 @@ def _to_record(chunk, vector):
         meta["chunk_index"], chunk["text"])
     return PointStruct(
         id=entry_id, vector=vector, payload=build_payload(chunk))
-
-
-
 
 
 # The file extension without the dot, e.g. "map/x.vue" -> "vue".
