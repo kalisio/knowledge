@@ -43,6 +43,10 @@ def chunk_vue(text, source_path):
     return chunks
 
 
+# ---------------------------------------------------------------------------
+# UTILS
+# ---------------------------------------------------------------------------
+
 # Build the block header: a JS comment for script, an HTML comment otherwise.
 def _header(source_path, component, block_type):
     if component:

@@ -38,6 +38,9 @@ def chunk_javascript(text, source_path):
         cursor = offset + len(piece)
     return chunks
 
+# ---------------------------------------------------------------------------
+# UTILS
+# ---------------------------------------------------------------------------
 
 # Get the last top-level symbol declared at or before `offset`.
 def _nearest_symbol(text, offset):

@@ -20,6 +20,8 @@ from config import get_runtime_config
 
 _client = None
 
+log = logging.getLogger("knowledge.vectordb")
+
 # Verify if qdrant collection exist
 def check_collection_exists(name):
     return _get_qdrant_client().collection_exists(name)
@@ -37,10 +39,12 @@ def create_collection(name, vector_size):
         collection_name=name,
         vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE),
     )
+    log.info("collection '%s' created (vector_size %d)", name, vector_size)
 
 # Remove a Qdrant collection
 def remove_collection(name):
     _get_qdrant_client().delete_collection(name)
+    log.info("collection '%s' removed", name)
 
 
 # Return the number of indexed points in the code collection
@@ -93,9 +97,6 @@ def ensure_collection(name, vector_size, recreate=False):
     if indexed_vector_size == vector_size and not recreate:
         return
     if indexed_vector_size is not None:
-        logging.getLogger("knowledge.vectordb").info(
-            "recreating collection '%s' (vector_size %s -> %d)",
-            name, indexed_vector_size, vector_size)
         remove_collection(name)
     create_collection(name, vector_size)
 
@@ -238,8 +239,7 @@ def _get_qdrant_client():
         try:
             client.get_collections()
         except Exception as e:
-            logging.getLogger("knowledge.vectordb").error(
-                "cannot reach Qdrant at %s: %s", url, e)
+            log.error("cannot reach Qdrant at %s: %s", url, e)
             sys.exit(1)
         _client = client
     return _client

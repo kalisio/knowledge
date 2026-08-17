@@ -1,4 +1,4 @@
-from ingestion import chunking
+from ingestion import chunkers
 from ingestion.indexed_file_state import compute_file_sha1
 
 JAVASCRIPT = "export function center () {\n  return [0, 0]\n}\n"
@@ -11,7 +11,7 @@ def test_chunk_files_dispatches_each_extension_to_a_chunker(tmp_path):
     _write(tmp_path, "kdk/map/base.js", JAVASCRIPT)
     _write(tmp_path, "kdk/docs/guide.md", MARKDOWN)
 
-    chunks = chunking.chunk_files(_files(tmp_path), tmp_path)
+    chunks = chunkers.chunk_files(_files(tmp_path), tmp_path)
 
     assert {chunk["metadata"]["source_path"] for chunk in chunks} == {
         "map/base.js", "docs/guide.md"}
@@ -23,7 +23,7 @@ def test_chunk_files_skips_extensions_without_a_chunker(tmp_path):
     _write(tmp_path, "kdk/scripts/deploy.py", "print('hi')")
     _write(tmp_path, "kdk/map/base.js", JAVASCRIPT)
 
-    chunks = chunking.chunk_files(_files(tmp_path), tmp_path)
+    chunks = chunkers.chunk_files(_files(tmp_path), tmp_path)
 
     assert all(chunk["metadata"]["source_path"] == "map/base.js"
                for chunk in chunks)
@@ -32,13 +32,13 @@ def test_chunk_files_skips_extensions_without_a_chunker(tmp_path):
 def test_chunk_files_dispatches_on_a_lowercased_extension(tmp_path):
     _write(tmp_path, "kdk/docs/GUIDE.MD", MARKDOWN)
 
-    chunks = chunking.chunk_files(_files(tmp_path), tmp_path)
+    chunks = chunkers.chunk_files(_files(tmp_path), tmp_path)
 
     assert chunks
 
 
 def test_chunk_files_returns_nothing_for_no_files(tmp_path):
-    assert chunking.chunk_files([], tmp_path) == []
+    assert chunkers.chunk_files([], tmp_path) == []
 
 
 # --- repository and source_path: the key everything else uses -------------
@@ -48,7 +48,7 @@ def test_chunk_files_splits_the_repository_from_the_source_path(tmp_path):
     # split silently orphans a file's chunks instead of replacing them.
     _write(tmp_path, "kdk/map/mixin.base-map.js", JAVASCRIPT)
 
-    chunk = chunking.chunk_files(_files(tmp_path), tmp_path)[0]
+    chunk = chunkers.chunk_files(_files(tmp_path), tmp_path)[0]
 
     assert chunk["metadata"]["repository"] == "kdk"
     assert chunk["metadata"]["source_path"] == "map/mixin.base-map.js"
@@ -57,7 +57,7 @@ def test_chunk_files_splits_the_repository_from_the_source_path(tmp_path):
 def test_chunk_files_keeps_the_source_path_repository_relative(tmp_path):
     _write(tmp_path, "kdk/packages/core/src/deep.js", JAVASCRIPT)
 
-    chunk = chunking.chunk_files(_files(tmp_path), tmp_path)[0]
+    chunk = chunkers.chunk_files(_files(tmp_path), tmp_path)[0]
 
     assert chunk["metadata"]["repository"] == "kdk"
     assert chunk["metadata"]["source_path"] == "packages/core/src/deep.js"
@@ -67,7 +67,7 @@ def test_chunk_files_distinguishes_the_same_path_in_two_repositories(tmp_path):
     _write(tmp_path, "kdk/map/base.js", JAVASCRIPT)
     _write(tmp_path, "kano/map/base.js", JAVASCRIPT)
 
-    chunks = chunking.chunk_files(_files(tmp_path), tmp_path)
+    chunks = chunkers.chunk_files(_files(tmp_path), tmp_path)
 
     assert {chunk["metadata"]["repository"] for chunk in chunks} == {
         "kdk", "kano"}
@@ -78,7 +78,7 @@ def test_chunk_files_distinguishes_the_same_path_in_two_repositories(tmp_path):
 def test_chunk_files_stamps_the_digest_of_the_whole_file(tmp_path):
     _write(tmp_path, "kdk/map/base.js", JAVASCRIPT)
 
-    chunk = chunking.chunk_files(_files(tmp_path), tmp_path)[0]
+    chunk = chunkers.chunk_files(_files(tmp_path), tmp_path)[0]
 
     assert chunk["metadata"]["file_sha1"] == compute_file_sha1(JAVASCRIPT)
 
@@ -89,7 +89,7 @@ def test_chunk_files_stamps_every_chunk_of_a_file_with_the_same_digest(
     # a different digest would re-embed a file that never changed.
     _write(tmp_path, "kdk/map/base.js", JAVASCRIPT * 40)
 
-    chunks = chunking.chunk_files(_files(tmp_path), tmp_path)
+    chunks = chunkers.chunk_files(_files(tmp_path), tmp_path)
 
     assert len(chunks) > 1
     assert len({chunk["metadata"]["file_sha1"] for chunk in chunks}) == 1
@@ -97,10 +97,10 @@ def test_chunk_files_stamps_every_chunk_of_a_file_with_the_same_digest(
 
 def test_chunk_files_changes_the_digest_when_the_content_changes(tmp_path):
     path = _write(tmp_path, "kdk/map/base.js", JAVASCRIPT)
-    before = chunking.chunk_files([path], tmp_path)[0]
+    before = chunkers.chunk_files([path], tmp_path)[0]
 
     path.write_text(JAVASCRIPT.replace("[0, 0]", "[1, 1]"))
-    after = chunking.chunk_files([path], tmp_path)[0]
+    after = chunkers.chunk_files([path], tmp_path)[0]
 
     assert before["metadata"]["file_sha1"] != after["metadata"]["file_sha1"]
 

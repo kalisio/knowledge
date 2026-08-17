@@ -31,6 +31,9 @@ def chunk_markdown(text, source_path):
         })
     return chunks
 
+# ---------------------------------------------------------------------------
+# UTILS
+# ---------------------------------------------------------------------------
 
 # Get the file's first h1 title, or `fallback` when it has none.
 def _doc_title(text, fallback):
