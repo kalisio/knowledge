@@ -61,28 +61,28 @@ def test_load_indexed_file_hashes_is_empty_on_the_first_run(monkeypatch):
     assert indexed_file_state.load_indexed_file_hashes() == {}
 
 
-# --- file_key: the identity the whole index is keyed on -------------------
+# --- get_file_key: the identity the whole index is keyed on ---------------
 
-def test_file_key_splits_the_repository_from_the_source_path(tmp_path):
+def test_get_file_key_splits_the_repository_from_the_source_path(tmp_path):
     path = tmp_path / "kdk" / "map" / "mixin.base-map.js"
 
-    assert indexed_file_state.file_key(path, tmp_path) == (
+    assert indexed_file_state.get_file_key(path, tmp_path) == (
         "kdk", "map/mixin.base-map.js")
 
 
-def test_file_key_keeps_the_source_path_repository_relative(tmp_path):
+def test_get_file_key_keeps_the_source_path_repository_relative(tmp_path):
     path = tmp_path / "kdk" / "packages" / "core" / "src" / "deep.js"
 
-    assert indexed_file_state.file_key(path, tmp_path) == (
+    assert indexed_file_state.get_file_key(path, tmp_path) == (
         "kdk", "packages/core/src/deep.js")
 
 
-def test_file_key_distinguishes_the_same_path_in_two_repositories(tmp_path):
+def test_get_file_key_distinguishes_the_same_path_in_two_repositories(tmp_path):
     # source_path is repo-relative, so the same path in another repo must not
     # be mistaken for an already indexed file.
-    assert (indexed_file_state.file_key(tmp_path / "kdk/map/x.js", tmp_path)
-            != indexed_file_state.file_key(tmp_path / "kano/map/x.js",
-                                           tmp_path))
+    assert (indexed_file_state.get_file_key(tmp_path / "kdk/map/x.js", tmp_path)
+            != indexed_file_state.get_file_key(tmp_path / "kano/map/x.js",
+                                               tmp_path))
 
 
 # --- hash_files: read once, hash once, never chunk to find out ------------

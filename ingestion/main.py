@@ -8,7 +8,7 @@ import ingestion.chunking as chunking
 from ingestion.config import get_ingestion_config
 from ingestion.file_scanner import scan_indexable_files
 from ingestion.indexed_file_state import (
-    file_key, find_deleted_files, hash_files, load_indexed_file_hashes,
+    find_deleted_files, get_file_key, hash_files, load_indexed_file_hashes,
     select_changed_files)
 from utils.logging import configure_logging
 import utils.embeddings as embeddings
@@ -58,7 +58,7 @@ def main():
     log.info("files to process: %d", len(indexable_files))
 
     workspace_root = Path(config.development_dir)
-    scanned_file_keys = {file_key(path, workspace_root) for path in indexable_files}
+    scanned_file_keys = {get_file_key(path, workspace_root) for path in indexable_files}
     scanned_file_hashes = hash_files(indexable_files)
     indexed_file_hashes = load_indexed_file_hashes()
 
@@ -90,7 +90,7 @@ def main():
         # Drop every reindexed file's chunks, including the files that now
         # yield none, so emptied files leave nothing stale behind.
         for path in files_to_index:
-            repository, source_path = file_key(path, workspace_root)
+            repository, source_path = get_file_key(path, workspace_root)
             vectordb.delete_file(repository, source_path)
         if chunks_to_index:
             vectordb.upsert(chunks_to_index, chunk_vectors)

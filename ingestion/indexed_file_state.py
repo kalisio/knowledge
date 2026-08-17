@@ -11,7 +11,7 @@ def compute_file_sha1(text):
 
 # A file's identity everywhere in the index: the first path segment under
 # `workspace` is its repository, the rest its repo-relative source path.
-def file_key(path, workspace):
+def get_file_key(path, workspace):
     parts = path.relative_to(workspace).parts
     return parts[0], "/".join(parts[1:])
 
@@ -43,7 +43,7 @@ def load_indexed_file_hashes():
 # same digest; anything else (new, edited) counts as changed.
 def select_changed_files(file_hashes, workspace, indexed):
     return [path for path, digest in file_hashes.items()
-            if indexed.get(file_key(path, workspace)) != digest]
+            if indexed.get(get_file_key(path, workspace)) != digest]
 
 
 # (repository, source_path) pairs indexed but no longer scanned.
