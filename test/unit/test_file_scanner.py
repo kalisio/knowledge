@@ -1,3 +1,5 @@
+import subprocess
+
 from ingestion.file_scanner import scan_indexable_files
 
 
@@ -103,6 +105,39 @@ def test_scan_keeps_a_file_exactly_at_the_size_limit(tmp_path, ingestion_env):
     assert _kept_names(tmp_path) == {"edge.md"}
 
 
+# --- only what git tracks is corpus ---------------------------------------
+
+def test_scan_skips_untracked_files(tmp_path, ingestion_env):
+    # Untracked files are local noise (caches, scratch output, secrets):
+    # what a repository does not track is not corpus.
+    ingestion_env()
+    _write(tmp_path, "kdk/tracked.md")
+    _track_repositories(tmp_path)
+    _write(tmp_path, "kdk/untracked.md")
+
+    assert ({path.name for path in scan_indexable_files(tmp_path)}
+            == {"tracked.md"})
+
+
+def test_scan_skips_a_directory_that_is_not_a_repository(
+        tmp_path, ingestion_env):
+    # A workspace can hold non-repository directories (key stores, database
+    # data); nothing in them may reach the index.
+    ingestion_env()
+    _write(tmp_path, "age/keys.md")
+
+    assert scan_indexable_files(tmp_path) == []
+
+
+def test_scan_skips_a_tracked_file_missing_from_disk(tmp_path, ingestion_env):
+    ingestion_env()
+    path = _write(tmp_path, "kdk/gone.md")
+    _track_repositories(tmp_path)
+    path.unlink()
+
+    assert scan_indexable_files(tmp_path) == []
+
+
 # --- empty workspace ------------------------------------------------------
 
 def test_scan_returns_nothing_for_an_empty_workspace(tmp_path, ingestion_env):
@@ -123,6 +158,22 @@ def _write(root, relative, text="x"):
     return path
 
 
+# Turn each top-level directory into a git repository tracking its current
+# files, as k-clone leaves the workspace.
+def _track_repositories(root):
+    for child in sorted(root.iterdir()):
+        if child.is_dir():
+            _git(child, "init", "-q")
+            _git(child, "add", "-A")
+
+
+# Run a git command in a repository, quietly.
+def _git(repo_dir, *args):
+    subprocess.run(["git", "-C", str(repo_dir), *args],
+                   capture_output=True, check=True)
+
+
 # The names of the files the scanner keeps, as a set for order-free asserts.
 def _kept_names(root):
+    _track_repositories(root)
     return {path.name for path in scan_indexable_files(root)}
