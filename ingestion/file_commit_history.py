@@ -13,6 +13,19 @@ def get_recent_commits(repo_dir, source_path, limit=MAX_COMMITS):
     return _git_log_subjects(repo_dir, source_path, limit)
 
 
+# Stamp each chunk with the recent commit subjects of its source file.
+# One git call per file, shared by every chunk of that file.
+def enrich_chunks_with_commit_history(chunks, workspace_root):
+    history_by_file = {}
+    for chunk in chunks:
+        metadata = chunk["metadata"]
+        key = (metadata["repository"], metadata["source_path"])
+        if key not in history_by_file:
+            history_by_file[key] = get_recent_commits(
+                workspace_root / key[0], key[1])
+        metadata["commit_history"] = history_by_file[key]
+
+
 # ---------------------------------------------------------------------------
 # UTILS
 # ---------------------------------------------------------------------------

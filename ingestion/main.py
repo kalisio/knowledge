@@ -6,6 +6,7 @@ from pathlib import Path
 
 import ingestion.chunkers as chunkers
 from ingestion.config import get_ingestion_config
+from ingestion.file_commit_history import enrich_chunks_with_commit_history
 from ingestion.file_scanner import scan_indexable_files
 from ingestion.indexed_file_state import (
     find_deleted_files, get_file_key, hash_files, load_indexed_file_hashes,
@@ -83,6 +84,7 @@ def main():
         indexable_files if index_config_changed
         else select_changed_files(scanned_file_hashes, workspace_root, indexed_file_hashes))
     chunks_to_index = chunkers.chunk_files(files_to_index, workspace_root)
+    enrich_chunks_with_commit_history(chunks_to_index, workspace_root)
     log.info("files to index: %d (chunks: %d)", len(files_to_index), len(chunks_to_index))
     if files_to_index:
         chunk_vectors = (embeddings.encode_batch([chunk["text"] for chunk in chunks_to_index])
@@ -94,7 +96,6 @@ def main():
             vectordb.delete_file(repository, source_path)
         if chunks_to_index:
             vectordb.upsert(chunks_to_index, chunk_vectors)
-    # TODO incremental: enrich chunks with commit_history.
 
     # Step 5: Persist the indexing state only after a successful run
     vectordb.set_last_ingestion(
