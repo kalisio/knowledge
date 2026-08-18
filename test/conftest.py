@@ -51,8 +51,7 @@ def ingestion_env(monkeypatch):
 # ---------------------------------------------------------------------------
 
 
-# A git repository the tests drive: commits at a chosen date, deletions, and
-# the paths find_file_changes is expected to report.
+# A git repository the tests drive: commits at a chosen date, deletions.
 class _Repository:
     def __init__(self, path):
         self.path = path
