@@ -119,7 +119,7 @@ def _present(value):
 # Log the indexed-chunk count; warn and name the ingestion command if empty.
 def _log_index_status(log, collection):
     try:
-        chunks = vectordb.count()
+        chunks = vectordb.get_code_collection_length()
     except Exception as exc:
         log.warning("could not reach Qdrant to check the index: %s", exc)
         return

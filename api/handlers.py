@@ -48,12 +48,12 @@ def search_chunks(query, top_k):
 # ---------------------------------------------------------------------------
 
 
-# Guard against querying before ingestion has run. Empty results plus an empty
-# collection means the corpus was never indexed -- surface an actionable hint
-# (503) instead of silently returning nothing. A non-empty collection with no
-# hits is a genuine "no match", so we let it through.
+# Guard against querying before ingestion has run. Empty results plus an
+# empty collection means the corpus was never indexed: answer 503 naming the
+# ingestion command. A non-empty collection with no hits is a genuine
+# "no match" and passes.
 def _ensure_indexed(chunks):
-    if chunks or vectordb.count() > 0:
+    if chunks or vectordb.get_code_collection_length() > 0:
         return
     log.warning("query hit an empty index -- ingestion has not run yet")
     raise HTTPException(

@@ -47,10 +47,13 @@ def remove_collection(name):
     log.info("collection '%s' removed", name)
 
 
-# Return the number of indexed points in the code collection
+# Return the number of indexed points in the code collection, or 0 when the
+# collection does not exist yet ("index not built" vs "query had no match").
 def get_code_collection_length():
     client = _get_qdrant_client()
     collection_name = get_runtime_config().qdrant_collection_code
+    if not client.collection_exists(collection_name):
+        return 0
     return client.count(collection_name=collection_name).count
 
 # Get last ingestion timestamp from the metadata collection
