@@ -1,3 +1,4 @@
+import logging
 import os
 import subprocess
 
@@ -31,10 +32,9 @@ def repo(tmp_path):
 
 
 # Build an IngestionConfig from a known environment. Both module caches are
-# reset first (IngestionConfig wraps RuntimeConfig, but get_runtime_config()
-# caches its own separate instance), so a test gets config built fresh from
-# its own env rather than a stale instance from an earlier test; monkeypatch
-# restores the environment and both caches afterwards.
+# reset first (IngestionConfig wraps RuntimeConfig, and get_runtime_config()
+# caches its own separate instance); monkeypatch restores the environment
+# and both caches afterwards.
 @pytest.fixture
 def ingestion_env(monkeypatch):
     def build(**overrides):
@@ -44,6 +44,17 @@ def ingestion_env(monkeypatch):
         monkeypatch.setattr(runtime_config, "_runtime_config", None)
         return ingestion_config.get_ingestion_config()
     return build
+
+
+# Capture "knowledge.*" log records. configure_logging() disables
+# propagation, so caplog's root-logger handler never receives them; the
+# handler is attached to the "knowledge" logger directly.
+@pytest.fixture
+def knowledge_logs(caplog):
+    logger = logging.getLogger("knowledge")
+    logger.addHandler(caplog.handler)
+    yield caplog
+    logger.removeHandler(caplog.handler)
 
 
 # ---------------------------------------------------------------------------
@@ -57,8 +68,8 @@ class _Repository:
         self.path = path
         self.workspace = path.parent
 
-    # Run a git command in the repository, optionally at a fixed date so a
-    # commit lands on a chosen side of the cursor.
+    # Run a git command in the repository, optionally at a fixed date so
+    # tests can order commits deterministically.
     def git(self, *args, date=None):
         env = dict(os.environ)
         if date:

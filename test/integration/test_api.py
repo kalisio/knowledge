@@ -1,5 +1,3 @@
-"""API tests: /health is open; /ask and /search require a valid JWT."""
-
 import os
 import time
 import urllib.request
@@ -39,6 +37,14 @@ def fake_config(enabled=True, secret=TEST_SECRET):
         jwt_algorithm="HS256", jwt_audience="kalisio", jwt_issuer="kalisio")
 
 
+# A RuntimeConfig stand-in pointing vectordb at the throwaway collection.
+def fake_runtime_config():
+    return SimpleNamespace(
+        qdrant_url=os.environ["QDRANT_URL"],
+        qdrant_collection_code=TEST_COLLECTION,
+        embedding_model="test", embedding_batch_size=8)
+
+
 # True when Qdrant answers at QDRANT_URL. The /ask and /search tests query
 # Qdrant through the handler, so they are skipped when it is unreachable.
 def qdrant_reachable():
@@ -67,11 +73,8 @@ class TestApi:
     # search against Qdrant; the embedding model and the LLM are stubbed.
     @pytest.fixture
     def seeded_qdrant(self, monkeypatch):
-        cfg = SimpleNamespace(
-            qdrant_url=os.environ["QDRANT_URL"],
-            qdrant_collection_code=TEST_COLLECTION,
-            embedding_model="test", embedding_batch_size=8)
-        monkeypatch.setattr(vectordb, "get_runtime_config", lambda: cfg)
+        monkeypatch.setattr(
+            vectordb, "get_runtime_config", fake_runtime_config)
         vector = [1.0, 0.0, 0.0, 0.0]
         chunk = {"text": "export const base = []", "metadata": {
             "source_path": "kano/store/layers.js", "repository": "kano",
@@ -83,8 +86,21 @@ class TestApi:
             top_k=5, max_context_chars=14000,
             prompt_template="Context:\n{context}\n\nQuestion: {question}"))
         monkeypatch.setattr(handlers.embeddings, "encode", lambda text: vector)
-        monkeypatch.setattr(handlers.llm, "ask", lambda prompt: SimpleNamespace(
-            answer="stub answer", provider="stub", model="stub-model"))
+        monkeypatch.setattr(
+            handlers.llm, "ask", lambda prompt: SimpleNamespace(
+                answer="stub answer", provider="stub", model="stub-model"))
+        yield
+        vectordb.remove_collection(TEST_COLLECTION)
+
+    # An existing but empty collection, so a query hits the index-empty
+    # guard in _ensure_indexed.
+    @pytest.fixture
+    def empty_qdrant(self, monkeypatch):
+        monkeypatch.setattr(
+            vectordb, "get_runtime_config", fake_runtime_config)
+        vectordb.ensure_collection(TEST_COLLECTION, 4, recreate=True)
+        monkeypatch.setattr(
+            handlers.embeddings, "encode", lambda text: [1.0, 0.0, 0.0, 0.0])
         yield
         vectordb.remove_collection(TEST_COLLECTION)
 
@@ -112,6 +128,47 @@ class TestApi:
         response = client.post(
             "/ask", json={"question": "hi"}, headers=headers)
         assert response.status_code == 401
+
+    # /ask with an expired token is rejected with 401.
+    def test_ask_with_expired_token_is_rejected(self, auth_on):
+        headers = {"Authorization": f"Bearer {make_token(ttl=-3600)}"}
+        response = client.post(
+            "/ask", json={"question": "hi"}, headers=headers)
+        assert response.status_code == 401
+
+    # A request body missing its required field is rejected with 422.
+    def test_ask_with_a_missing_question_is_rejected(self, auth_on):
+        headers = {"Authorization": f"Bearer {make_token()}"}
+        response = client.post("/ask", json={}, headers=headers)
+        assert response.status_code == 422
+
+    # A query on an existing but never-ingested collection returns the
+    # 503 hint that names the ingestion command.
+    @requires_qdrant
+    def test_search_on_an_empty_index_returns_503(self, auth_on, empty_qdrant):
+        headers = {"Authorization": f"Bearer {make_token()}"}
+        response = client.post(
+            "/search", json={"query": "hi", "top_k": 3}, headers=headers)
+        assert response.status_code == 503
+        assert "ingestion" in response.json()["detail"]
+
+    # The startup banner logs the configuration and warns about an empty
+    # index, naming the ingestion command.
+    @requires_qdrant
+    def test_startup_banner_warns_when_the_index_is_empty(
+            self, empty_qdrant, monkeypatch, knowledge_logs):
+        cfg = SimpleNamespace(
+            log_level="INFO", auth_enabled=False, app_secret=None,
+            host="127.0.0.1", port=8000,
+            qdrant_url=os.environ["QDRANT_URL"],
+            qdrant_collection_code=TEST_COLLECTION,
+            embedding_model="test", llm_model="stub",
+            llm_endpoint="http://stub", llm_api_key=None)
+        monkeypatch.setattr(app_module, "get_config", lambda: cfg)
+        with TestClient(app):
+            pass
+        assert "starting knowledge API" in knowledge_logs.text
+        assert "EMPTY" in knowledge_logs.text
 
     # /ask with a valid token returns an answer and its sources.
     @requires_qdrant
@@ -142,9 +199,8 @@ class TestApi:
         response = client.post("/ask", json={"question": "hi"})
         assert response.status_code == 200
 
-    # With auth ON but APP_SECRET missing, the service refuses to start: the
-    # lifespan raises, so entering the TestClient (startup) errors out instead
-    # of booting into a state where every authenticated request 500s.
+    # With auth ON but APP_SECRET missing, the lifespan raises and startup
+    # (entering the TestClient) fails.
     def test_startup_fails_when_auth_on_without_secret(self, monkeypatch):
         broken = SimpleNamespace(
             log_level="INFO", auth_enabled=True, app_secret=None)
