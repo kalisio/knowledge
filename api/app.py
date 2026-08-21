@@ -13,9 +13,8 @@ from utils.logging import configure_logging
 import api.handlers as handlers
 from api.schemas import AskRequest, AskResponse, SearchRequest, SearchResponse
 
-# Startup banner: log the effective configuration, auth state, and index
-# readiness once at boot. Best-effort -- introspection must never stop the
-# server from booting.
+# Startup checks: fail fast on a broken auth configuration, then log the
+# effective configuration, auth state, and index readiness once at boot.
 @asynccontextmanager
 async def lifespan(app):
     config = get_config()
@@ -23,8 +22,7 @@ async def lifespan(app):
     log = logging.getLogger("knowledge.api")
 
     # Fail fast: auth on without APP_SECRET means no token can be verified,
-    # so every authenticated request would 500. Refuse to start rather than
-    # serve in that broken state.
+    # so every authenticated request would 500.
     if config.auth_enabled and not config.app_secret:
         raise RuntimeError(
             "APP_SECRET is required when auth is enabled -- set APP_SECRET "
