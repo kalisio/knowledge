@@ -11,6 +11,8 @@ import jwt
 import pytest
 from fastapi.testclient import TestClient
 
+import api.clients.llm as llm
+import api.services.retrieval as retrieval
 import ingestion.clients.vectordb as vectordb
 from api.main import app
 
@@ -205,3 +207,26 @@ class TestRequestValidation:
         assert response.status_code == 503
         assert "python -m ingestion.bin" in response.json()["detail"]
         assert "empty index" in pipeline.logs.text
+
+    # An LLM provider that is down used to escape as an openai exception and
+    # reach the caller as a bare "Internal Server Error" with a traceback in
+    # the logs. It is a dependency outage, like Qdrant being down.
+    @requires_qdrant
+    def test_a_question_with_the_llm_down_returns_503(
+            self, pipeline, monkeypatch):
+        pipeline.workspace.install_samples("feat: import the corpus")
+        assert pipeline.run() == 0
+
+        def unreachable(prompt):
+            raise llm.LLMUnreachable(
+                "the LLM at http://llm.invalid/v1/ could not be reached "
+                "(APIConnectionError): check LLM_ENDPOINT, LLM_MODEL and "
+                "LLM_API_KEY")
+
+        monkeypatch.setattr(retrieval.llm, "ask", unreachable)
+
+        response = pipeline.client.post("/ask", json={"question": "layer?"})
+
+        assert response.status_code == 503
+        assert "LLM_ENDPOINT" in response.json()["detail"]
+        assert "llm unreachable" in pipeline.logs.text

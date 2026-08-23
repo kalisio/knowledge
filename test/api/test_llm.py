@@ -1,6 +1,7 @@
 from types import SimpleNamespace
 
 import pytest
+from openai import APIConnectionError, OpenAIError
 
 import api.clients.llm as llm
 from api.config import DEFAULT_SYSTEM_PROMPT
@@ -108,3 +109,54 @@ def test_ask_caps_the_answer_length(recorder, monkeypatch):
     llm.ask("Question?")
 
     assert recorder.calls[0]["max_tokens"] == 128
+
+
+# --- ask: when the provider is down ----------------------------------------
+
+# A client whose every call fails the way the openai SDK signals an outage.
+@pytest.fixture
+def unreachable(monkeypatch):
+    def failing(**kwargs):
+        raise APIConnectionError(request=None)
+
+    client = SimpleNamespace(
+        chat=SimpleNamespace(completions=SimpleNamespace(create=failing)))
+    monkeypatch.setattr(llm, "_get_client", lambda: client)
+    monkeypatch.setenv("LLM_API_KEY", "test-key")
+    monkeypatch.setenv("LLM_MODEL", "test-llm")
+    monkeypatch.setenv("LLM_ENDPOINT", "http://llm.invalid/v1/")
+    return client
+
+
+def test_a_provider_that_cannot_be_reached_is_not_a_bare_500(unreachable):
+    # An unreachable provider used to escape as an openai exception and come
+    # back to the caller as "Internal Server Error" with a traceback in the
+    # logs. It is an outage, and the API answers 503 for those.
+    with pytest.raises(llm.LLMUnreachable):
+        llm.ask("Question?")
+
+
+def test_the_outage_names_the_endpoint_and_what_to_check(unreachable):
+    with pytest.raises(llm.LLMUnreachable) as failure:
+        llm.ask("Question?")
+
+    message = str(failure.value)
+    assert "http://llm.invalid/v1/" in message
+    assert "LLM_ENDPOINT" in message
+    assert "APIConnectionError" in message
+
+
+def test_a_rejected_key_is_reported_the_same_way(monkeypatch):
+    # A wrong LLM_API_KEY raises AuthenticationError, another OpenAIError:
+    # the caller gets the same readable 503 rather than a 500.
+    def failing(**kwargs):
+        raise OpenAIError("invalid api key")
+
+    monkeypatch.setattr(llm, "_get_client", lambda: SimpleNamespace(
+        chat=SimpleNamespace(completions=SimpleNamespace(create=failing))))
+    monkeypatch.setenv("LLM_API_KEY", "wrong")
+    monkeypatch.setenv("LLM_MODEL", "test-llm")
+    monkeypatch.setenv("LLM_ENDPOINT", "https://api.anthropic.com/v1/")
+
+    with pytest.raises(llm.LLMUnreachable):
+        llm.ask("Question?")

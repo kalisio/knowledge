@@ -2,7 +2,7 @@
 
 from collections import namedtuple
 
-from openai import OpenAI
+from openai import OpenAI, OpenAIError
 
 from api.config import get_config
 
@@ -13,17 +13,30 @@ LLMResponse = namedtuple("LLMResponse", ["answer", "provider", "model"])
 _client = None
 
 
+# Raised when the LLM cannot be reached or refuses the call. The API turns
+# it into a 503: a provider being down, or a key being wrong, is an outage
+# on our side, not a bad request from the caller.
+class LLMUnreachable(RuntimeError):
+    pass
+
+
 # Send `prompt` to the configured LLM and return its answer + provenance.
 def ask(prompt):
     config = get_config()
-    completion = _get_client().chat.completions.create(
-        model=config.llm_model,
-        messages=[
-            {"role": "system", "content": config.system_prompt},
-            {"role": "user", "content": prompt},
-        ],
-        max_tokens=config.max_answer_tokens,
-    )
+    try:
+        completion = _get_client().chat.completions.create(
+            model=config.llm_model,
+            messages=[
+                {"role": "system", "content": config.system_prompt},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=config.max_answer_tokens,
+        )
+    except OpenAIError as exc:
+        raise LLMUnreachable(
+            f"the LLM at {config.llm_endpoint} could not be reached "
+            f"({type(exc).__name__}): check LLM_ENDPOINT, LLM_MODEL and "
+            f"LLM_API_KEY") from exc
     answer = completion.choices[0].message.content
     return LLMResponse(
         answer=answer,

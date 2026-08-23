@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse
 from api.config import get_config
 from api.logger import configure_logging, get_logger
 from api.routes import router
+from api.clients.llm import LLMUnreachable
 from api.clients.vectordb import QdrantUnreachable
 import api.clients.vectordb as vectordb
 
@@ -69,11 +70,16 @@ def create_app():
         allow_headers=["*"],
     )
 
-    # A vector database that is down is a dependency outage, not a bug in
-    # the request: answer 503 with a readable reason instead of a bare 500.
+    # A dependency that is down is an outage, not a bug in the request:
+    # answer 503 with a readable reason instead of a bare 500.
     @app.exception_handler(QdrantUnreachable)
     def qdrant_unreachable_handler(request, exc):
         get_logger("api").error("qdrant unreachable: %s", exc)
+        return JSONResponse(status_code=503, content={"detail": str(exc)})
+
+    @app.exception_handler(LLMUnreachable)
+    def llm_unreachable_handler(request, exc):
+        get_logger("api").error("llm unreachable: %s", exc)
         return JSONResponse(status_code=503, content={"detail": str(exc)})
 
     app.include_router(router)
