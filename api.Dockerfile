@@ -11,7 +11,7 @@ COPY --chown=mambauser:mambauser . ${HOME}
 WORKDIR ${HOME}
 USER mambauser
 
-RUN micromamba install -y -n base -f environment.yml \
+RUN micromamba install -y -n base -f environment.runtime.yml \
     && micromamba clean --all --yes
 
 EXPOSE 8187

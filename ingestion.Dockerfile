@@ -89,7 +89,7 @@ RUN mkdir -p ${HOME} && chown mambauser:mambauser ${HOME} \
 # Named explicitly rather than `COPY .`: the build context also holds the
 # staged tooling above, which has no business being copied a second time.
 COPY --chown=mambauser:mambauser ingestion ${HOME}/ingestion
-COPY --chown=mambauser:mambauser environment.yml ${HOME}/environment.yml
+COPY --chown=mambauser:mambauser environment.runtime.yml ${HOME}/environment.runtime.yml
 WORKDIR ${HOME}
 USER mambauser
 
@@ -98,7 +98,7 @@ USER mambauser
 # `git ls-files` would come back empty and the job would index nothing.
 RUN git config --global --add safe.directory '*'
 
-RUN micromamba install -y -n base -f environment.yml \
+RUN micromamba install -y -n base -f environment.runtime.yml \
     && micromamba clean --all --yes
 
 CMD ["micromamba", "run", "-n", "base", "python", "-m", "ingestion.bin"]
