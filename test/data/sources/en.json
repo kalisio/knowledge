@@ -1,0 +1,14 @@
+{
+  "APPLICATION_NAME": "Kano",
+  "CANCEL": "Cancel",
+  "KLayerList": {
+    "TITLE": "Layers",
+    "EMPTY": "No layer available",
+    "TOOLTIP": "Toggle the layer visibility"
+  },
+  "KCatalogPanel": {
+    "TITLE": "Catalog",
+    "ADD_LAYER": "Add a layer",
+    "REMOVE_LAYER": "Remove the layer"
+  }
+}

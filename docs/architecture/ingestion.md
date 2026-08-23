@@ -75,7 +75,7 @@ flowchart TD
     #   - Read the current file content.
     #   - Compute file_sha1 from the file content itself.
     #   - Compare it with the file_sha1 already stored in Qdrant for the same
-    #     (repository, source_path).
+    #     (repo, path).
     #   - If the hash is unchanged, skip the file.
     #   - If the hash changed, mark the file for reindexation.
     #
@@ -86,7 +86,7 @@ flowchart TD
     # 5. Synchronize the vector store
     #
     # For each file marked for reindexation:
-    #   - Delete the existing chunks for (repository, source_path) to avoid
+    #   - Delete the existing chunks for (repo, path) to avoid
     #     stale versions remaining in the collection.
     #   - Re-chunk the current file content.
     #   - Recompute embeddings.
@@ -97,3 +97,43 @@ flowchart TD
     # Only after a successful run, update the metadata collection with the new
     # last_ingestion timestamp. Do not update it at job start, otherwise a
     # failed run could move the recovery cursor forward and miss files.
+
+## Workspace layout
+
+The job scans `DEVELOPMENT_DIR`, the directory `k-clone` works from. It holds
+one directory per organisation, and each of those holds the cloned
+repositories:
+
+```
+$DEVELOPMENT_DIR/
+├── kalisio/      kdk, kano, development, kli, …
+├── irsn/         planet, criter, …
+└── airbus/       Gift-*, …
+```
+
+So a repository sits two levels down, and that is what the scan looks for (a
+repository sitting directly under the root is picked up too, which is how a
+hand-made workspace is laid out). A file is identified by the repository
+holding it and its path inside that repository — never by its path from the
+workspace, so `repo` stays `kano` and not `kalisio/kano`.
+
+## Commit history
+
+The commit history of a file is stored **once per file**, in its own
+collection (`QDRANT_COLLECTION_FILES`, derived from the code collection by
+default), and joined back onto every chunk of that file when a search
+returns it. Storing it on each chunk instead multiplies it by the number of
+chunks — eight times more on the kdk corpus.
+
+What is kept is a sliding window: commits older than
+`COMMIT_HISTORY_MAX_AGE_DAYS` (180) drop off on their own and new ones come
+in, with a floor of `COMMIT_HISTORY_MIN_COMMITS` (5) kept whatever their age
+— without it, 84% of the kdk files would carry no history at all, and those
+are the stable files whose intent is hardest to recover from the code.
+`COMMIT_HISTORY_DEPTH` (0, no cap) can bound a very active file.
+
+The window is rebuilt from git on every run, for every scanned file and not
+only the ones being reindexed, so a file nobody touched still lets its
+oldest commits go. It costs one `git log` pass per repository — 2.4 s over
+the 70 repositories of the workspace, against about four minutes if git were
+asked per file.

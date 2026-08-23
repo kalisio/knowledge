@@ -9,6 +9,8 @@ htmlcov/
 
 # ── Data & ML artifacts
 data/
+# the chunking reference files are test fixtures, not data artifacts
+!test/data/
 qdrant_data/
 vector_db/
 outputs/

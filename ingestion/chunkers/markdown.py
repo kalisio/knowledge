@@ -5,28 +5,34 @@ from langchain_text_splitters import (
     RecursiveCharacterTextSplitter,
 )
 
-# Target chunk length and overlap in characters.
-CHUNK_SIZE = 500
-CHUNK_OVERLAP = 80
+from ingestion.chunkers.locator import Locator
+from ingestion.config import get_config
 
 _HEADING_LEVELS = ("Header 1", "Header 2", "Header 3", "Header 4")
 
 
 # Chunk one markdown file: merge atoms per heading, prefix a breadcrumb.
-def chunk_markdown(text, source_path):
+def chunk_markdown(text, path):
+    config = get_config()
     atoms = MarkdownSyntaxTextSplitter(strip_headers=False).split_text(text)
-    title = _doc_title(text, Path(source_path).stem)
-    sections = _split_prose(_merge_by_heading(atoms))
+    title = _doc_title(text, Path(path).stem)
+    sections = _split_prose(_merge_by_heading(atoms, config.chunk_size),
+                            config)
+    locator = Locator(text)
     chunks = []
     for chunk_index, section in enumerate(sections):
         breadcrumb = _breadcrumb(section["metadata"], title)
-        prefix = f"Context: {breadcrumb}\nSource: {source_path}\n\n"
+        prefix = f"Context: {breadcrumb}\nSource: {path}\n\n"
+        start_line, end_line = (locator.locate(section["text"])
+                                or locator.whole_file())
         chunks.append({
             "text": prefix + section["text"],
             "metadata": {
-                "source_path": source_path,
+                "path": path,
                 "chunk_index": chunk_index,
                 "breadcrumb": breadcrumb,
+                "start_line": start_line,
+                "end_line": end_line,
             },
         })
     return chunks
@@ -38,7 +44,7 @@ def chunk_markdown(text, source_path):
 # Get the file's first h1 title, or `fallback` when it has none.
 def _doc_title(text, fallback):
     for line in text.splitlines():
-        if line.startswith("# ") and not line.startswith("## "):
+        if line.startswith("# "):
             return line[2:].strip()
     return fallback
 
@@ -49,9 +55,9 @@ def _breadcrumb(metadata, fallback):
     return " > ".join(parts) if parts else fallback
 
 
-# Merge adjacent atoms sharing a heading up to CHUNK_SIZE; an atom larger
+# Merge adjacent atoms sharing a heading up to `chunk_size`; an atom larger
 # than that (usually a code block) stays whole so code is never split.
-def _merge_by_heading(atoms):
+def _merge_by_heading(atoms, chunk_size):
     sections = []
     text = ""
     metadata = {}
@@ -61,7 +67,7 @@ def _merge_by_heading(atoms):
         if not atom_text:
             continue
         atom_key = _breadcrumb(atom.metadata, "_root_")
-        if atom_key == key and len(text) + len(atom_text) + 2 <= CHUNK_SIZE:
+        if atom_key == key and len(text) + len(atom_text) + 2 <= chunk_size:
             text = f"{text}\n\n{atom_text}"
         else:
             if text:
@@ -74,15 +80,15 @@ def _merge_by_heading(atoms):
     return sections
 
 
-# Split the prose sections a single oversized atom left above CHUNK_SIZE.
+# Split the prose sections a single oversized atom left above chunk_size.
 # Without this a heading with no subheading is never cut, so a long document
 # reaches the embedding model as one vector and is silently truncated there.
-def _split_prose(sections):
+def _split_prose(sections, config):
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
+        chunk_size=config.chunk_size, chunk_overlap=config.chunk_overlap)
     split = []
     for section in sections:
-        if _stays_whole(section):
+        if _stays_whole(section, config.chunk_size):
             split.append(section)
             continue
         split += [{"text": piece, "metadata": section["metadata"]}
@@ -93,5 +99,5 @@ def _split_prose(sections):
 # A section is left alone when it already fits, or when it is the fenced code
 # the size exemption in _merge_by_heading is there to protect; the splitter
 # marks such an atom with a Code entry naming the language.
-def _stays_whole(section):
-    return len(section["text"]) <= CHUNK_SIZE or "Code" in section["metadata"]
+def _stays_whole(section, chunk_size):
+    return len(section["text"]) <= chunk_size or "Code" in section["metadata"]

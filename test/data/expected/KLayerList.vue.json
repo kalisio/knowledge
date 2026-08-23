@@ -1,0 +1,30 @@
+{
+  "source": "sources/KLayerList.vue",
+  "path": "client/components/KLayerList.vue",
+  "chunks": [
+    {
+      "chunk_index": 0,
+      "breadcrumb": "layer list",
+      "start_line": 2,
+      "end_line": 9,
+      "text": "<!-- client/components/KLayerList.vue — layer list [template] -->\n<q-list dense class=\"layer-list\">\n    <q-item v-for=\"layer in layers\" :key=\"layer.name\" clickable>\n      <q-item-section avatar>\n        <q-icon :name=\"layer.icon\" />\n      </q-item-section>\n      <q-item-section>{{ layer.label }}</q-item-section>\n    </q-item>\n  </q-list>",
+      "excerpt": "  <q-list dense class=\"layer-list\">\n    <q-item v-for=\"layer in layers\" :key=\"layer.name\" clickable>\n      <q-item-section avatar>\n        <q-icon :name=\"layer.icon\" />\n      </q-item-section>\n      <q-item-section>{{ layer.label }}</q-item-section>\n    </q-item>\n  </q-list>"
+    },
+    {
+      "chunk_index": 1,
+      "breadcrumb": "layer list",
+      "start_line": 13,
+      "end_line": 25,
+      "text": "// client/components/KLayerList.vue — layer list [script]\nimport { ref, onMounted } from 'vue'\nimport { useCatalog } from '../composables/catalog.js'\n\nconst layers = ref([])\nconst { getLayers } = useCatalog()\n\nasync function refresh () {\n  layers.value = await getLayers({ type: 'OverlayLayer' })\n}\n\nonMounted(refresh)\n\ndefineExpose({ refresh })",
+      "excerpt": "import { ref, onMounted } from 'vue'\nimport { useCatalog } from '../composables/catalog.js'\n\nconst layers = ref([])\nconst { getLayers } = useCatalog()\n\nasync function refresh () {\n  layers.value = await getLayers({ type: 'OverlayLayer' })\n}\n\nonMounted(refresh)\n\ndefineExpose({ refresh })"
+    },
+    {
+      "chunk_index": 2,
+      "breadcrumb": "layer list",
+      "start_line": 29,
+      "end_line": 32,
+      "text": "<!-- client/components/KLayerList.vue — layer list [style] -->\n.layer-list {\n  max-height: 60vh;\n  overflow-y: auto;\n}",
+      "excerpt": ".layer-list {\n  max-height: 60vh;\n  overflow-y: auto;\n}"
+    }
+  ]
+}

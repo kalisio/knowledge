@@ -89,7 +89,7 @@ curl -s $QDRANT_URL/collections/$QDRANT_COLLECTION/points/<id> | jq
 
 ## Inspect from Python
 
-The project wraps Qdrant in `utils/vectordb.py`, which reads `QDRANT_URL` / `QDRANT_COLLECTION`
+Each service wraps Qdrant on its own side — `ingestion/services/vectordb.py` writes, `api/services/vectordb.py` reads — from `QDRANT_URL` / `QDRANT_COLLECTION_CODE`
 from the runtime config:
 
 ```python
@@ -113,7 +113,7 @@ records, _ = client.scroll("<collection>", limit=5, with_payload=True, with_vect
 ## What is stored per point
 
 Each point is one chunk: its embedding vector plus a payload. The payload fields (built in
-`utils/vectordb.py`):
+`ingestion/services/vectordb.py`):
 
 | Field | Meaning |
 | --- | --- |
@@ -132,7 +132,7 @@ selected Qwen3 model). The point id is deterministic — `uuid5(repository:sourc
 
 ## Verify data after ingestion
 
-After running the ingestion job (`python -m ingestion.main`):
+After running the ingestion job (`python -m ingestion.bin`):
 
 1. **Count** — the point count should be greater than zero:
 

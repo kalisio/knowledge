@@ -96,7 +96,7 @@ conda activate knowledge
 Start the API:
 
 ```bash
-python -m api.main
+python -m api.bin
 ```
 
 Run the ingestion job:

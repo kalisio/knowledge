@@ -51,7 +51,7 @@ decrypt_stdout "$WORKSPACE_DIR/development/common/KALISIO_DOCKERHUB_PASSWORD.enc
 
 # DOCKER_BUILDKIT is here to be able to use Dockerfile specific dockerginore (app.Dockerfile.dockerignore)
 DOCKER_BUILDKIT=1 docker build \
-    -f job.Dockerfile \
+    -f ingestion.Dockerfile \
     -t "$IMAGE_NAME:$IMAGE_TAG" \
     "$ROOT_DIR"
 

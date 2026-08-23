@@ -1,0 +1,46 @@
+{
+  "source": "sources/guide.md",
+  "path": "docs/catalog/guide.md",
+  "chunks": [
+    {
+      "chunk_index": 0,
+      "breadcrumb": "Layer catalog",
+      "start_line": 1,
+      "end_line": 5,
+      "text": "Context: Layer catalog\nSource: docs/catalog/guide.md\n\n# Layer catalog\n\nThe catalog service stores the layer descriptors an application exposes to\nits users. Each descriptor is a GeoJSON-friendly document describing where\nthe data comes from and how it must be rendered on the map.",
+      "excerpt": "# Layer catalog\n\nThe catalog service stores the layer descriptors an application exposes to\nits users. Each descriptor is a GeoJSON-friendly document describing where\nthe data comes from and how it must be rendered on the map."
+    },
+    {
+      "chunk_index": 1,
+      "breadcrumb": "Layer catalog > Installation",
+      "start_line": 7,
+      "end_line": 18,
+      "text": "Context: Layer catalog > Installation\nSource: docs/catalog/guide.md\n\n## Installation\n\nInstall the module and register the service in your application:\n\n```js\nimport { catalog } from '@kalisio/kdk/map.api.js'\n\nexport default function () {\n  const app = this\n  app.configure(catalog)\n}\n```",
+      "excerpt": "## Installation\n\nInstall the module and register the service in your application:\n\n```js\nimport { catalog } from '@kalisio/kdk/map.api.js'\n\nexport default function () {\n  const app = this\n  app.configure(catalog)\n}\n```"
+    },
+    {
+      "chunk_index": 2,
+      "breadcrumb": "Layer catalog > Configuration",
+      "start_line": 20,
+      "end_line": 27,
+      "text": "Context: Layer catalog > Configuration\nSource: docs/catalog/guide.md\n\n## Configuration\n\nA descriptor is made of a `name`, a `type` and a rendering section. The\nrenderer is picked from the `leaflet` or `cesium` key, so the very same\ndescriptor drives both the 2D map and the 3D globe without any change on\nthe application side. Descriptors are validated against the catalog schema\nbefore they are stored, which means a malformed renderer is rejected at\ncreation time rather than failing silently when the layer is displayed.",
+      "excerpt": "## Configuration\n\nA descriptor is made of a `name`, a `type` and a rendering section. The\nrenderer is picked from the `leaflet` or `cesium` key, so the very same\ndescriptor drives both the 2D map and the 3D globe without any change on\nthe application side. Descriptors are validated against the catalog schema\nbefore they are stored, which means a malformed renderer is rejected at\ncreation time rather than failing silently when the layer is displayed."
+    },
+    {
+      "chunk_index": 3,
+      "breadcrumb": "Layer catalog > Configuration > Zoom levels",
+      "start_line": 29,
+      "end_line": 32,
+      "text": "Context: Layer catalog > Configuration > Zoom levels\nSource: docs/catalog/guide.md\n\n### Zoom levels\n\nSet `minZoom` and `maxZoom` to restrict the zoom range a layer is rendered\nat. Outside of that range the layer stays in the catalog but is hidden.",
+      "excerpt": "### Zoom levels\n\nSet `minZoom` and `maxZoom` to restrict the zoom range a layer is rendered\nat. Outside of that range the layer stays in the catalog but is hidden."
+    },
+    {
+      "chunk_index": 4,
+      "breadcrumb": "Layer catalog > Troubleshooting",
+      "start_line": 34,
+      "end_line": 37,
+      "text": "Context: Layer catalog > Troubleshooting\nSource: docs/catalog/guide.md\n\n## Troubleshooting\n\nWhen a layer never shows up, check the browser console first: a missing\n`type` is the most common mistake.",
+      "excerpt": "## Troubleshooting\n\nWhen a layer never shows up, check the browser console first: a missing\n`type` is the most common mistake."
+    }
+  ]
+}

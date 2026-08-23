@@ -2,10 +2,13 @@ from ingestion.chunkers.markdown import chunk_markdown
 from ingestion.chunkers.javascript import chunk_javascript
 from ingestion.chunkers.vue import chunk_vue
 from ingestion.chunkers.json import chunk_json
-from ingestion.indexed_file_state import compute_file_sha1, get_file_key
+from ingestion.services.state import compute_file_sha1, get_file_key
 
-# Bump by hand when a chunker's splitting behaviour changes.
-CHUNKING_VERSION = 1
+# Bump by hand when a chunker's splitting behaviour changes, or when the
+# stored payload does. 2: chunks carry their line range and the payload moved
+# to the path/repo/content contract. 3: the commit history left the chunk
+# payload for a per-file entry.
+CHUNKING_VERSION = 3
 
 # Which chunker handles each file extension.
 _CHUNKERS = {
@@ -22,15 +25,15 @@ _CHUNKERS = {
 # the chunkers know nothing about: its repository and its content digest.
 def chunk_files(files, workspace):
     chunks = []
-    for path in files:
-        chunker = _CHUNKERS.get(path.suffix.lower())
+    for file_path in files:
+        chunker = _CHUNKERS.get(file_path.suffix.lower())
         if chunker is None:
             continue
-        repository, source_path = get_file_key(path, workspace)
-        text = path.read_text(encoding="utf-8", errors="ignore")
+        repository, path = get_file_key(file_path, workspace)
+        text = file_path.read_text(encoding="utf-8", errors="ignore")
         file_sha1 = compute_file_sha1(text)
-        for chunk in chunker(text, source_path):
-            chunk["metadata"]["repository"] = repository
+        for chunk in chunker(text, path):
+            chunk["metadata"]["repo"] = repository
             chunk["metadata"]["file_sha1"] = file_sha1
             chunks.append(chunk)
     return chunks

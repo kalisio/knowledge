@@ -1,14 +1,112 @@
-"""Command-line entry point that starts the knowledge API server."""
+"""Build the knowledge API application.
 
-import uvicorn
+Assembles the FastAPI app: middlewares, error handling, routes, and the
+boot-time checks. Starting it is bin.py's job.
+"""
+
+import os
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from api.config import get_config
+from api.logger import configure_logging, get_logger
+from api.routes import router
+from api.services.vectordb import QdrantUnreachable
+import api.services.vectordb as vectordb
 
 
-def main() -> None:
+# Startup checks: fail fast on a broken auth configuration, then log the
+# effective configuration, auth state, and index readiness once at boot.
+@asynccontextmanager
+async def lifespan(app):
     config = get_config()
-    uvicorn.run("api.app:app", host=config.host, port=config.port)
+    configure_logging(config.log_level)
+    log = get_logger("api")
+
+    # Fail fast: auth on without APP_SECRET means no token can be verified,
+    # so every authenticated request would 500.
+    if config.auth_enabled and not config.app_secret:
+        raise RuntimeError(
+            "APP_SECRET is required when auth is enabled -- set APP_SECRET "
+            "or disable auth with KNOWLEDGE_AUTH_ENABLED=false")
+
+    # Best-effort startup banner -- introspection must never stop the server.
+    try:
+        log.info("starting knowledge API on %s:%s", config.host, config.port)
+        log.info("qdrant=%s collection=%s",
+                 config.qdrant_url, config.qdrant_collection_code)
+        log.info("embedding model=%s", config.embedding_model)
+        log.info("llm model=%s endpoint=%s",
+                 config.llm_model, config.llm_endpoint)
+        log.info("auth %s | secrets: LLM_API_KEY=%s APP_SECRET=%s",
+                 "enabled" if config.auth_enabled else "DISABLED",
+                 _present(config.llm_api_key), _present(config.app_secret))
+        _log_index_status(log, config.qdrant_collection_code)
+    except Exception as exc:
+        log.warning("startup banner skipped: %s", exc)
+    yield
 
 
-if __name__ == "__main__":
-    main()
+# Build the application. A factory rather than a module-level app, so a test
+# can build one against its own configuration.
+def create_app():
+    app = FastAPI(
+        title="knowledge API",
+        version=os.getenv("APP_VERSION", "0.1.0"),
+        description="RAG retrieval over the Kalisio code corpus.",
+        contact={
+            "name": "Kalisio",
+            "url": "https://kalisio.xyz",
+            "email": "contact@kalisio.xyz",
+        },
+        lifespan=lifespan,
+    )
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    # A vector database that is down is a dependency outage, not a bug in
+    # the request: answer 503 with a readable reason instead of a bare 500.
+    @app.exception_handler(QdrantUnreachable)
+    def qdrant_unreachable_handler(request, exc):
+        get_logger("api").error("qdrant unreachable: %s", exc)
+        return JSONResponse(status_code=503, content={"detail": str(exc)})
+
+    app.include_router(router)
+    return app
+
+
+app = create_app()
+
+
+# ---------------------------------------------------------------------------
+# UTILS
+# ---------------------------------------------------------------------------
+
+
+# Report a secret as "set" or "missing" without exposing its value.
+def _present(value):
+    return "set" if value else "missing"
+
+
+# Log the indexed-chunk count; warn and name the ingestion command if empty.
+def _log_index_status(log, collection):
+    try:
+        chunks = vectordb.count_chunks()
+    except Exception as exc:
+        log.warning("could not reach Qdrant to check the index: %s", exc)
+        return
+    if chunks == 0:
+        log.warning("collection '%s' is EMPTY -- run `python -m "
+                    "ingestion.bin` to index the corpus before querying",
+                    collection)
+    else:
+        log.info("collection '%s' has %d indexed chunks", collection, chunks)

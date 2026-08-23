@@ -4,19 +4,33 @@ import subprocess
 
 import pytest
 
-import config as runtime_config
+import api.config as api_config
 import ingestion.config as ingestion_config
 
 
-# The environment IngestionConfig requires. A test overrides only the
-# variables it actually exercises.
+# The environment both services need to build a configuration. Every test
+# runs with it in place -- the chunkers read their sizes from the ingestion
+# config, so even a unit test on a chunker needs a valid one. A test
+# overrides only the variables it actually exercises.
 _BASE_ENV = {
     "DEVELOPMENT_DIR": "/tmp/development",
     "QDRANT_URL": "http://localhost:6333",
     "QDRANT_COLLECTION_CODE": "knowledge_test_code",
     "QDRANT_COLLECTION_METADATA": "knowledge_test_metadata",
     "EMBEDDING_MODEL": "test-model",
+    "LLM_API_KEY": "test-key",
+    "LLM_MODEL": "test-llm",
+    "LLM_ENDPOINT": "http://localhost:11434/v1/",
 }
+
+
+# Put the base environment in place and drop every cached configuration, so
+# no test inherits the settings of the one before it.
+@pytest.fixture(autouse=True)
+def runtime_env(monkeypatch):
+    for name, value in _BASE_ENV.items():
+        monkeypatch.setenv(name, value)
+    _reset_config_caches(monkeypatch)
 
 
 # One initialised git repository inside a workspace, as k-clone leaves it.
@@ -31,18 +45,14 @@ def repo(tmp_path):
     return repository
 
 
-# Build an IngestionConfig from a known environment. Both module caches are
-# reset first (IngestionConfig wraps RuntimeConfig, and get_runtime_config()
-# caches its own separate instance); monkeypatch restores the environment
-# and both caches afterwards.
+# Build an IngestionConfig from a known environment, on top of the base one.
 @pytest.fixture
 def ingestion_env(monkeypatch):
     def build(**overrides):
         for name, value in {**_BASE_ENV, **overrides}.items():
             monkeypatch.setenv(name, str(value))
-        monkeypatch.setattr(ingestion_config, "_config", None)
-        monkeypatch.setattr(runtime_config, "_runtime_config", None)
-        return ingestion_config.get_ingestion_config()
+        _reset_config_caches(monkeypatch)
+        return ingestion_config.get_config()
     return build
 
 
@@ -62,6 +72,13 @@ def knowledge_logs(caplog):
 # ---------------------------------------------------------------------------
 
 
+# The two services cache their own configuration; both have to go for a new
+# environment to be read.
+def _reset_config_caches(monkeypatch):
+    monkeypatch.setattr(ingestion_config, "_config", None)
+    monkeypatch.setattr(api_config, "_config", None)
+
+
 # A git repository the tests drive: commits at a chosen date, deletions.
 class _Repository:
     def __init__(self, path):
@@ -79,18 +96,18 @@ class _Repository:
             capture_output=True, text=True, check=True, env=env)
 
     # Write a repo-relative file and commit it at `date`.
-    def commit(self, source_path, text, date, message="change"):
-        path = self.file(source_path)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(text)
+    def commit(self, path, text, date, message="change"):
+        file_path = self.file(path)
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_path.write_text(text)
         self.git("add", "-A")
         self.git("commit", "-q", "-m", message, date=date)
 
     # Delete a repo-relative file and commit the deletion at `date`.
-    def remove(self, source_path, date, message="remove"):
-        self.git("rm", "-q", source_path)
+    def remove(self, path, date, message="remove"):
+        self.git("rm", "-q", path)
         self.git("commit", "-q", "-m", message, date=date)
 
     # Absolute path of a repo-relative file.
-    def file(self, source_path):
-        return self.path / source_path
+    def file(self, path):
+        return self.path / path

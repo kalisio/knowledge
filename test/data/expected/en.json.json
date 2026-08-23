@@ -1,0 +1,30 @@
+{
+  "source": "sources/en.json",
+  "path": "client/i18n/en.json",
+  "chunks": [
+    {
+      "chunk_index": 0,
+      "breadcrumb": "",
+      "start_line": 2,
+      "end_line": 3,
+      "text": "// client/i18n/en.json\n{\n  \"APPLICATION_NAME\": \"Kano\",\n  \"CANCEL\": \"Cancel\"\n}",
+      "excerpt": "  \"APPLICATION_NAME\": \"Kano\",\n  \"CANCEL\": \"Cancel\","
+    },
+    {
+      "chunk_index": 1,
+      "breadcrumb": "KLayerList",
+      "start_line": 4,
+      "end_line": 8,
+      "text": "// client/i18n/en.json :: KLayerList\n{\n  \"KLayerList\": {\n    \"TITLE\": \"Layers\",\n    \"EMPTY\": \"No layer available\",\n    \"TOOLTIP\": \"Toggle the layer visibility\"\n  }\n}",
+      "excerpt": "  \"KLayerList\": {\n    \"TITLE\": \"Layers\",\n    \"EMPTY\": \"No layer available\",\n    \"TOOLTIP\": \"Toggle the layer visibility\"\n  },"
+    },
+    {
+      "chunk_index": 2,
+      "breadcrumb": "KCatalogPanel",
+      "start_line": 9,
+      "end_line": 13,
+      "text": "// client/i18n/en.json :: KCatalogPanel\n{\n  \"KCatalogPanel\": {\n    \"TITLE\": \"Catalog\",\n    \"ADD_LAYER\": \"Add a layer\",\n    \"REMOVE_LAYER\": \"Remove the layer\"\n  }\n}",
+      "excerpt": "  \"KCatalogPanel\": {\n    \"TITLE\": \"Catalog\",\n    \"ADD_LAYER\": \"Add a layer\",\n    \"REMOVE_LAYER\": \"Remove the layer\"\n  }"
+    }
+  ]
+}

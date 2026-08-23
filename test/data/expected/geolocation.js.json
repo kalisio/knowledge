@@ -1,0 +1,22 @@
+{
+  "source": "sources/geolocation.js",
+  "path": "core/client/geolocation.js",
+  "chunks": [
+    {
+      "chunk_index": 0,
+      "breadcrumb": "",
+      "start_line": 1,
+      "end_line": 24,
+      "text": "// core/client/geolocation.js\nimport _ from 'lodash'\nimport logger from 'loglevel'\n\nexport const GEOLOCATION_TIMEOUT = 30000\n\n// Read the current position from the browser geolocation API.\nexport async function getCurrentPosition (options = {}) {\n  const timeout = _.get(options, 'timeout', GEOLOCATION_TIMEOUT)\n  return new Promise((resolve, reject) => {\n    navigator.geolocation.getCurrentPosition(resolve, reject, { timeout })\n  })\n}\n\n// Convert a browser position into the longitude/latitude pair the map uses.\nexport function toLongitudeLatitude (position) {\n  const { longitude, latitude } = position.coords\n  return [longitude, latitude]\n}\n\nexport class GeolocationTracker {\n  constructor (map) {\n    this.map = map\n    this.watchId = null\n  }",
+      "excerpt": "import _ from 'lodash'\nimport logger from 'loglevel'\n\nexport const GEOLOCATION_TIMEOUT = 30000\n\n// Read the current position from the browser geolocation API.\nexport async function getCurrentPosition (options = {}) {\n  const timeout = _.get(options, 'timeout', GEOLOCATION_TIMEOUT)\n  return new Promise((resolve, reject) => {\n    navigator.geolocation.getCurrentPosition(resolve, reject, { timeout })\n  })\n}\n\n// Convert a browser position into the longitude/latitude pair the map uses.\nexport function toLongitudeLatitude (position) {\n  const { longitude, latitude } = position.coords\n  return [longitude, latitude]\n}\n\nexport class GeolocationTracker {\n  constructor (map) {\n    this.map = map\n    this.watchId = null\n  }"
+    },
+    {
+      "chunk_index": 1,
+      "breadcrumb": "GeolocationTracker",
+      "start_line": 20,
+      "end_line": 42,
+      "text": "// core/client/geolocation.js :: GeolocationTracker\nexport class GeolocationTracker {\n  constructor (map) {\n    this.map = map\n    this.watchId = null\n  }\n\n  start () {\n    if (this.watchId !== null) return\n    this.watchId = navigator.geolocation.watchPosition((position) => {\n      this.map.setCenter(toLongitudeLatitude(position))\n    }, (error) => {\n      logger.error('geolocation failed', error)\n    })\n  }\n\n  stop () {\n    if (this.watchId === null) return\n    navigator.geolocation.clearWatch(this.watchId)\n    this.watchId = null\n  }\n}\n\nexport default GeolocationTracker",
+      "excerpt": "export class GeolocationTracker {\n  constructor (map) {\n    this.map = map\n    this.watchId = null\n  }\n\n  start () {\n    if (this.watchId !== null) return\n    this.watchId = navigator.geolocation.watchPosition((position) => {\n      this.map.setCenter(toLongitudeLatitude(position))\n    }, (error) => {\n      logger.error('geolocation failed', error)\n    })\n  }\n\n  stop () {\n    if (this.watchId === null) return\n    navigator.geolocation.clearWatch(this.watchId)\n    this.watchId = null\n  }\n}\n\nexport default GeolocationTracker"
+    }
+  ]
+}

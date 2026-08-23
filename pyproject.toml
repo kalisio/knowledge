@@ -5,8 +5,17 @@ description = "AI developer assistant for the Kalisio ecosystem"
 
 [tool.pytest.ini_options]
 testpaths = ["test"]
+# The two services are mirrored under test/, so the same file name lives in
+# test/api and test/ingestion. importlib keeps them apart without turning
+# the test tree into packages.
+addopts = "--import-mode=importlib"
 markers = [
   "General: General tests for the API",
+  "Startup: End-to-end tests for starting the API",
+  "Ingestion: End-to-end tests for the ingestion job",
+  "Incremental: End-to-end tests for re-running the ingestion job",
+  "Robustness: End-to-end tests for non-nominal files and configurations",
+  "Contract: End-to-end tests for the /search response contract",
 ]
 
 [tool.ruff]
