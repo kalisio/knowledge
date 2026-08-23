@@ -1,6 +1,6 @@
 import subprocess
 
-from ingestion.services.scanner import (find_repositories,
+from ingestion.pipeline.workspace_scanner import (find_repositories,
                                         scan_indexable_files)
 
 

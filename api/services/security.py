@@ -1,8 +1,4 @@
-"""JWT bearer authentication for the knowledge API.
-
-A token is accepted only if its signature verifies against APP_SECRET and
-its audience, issuer, and expiry claims hold.
-"""
+"""Checks the JWT bearer token that protects the API."""
 
 import jwt
 from fastapi import Depends, HTTPException
@@ -61,7 +57,7 @@ def verify_jwt(
 
 
 # ---------------------------------------------------------------------------
-# UTILS
+# UTILITIES
 # ---------------------------------------------------------------------------
 
 

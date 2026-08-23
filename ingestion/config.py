@@ -1,34 +1,12 @@
-"""Configuration of the ingestion job.
-
-Self-contained on purpose: the ingestion job and the API are deployed as two
-separate images and share nothing but the Qdrant collections they agree on.
-Each reads its own settings, and only the ones it actually needs.
-"""
+"""Settings the ingestion job reads from the environment."""
 
 import os
 from dataclasses import dataclass, field
 
 
-# Return env var `name`, or raise when it is unset/empty (required setting).
-def require(name):
-    value = os.getenv(name)
-    if not value:
-        raise RuntimeError(f"required environment variable {name} is not set")
-    return value
-
-
-# Return env var `name` as a string, or `default` when unset/empty.
-def env_str(name, default):
-    value = os.getenv(name)
-    return default if value is None or value == "" else value
-
-
-# Return env var `name` as an int, or `default` when unset/empty.
-def env_int(name, default):
-    value = os.getenv(name)
-    return default if value is None or value == "" else int(value)
-
-
+# Self-contained on purpose: the ingestion job and the API are deployed as
+# two separate images and share nothing but the Qdrant collections they
+# agree on. Each reads its own settings, and only the ones it needs.
 @dataclass(frozen=True)
 class Config:
     """Everything the ingestion job reads from the environment."""
@@ -54,6 +32,12 @@ class Config:
     development_dir: str = field(default_factory=lambda: require("DEVELOPMENT_DIR"))
     kli_organization: str = field(default_factory=lambda: env_str("KLI_ORGANIZATION", "kalisio"))
     kli_workspace: str = field(default_factory=lambda: env_str("KLI_WORKSPACE", "apps"))
+
+    # Where the dev tooling lives. k-clone reads
+    # $KALISIO_DEVELOPMENT_DIR/development whichever organisation it clones,
+    # so this is the kalisio directory of the workspace even for an irsn or
+    # airbus run. Empty means "next to the other organisations".
+    kalisio_development_dir: str = field(default_factory=lambda: env_str("KALISIO_DEVELOPMENT_DIR", ""))
 
     # Logging
     log_level: str = field(default_factory=lambda: env_str("LOG_LEVEL", "INFO"))
@@ -97,6 +81,13 @@ class Config:
         return env_str("QDRANT_COLLECTION_FILES",
                        f"{self.qdrant_collection_code}_files")
 
+    # `kalisio_development_dir` defaults to the kalisio organisation
+    # directory of the workspace, which is where the container's PATH points.
+    def __post_init__(self):
+        if not self.kalisio_development_dir:
+            object.__setattr__(self, "kalisio_development_dir",
+                               os.path.join(self.development_dir, "kalisio"))
+
 
 _config = None
 
@@ -107,3 +98,28 @@ def get_config():
     if _config is None:
         _config = Config()
     return _config
+
+
+# ---------------------------------------------------------------------------
+# UTILITIES
+# ---------------------------------------------------------------------------
+
+
+# Return env var `name`, or raise when it is unset/empty (required setting).
+def require(name):
+    value = os.getenv(name)
+    if not value:
+        raise RuntimeError(f"required environment variable {name} is not set")
+    return value
+
+
+# Return env var `name` as a string, or `default` when unset/empty.
+def env_str(name, default):
+    value = os.getenv(name)
+    return default if value is None or value == "" else value
+
+
+# Return env var `name` as an int, or `default` when unset/empty.
+def env_int(name, default):
+    value = os.getenv(name)
+    return default if value is None or value == "" else int(value)

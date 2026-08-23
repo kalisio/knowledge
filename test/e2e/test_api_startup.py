@@ -11,7 +11,7 @@ import jwt
 import pytest
 from fastapi.testclient import TestClient
 
-import ingestion.services.vectordb as vectordb
+import ingestion.clients.vectordb as vectordb
 from api.main import app
 
 from conftest import base_env

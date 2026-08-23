@@ -1,3 +1,5 @@
+"""Lists the files of the workspace that are worth indexing."""
+
 import re
 import subprocess
 from pathlib import Path
@@ -65,7 +67,7 @@ def find_repositories(root):
 
 
 # ---------------------------------------------------------------------------
-# UTILS
+# UTILITIES
 # ---------------------------------------------------------------------------
 
 

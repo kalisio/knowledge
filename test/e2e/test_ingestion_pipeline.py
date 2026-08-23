@@ -8,7 +8,7 @@ chunkers produce, what lands in Qdrant, and what the API gives back.
 import pytest
 
 import ingestion.chunkers as chunkers
-import ingestion.services.vectordb as vectordb
+import ingestion.clients.vectordb as vectordb
 
 from helpers import (CODE_COLLECTION, METADATA_COLLECTION, SAMPLES,
                      VECTOR_SIZE, chunks_of, code_points, file_key,

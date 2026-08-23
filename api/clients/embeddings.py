@@ -1,15 +1,4 @@
-"""Embed a question into a query vector.
-
-Loads the model named by EMBEDDING_MODEL once (lazily, on first use). The
-query is embedded ASYMMETRICALLY, the way Qwen3-Embedding is trained for
-retrieval: encode() prefixes it with a retrieval instruction (QUERY_PREFIX),
-while the ingestion job embeds documents without one. Vectors are
-L2-normalized, so cosine similarity in Qdrant reduces to a dot product.
-
-The API and the ingestion job must embed with the SAME model for a query
-vector and a chunk vector to be comparable -- which is why the model name
-comes from the configuration rather than being hard-coded here.
-"""
+"""Embeds a question into the query vector the API searches Qdrant with."""
 
 import torch
 from sentence_transformers import SentenceTransformer
@@ -39,7 +28,7 @@ def encode(text):
 
 
 # ---------------------------------------------------------------------------
-# UTILS
+# UTILITIES
 # ---------------------------------------------------------------------------
 
 

@@ -78,9 +78,14 @@ conda activate knowledge
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
-| `KLI_ORGANIZATION` | no | `kalisio` | GitHub organisation passed to `k-clone` |
-| `KLI_WORKSPACE` | no | `apps` | kli workspace to index |
-| `GIT_HISTORY_LIMIT` | no | `10` | Recent commits attached to each chunk |
+| `KALISIO_GITHUB_TOKEN` | yes | — | Token `k-clone` clones the GitHub repositories with. Without it the tooling falls back to ssh, which needs a key in the container |
+| `GITLAB_IRSN_TOKEN` | no | — | Same, for an IRSN workspace hosted on GitLab |
+| `KLI_ORGANIZATION` | no | `kalisio` | Organisation passed to `k-clone` (`kalisio`, `irsn`, `airbus`) |
+| `KLI_WORKSPACE` | no | `apps` | kli workspace to clone and index |
+| `INDEXED_REPOSITORIES` | no | — | Comma-separated repository names to index; empty means all of them |
+| `COMMIT_HISTORY_MAX_AGE_DAYS` | no | `180` | Age window of the commit history kept per file |
+| `COMMIT_HISTORY_MIN_COMMITS` | no | `3` | Commits kept however old, so a stable file keeps a history |
+| `COMMIT_HISTORY_DEPTH` | no | `0` | Cap on the commits kept per file; `0` means no cap |
 
 :::tip Choosing an embedding model
 

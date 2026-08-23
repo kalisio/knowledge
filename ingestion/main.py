@@ -1,13 +1,4 @@
-"""The ingestion pipeline: clone, scan, chunk, embed, index.
-
-Run it with `python -m ingestion.bin`.
-
-The run narrates itself. Indexing a corpus takes minutes, most of them spent
-inside a single embedding call, so every step says what it is about to do,
-what it found and how long it took. An engineer reading these logs should be
-able to answer, without opening the code: what was indexed, what was skipped
-and why, where the time went, and what the index holds now.
-"""
+"""Runs one ingestion: clone, scan, chunk, embed, index."""
 
 import subprocess
 import time
@@ -16,15 +7,16 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import ingestion.chunkers as chunkers
-import ingestion.services.embeddings as embeddings
-import ingestion.services.vectordb as vectordb
+import ingestion.clients.embeddings as embeddings
+import ingestion.clients.vectordb as vectordb
 from ingestion.config import get_config
 from ingestion.logger import format_duration, get_logger, step
-from ingestion.services.history import collect_commit_history
-from ingestion.services.scanner import find_repositories, scan_indexable_files
-from ingestion.services.state import (
+from ingestion.pipeline.commit_history import collect_commit_history
+from ingestion.pipeline.workspace_scanner import find_repositories, scan_indexable_files
+from ingestion.pipeline.change_detection import (
     find_deleted_files, get_file_key, hash_files, load_indexed_file_hashes,
     select_changed_files)
+from ingestion.pipeline.workspace_clone import clone_workspace
 
 _STEPS = 7
 
@@ -56,7 +48,7 @@ def run():
 
 
 # ---------------------------------------------------------------------------
-# UTILS
+# UTILITIES
 # ---------------------------------------------------------------------------
 
 
@@ -94,10 +86,8 @@ def _ingest(config, log, started):
               f"cloning the workspace (k-clone {config.kli_organization} "
               f"{config.kli_workspace})"):
         try:
-            subprocess.run(
-                ["bash", "k-clone", config.kli_organization,
-                 config.kli_workspace],
-                check=True)
+            clone_workspace(config.kalisio_development_dir,
+                            config.kli_organization, config.kli_workspace)
         except subprocess.CalledProcessError as exc:
             log.error("k-clone %s %s failed (exit code %d) -- is the tooling "
                       "on PATH and the git token set?",

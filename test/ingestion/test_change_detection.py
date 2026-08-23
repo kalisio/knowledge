@@ -1,4 +1,4 @@
-from ingestion.services import state as indexed_file_state
+from ingestion.pipeline import change_detection as indexed_file_state
 
 
 # --- compute_file_sha1: stable whole-file digest --------------------------

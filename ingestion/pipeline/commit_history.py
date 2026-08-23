@@ -1,30 +1,4 @@
-"""The commit history of a file: a sliding window, kept once per file.
-
-Stored on the file entry (services/vectordb), not on every chunk, so real
-history costs one copy instead of one per chunk -- eight times less on the
-kdk corpus.
-
-WHAT IS KEPT. Commits older than COMMIT_HISTORY_MAX_AGE_DAYS drop off as
-time passes, and the commits that landed since the last run come in. The
-whole window is rebuilt from git on every run, so there is no stored history
-to reconcile when a branch is rebased or force-pushed. A plain window would
-empty most of the corpus -- 84% of the kdk files have no commit in the last
-six months, and those are exactly the stable files whose "why" is hardest to
-guess from the code -- so it has a floor: COMMIT_HISTORY_MIN_COMMITS are
-kept however old they are.
-
-Every subject is kept as it was written. Judging which ones "look
-meaningful" would throw away most of the history: 30% of the kdk commits are
-`wip:` carrying the real subject and its issue number, 3% have no prefix at
-all, and prefixes get misspelled.
-
-HOW IT IS READ. One `git log` pass per repository, not per file. Asking git
-per file costs ~40 ms each, four minutes over the workspace; one pass builds
-the history of every file in kdk in 0.2 s. Renames are followed through the
-renames git itself reports (-M), which is a little less eager than
-`--follow`: a rename hidden inside a heavily edited commit can be missed,
-costing one old subject on a file that moved.
-"""
+"""Collects the recent commits that touched each indexed file."""
 
 import subprocess
 import time
@@ -62,10 +36,16 @@ def read_history(repo_dir, path):
 
 
 # ---------------------------------------------------------------------------
-# UTILS
+# UTILITIES
 # ---------------------------------------------------------------------------
 
 
+# A plain age window would empty most of the corpus -- 84% of the kdk files
+# have no commit in the last six months, and those are exactly the stable
+# files whose "why" is hardest to guess from the code -- hence the floor.
+# Every subject is kept as it was written: judging which ones look
+# meaningful would throw away 30% of the kdk commits, the `wip:` ones that
+# carry the real subject and its issue number.
 # The commits of the window, plus enough older ones to reach the floor, then
 # the optional cap.
 def _window(commits):

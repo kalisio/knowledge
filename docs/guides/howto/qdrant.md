@@ -89,7 +89,7 @@ curl -s $QDRANT_URL/collections/$QDRANT_COLLECTION/points/<id> | jq
 
 ## Inspect from Python
 
-Each service wraps Qdrant on its own side — `ingestion/services/vectordb.py` writes, `api/services/vectordb.py` reads — from `QDRANT_URL` / `QDRANT_COLLECTION_CODE`
+Each service wraps Qdrant on its own side — `ingestion/clients/vectordb.py` writes, `api/clients/vectordb.py` reads — from `QDRANT_URL` / `QDRANT_COLLECTION_CODE`
 from the runtime config:
 
 ```python
@@ -113,7 +113,7 @@ records, _ = client.scroll("<collection>", limit=5, with_payload=True, with_vect
 ## What is stored per point
 
 Each point is one chunk: its embedding vector plus a payload. The payload fields (built in
-`ingestion/services/vectordb.py`):
+`ingestion/clients/vectordb.py`):
 
 | Field | Meaning |
 | --- | --- |

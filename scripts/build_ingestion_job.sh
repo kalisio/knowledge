@@ -39,6 +39,29 @@ echo "About to build $NAME v$VERSION ..."
 
 load_env_files "$WORKSPACE_DIR/development/common/kalisio_dockerhub.enc.env"
 
+## Stage the Kalisio dev tooling into the build context
+##
+## The image ships k-clone and the rest of the `development` repository: the
+## workspace it fills is an empty volume, so the tooling cannot live there.
+## The repository is private, but the CI already checked it out next to this
+## one, so it is staged from that copy -- no token is needed to build, and
+## none can end up in a layer of what is a public image.
+##
+## Only what git tracks is copied: a developer's decrypted `.dec.` files stay
+## on their machine.
+
+TOOLING_STAGE="$ROOT_DIR/.build"
+
+begin_group "Staging the dev tooling from $WORKSPACE_DIR/development ..."
+
+rm -rf "$TOOLING_STAGE"
+mkdir -p "$TOOLING_STAGE/development"
+git -C "$WORKSPACE_DIR/development" ls-files --recurse-submodules -z \
+    | tar -C "$WORKSPACE_DIR/development" --null --files-from - -cf - \
+    | tar -C "$TOOLING_STAGE/development" -xf -
+
+end_group "Staging the dev tooling from $WORKSPACE_DIR/development ..."
+
 ## Build container
 ##
 
@@ -60,5 +83,7 @@ if [ "$PUBLISH" = true ]; then
 fi
 
 docker logout "$KALISIO_DOCKERHUB_URL"
+
+rm -rf "$TOOLING_STAGE"
 
 end_group "Building container $IMAGE_NAME:$IMAGE_TAG ..."

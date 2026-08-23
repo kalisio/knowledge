@@ -1,8 +1,10 @@
+"""Tells which files changed since the last ingestion, by digest."""
+
 import hashlib
 from functools import lru_cache
 from pathlib import Path
 
-import ingestion.services.vectordb as vectordb
+import ingestion.clients.vectordb as vectordb
 
 
 # Hex SHA-1 of a whole file's text. Stamped on every chunk of the file so
@@ -61,7 +63,7 @@ def find_deleted_files(indexed, current_files):
 
 
 # ---------------------------------------------------------------------------
-# UTILS
+# UTILITIES
 # ---------------------------------------------------------------------------
 
 

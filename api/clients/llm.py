@@ -1,16 +1,4 @@
-"""Call the configured LLM to answer a retrieval-augmented prompt.
-
-Speaks to any OpenAI-compatible endpoint (LLM_ENDPOINT): a local server
-(Ollama, llama.cpp, LM Studio, ...) or a hosted provider — switching
-between them is only a matter of configuration, not code. ask() sends the
-configured system instruction (config.system_prompt) telling the model to
-answer only from the provided Kalisio context, plus the retrieval-built user
-prompt, and returns the answer with the provider and model used.
-
-The configuration and the client are loaded lazily, so importing this
-module — or serving /search, which never calls the LLM — does not require
-the LLM_* settings to be present.
-"""
+"""Calls the configured LLM to turn the retrieved chunks into an answer."""
 
 from collections import namedtuple
 
@@ -45,7 +33,7 @@ def ask(prompt):
 
 
 # ---------------------------------------------------------------------------
-# UTILS
+# UTILITIES
 # ---------------------------------------------------------------------------
 
 # Label the provider from the endpoint host, for the response metadata.

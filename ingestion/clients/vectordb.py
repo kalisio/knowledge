@@ -1,11 +1,4 @@
-"""Write the Kalisio corpus into Qdrant.
-
-The writing half of the contract with the API: this module owns the
-collections -- it creates them, fills them, prunes them -- and decides the
-SHAPE of what is stored (build_payload below). api/services/vectordb.py
-reads that shape back. The end-to-end suite runs both against one Qdrant, so
-a drift between them fails a test rather than silently returning nothing.
-"""
+"""Writes the Kalisio corpus into Qdrant."""
 
 import hashlib
 import uuid
@@ -233,6 +226,9 @@ def payload_id(repository, path, chunk_index, text):
     return str(uuid.uuid5(uuid.NAMESPACE_URL, key))
 
 
+# api/clients/vectordb.py reads this shape back. The end-to-end suite runs
+# both against one Qdrant, so a drift between them fails a test rather than
+# silently returning nothing.
 # Build the payload stored alongside a chunk's vector (everything but the
 # vector). The commit history is NOT part of it: it belongs to the file, not
 # to the chunk, and is stored once per file (see upsert_file_entries).
@@ -254,7 +250,7 @@ def build_payload(chunk):
 
 
 # ---------------------------------------------------------------------------
-# UTILS
+# UTILITIES
 # ---------------------------------------------------------------------------
 
 

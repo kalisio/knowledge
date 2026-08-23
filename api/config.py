@@ -1,10 +1,4 @@
-"""Configuration of the knowledge API.
-
-Self-contained on purpose: the API and the ingestion job are deployed as two
-separate images and share nothing but the Qdrant collections they agree on.
-Each reads its own settings, and only the ones it actually needs -- the API
-never creates a collection, so it knows nothing about vector sizes.
-"""
+"""Settings the knowledge API reads from the environment."""
 
 import os
 from dataclasses import dataclass, field
@@ -27,26 +21,9 @@ Question: {question}
 Answer:"""
 
 
-# Return env var `name`, or raise when it is unset/empty (required setting).
-def require(name):
-    value = os.getenv(name)
-    if not value:
-        raise RuntimeError(f"required environment variable {name} is not set")
-    return value
-
-
-# Return env var `name` as a string, or `default` when unset/empty.
-def env_str(name, default):
-    value = os.getenv(name)
-    return default if value is None or value == "" else value
-
-
-# Return env var `name` as an int, or `default` when unset/empty.
-def env_int(name, default):
-    value = os.getenv(name)
-    return default if value is None or value == "" else int(value)
-
-
+# Self-contained on purpose: the API and the ingestion job are deployed as
+# two separate images and share nothing but the Qdrant collections they
+# agree on. Each reads its own settings, and only the ones it needs.
 @dataclass(frozen=True)
 class Config:
     """Everything the API reads from the environment.
@@ -127,3 +104,28 @@ def get_config():
     if _config is None:
         _config = Config()
     return _config
+
+
+# ---------------------------------------------------------------------------
+# UTILITIES
+# ---------------------------------------------------------------------------
+
+
+# Return env var `name`, or raise when it is unset/empty (required setting).
+def require(name):
+    value = os.getenv(name)
+    if not value:
+        raise RuntimeError(f"required environment variable {name} is not set")
+    return value
+
+
+# Return env var `name` as a string, or `default` when unset/empty.
+def env_str(name, default):
+    value = os.getenv(name)
+    return default if value is None or value == "" else value
+
+
+# Return env var `name` as an int, or `default` when unset/empty.
+def env_int(name, default):
+    value = os.getenv(name)
+    return default if value is None or value == "" else int(value)

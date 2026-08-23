@@ -13,8 +13,8 @@ knowledge is built around three pieces that each do one job :
 The ingestion job and the API are two independent services, built into two
 images and deployed apart. They share no code — not a configuration module,
 not a utility package. What they do share is the Qdrant collections they
-agree on: the job writes them (`ingestion/services/vectordb.py`), the API
-reads them (`api/services/vectordb.py`), and the end-to-end suite runs both
+agree on: the job writes them (`ingestion/clients/vectordb.py`), the API
+reads them (`api/clients/vectordb.py`), and the end-to-end suite runs both
 against one Qdrant so a drift between the two fails a test.
 
 Each service has the same shape: general things at the root, and folders for
@@ -26,15 +26,20 @@ api/                          ingestion/
 ├── main.py   the app         ├── main.py   the pipeline
 ├── config.py                 ├── config.py
 ├── logger.py                 ├── logger.py
-├── routes.py                 ├── chunkers/   one per file type
-├── schemas.py                │   ├── locator.py
-└── services/                 │   ├── markdown.py, javascript.py, …
-    ├── retrieval.py          └── services/
-    ├── security.py               ├── scanner.py   files git tracks
-    ├── llm.py                    ├── history.py   commit history
-    ├── embeddings.py             ├── state.py     digests, change detection
-    └── vectordb.py               ├── embeddings.py
+├── routes.py                 ├── chunkers/    one per file type
+├── schemas.py                │   ├── line_locator.py
+├── services/  what it does   │   ├── markdown.py, javascript.py, …
+│   ├── retrieval.py          ├── pipeline/    what the job does
+│   └── security.py           │   ├── workspace_clone.py   fills the workspace
+└── clients/   what it talks  │   ├── workspace_scanner.py files git tracks
+    ├── llm.py     to         │   ├── change_detection.py  digests, what moved
+    ├── embeddings.py         │   └── commit_history.py    commit history
+    └── vectordb.py           └── clients/     what it talks to
+                                  ├── embeddings.py
                                   └── vectordb.py
 ```
+
+`services/` holds what a service *does*, `clients/` what it talks to, and
+`pipeline/` the steps of one ingestion run.
 
 Run them with `python -m api.bin` and `python -m ingestion.bin`.

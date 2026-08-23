@@ -7,8 +7,8 @@ and the e2e suite for the asymmetry itself).
 
 import pytest
 
-import api.services.embeddings as embeddings
-from api.services.embeddings import QUERY_PREFIX
+import api.clients.embeddings as embeddings
+from api.clients.embeddings import QUERY_PREFIX
 
 
 # Stands in for a SentenceTransformer vector: encode() calls .tolist().

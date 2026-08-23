@@ -10,7 +10,7 @@ from coming back.
 
 import pytest
 
-import ingestion.services.vectordb as vectordb
+import ingestion.clients.vectordb as vectordb
 
 from conftest import base_env
 from helpers import (SAMPLES, chunks_of, code_points, file_key,

@@ -1,3 +1,5 @@
+"""The request and response shapes the API endpoints exchange."""
+
 from pydantic import BaseModel, Field
 
 

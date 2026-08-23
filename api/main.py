@@ -1,8 +1,4 @@
-"""Build the knowledge API application.
-
-Assembles the FastAPI app: middlewares, error handling, routes, and the
-boot-time checks. Starting it is bin.py's job.
-"""
+"""Builds the FastAPI application: middlewares, errors, routes, checks."""
 
 import os
 from contextlib import asynccontextmanager
@@ -14,8 +10,8 @@ from fastapi.responses import JSONResponse
 from api.config import get_config
 from api.logger import configure_logging, get_logger
 from api.routes import router
-from api.services.vectordb import QdrantUnreachable
-import api.services.vectordb as vectordb
+from api.clients.vectordb import QdrantUnreachable
+import api.clients.vectordb as vectordb
 
 
 # Startup checks: fail fast on a broken auth configuration, then log the
@@ -88,7 +84,7 @@ app = create_app()
 
 
 # ---------------------------------------------------------------------------
-# UTILS
+# UTILITIES
 # ---------------------------------------------------------------------------
 
 

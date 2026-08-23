@@ -5,7 +5,7 @@ overlapping pieces, a piece the splitter stripped, a repeated line, a last
 line as common as a closing brace.
 """
 
-from ingestion.chunkers.locator import Locator
+from ingestion.chunkers.line_locator import LineLocator
 
 TEXT = """import _ from 'lodash'
 
@@ -22,18 +22,18 @@ export function second () {
 # --- line_of ---------------------------------------------------------------
 
 def test_the_first_character_is_on_line_one():
-    assert Locator(TEXT).line_of(0) == 1
+    assert LineLocator(TEXT).line_of(0) == 1
 
 
 def test_an_offset_maps_to_the_line_holding_it():
-    locator = Locator(TEXT)
+    locator = LineLocator(TEXT)
 
     assert locator.line_of(TEXT.index("export function first")) == 3
     assert locator.line_of(TEXT.index("export function second")) == 7
 
 
 def test_the_line_of_a_newline_is_the_line_it_ends():
-    locator = Locator(TEXT)
+    locator = LineLocator(TEXT)
 
     assert locator.line_of(TEXT.index("\n")) == 1
 
@@ -43,30 +43,30 @@ def test_the_line_of_a_newline_is_the_line_it_ends():
 def test_a_piece_is_located_at_its_lines():
     piece = "export function first () {\n  return 1\n}"
 
-    assert Locator(TEXT).locate(piece) == (3, 5)
+    assert LineLocator(TEXT).locate(piece) == (3, 5)
 
 
 def test_a_stripped_piece_is_still_located():
     # The splitters strip the pieces they return.
     piece = "  return 1\n"
 
-    assert Locator(TEXT).locate(piece.strip()) == (4, 4)
+    assert LineLocator(TEXT).locate(piece.strip()) == (4, 4)
 
 
 def test_a_single_line_piece_reports_one_line():
-    assert Locator(TEXT).locate("import _ from 'lodash'") == (1, 1)
+    assert LineLocator(TEXT).locate("import _ from 'lodash'") == (1, 1)
 
 
 def test_a_piece_that_is_not_in_the_text_is_not_located():
-    assert Locator(TEXT).locate("export function third () {}") is None
+    assert LineLocator(TEXT).locate("export function third () {}") is None
 
 
 def test_a_blank_piece_is_not_located():
-    assert Locator(TEXT).locate("   \n\n") is None
+    assert LineLocator(TEXT).locate("   \n\n") is None
 
 
 def test_successive_pieces_advance_through_the_file():
-    locator = Locator(TEXT)
+    locator = LineLocator(TEXT)
 
     first = locator.locate("export function first () {\n  return 1\n}")
     second = locator.locate("export function second () {\n  return 2\n}")
@@ -78,7 +78,7 @@ def test_successive_pieces_advance_through_the_file():
 def test_overlapping_pieces_are_both_located():
     # The cursor advances by one character past a match, not past the whole
     # piece: a chunk that overlaps the previous one still starts inside it.
-    locator = Locator(TEXT)
+    locator = LineLocator(TEXT)
 
     locator.locate("export function first () {\n  return 1\n}")
     overlapping = locator.locate("}\n\nexport function second () {")
@@ -88,7 +88,7 @@ def test_overlapping_pieces_are_both_located():
 
 def test_a_repeated_line_resolves_to_the_next_occurrence():
     text = "value = 1\nvalue = 1\nvalue = 1\n"
-    locator = Locator(text)
+    locator = LineLocator(text)
 
     assert locator.locate("value = 1") == (1, 1)
     assert locator.locate("value = 1") == (2, 2)
@@ -100,11 +100,11 @@ def test_a_common_closing_line_does_not_cut_the_range_short():
     # piece must end, not forwards from its start.
     piece = "export function first () {\n  return 1\n}\n\nexport function second () {\n  return 2\n}"
 
-    assert Locator(TEXT).locate(piece) == (3, 9)
+    assert LineLocator(TEXT).locate(piece) == (3, 9)
 
 
 def test_seek_restarts_the_search_further_down():
-    locator = Locator(TEXT)
+    locator = LineLocator(TEXT)
     locator.seek(TEXT.index("export function second"))
 
     # The first function is above the cursor; the fallback search from the
@@ -118,18 +118,18 @@ def test_a_span_maps_offsets_to_lines():
     start = TEXT.index("export function first")
     end = TEXT.index("export function second")
 
-    assert Locator(TEXT).span(start, end) == (3, 6)
+    assert LineLocator(TEXT).span(start, end) == (3, 6)
 
 
 def test_an_empty_span_reports_a_single_line():
     start = TEXT.index("export function first")
 
-    assert Locator(TEXT).span(start, start) == (3, 3)
+    assert LineLocator(TEXT).span(start, start) == (3, 3)
 
 
 def test_the_whole_file_covers_every_line():
-    assert Locator(TEXT).whole_file() == (1, len(TEXT.splitlines()))
+    assert LineLocator(TEXT).whole_file() == (1, len(TEXT.splitlines()))
 
 
 def test_the_whole_file_of_an_empty_text_is_line_one():
-    assert Locator("").whole_file() == (1, 1)
+    assert LineLocator("").whole_file() == (1, 1)

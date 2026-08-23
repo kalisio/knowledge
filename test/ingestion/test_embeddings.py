@@ -7,7 +7,7 @@ the e2e suite for the asymmetry itself).
 
 import pytest
 
-import ingestion.services.embeddings as embeddings
+import ingestion.clients.embeddings as embeddings
 
 
 # Stands in for a SentenceTransformer vector: encode_batch() calls .tolist().

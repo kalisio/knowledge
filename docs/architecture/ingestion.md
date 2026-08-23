@@ -111,6 +111,14 @@ $DEVELOPMENT_DIR/
 └── airbus/       Gift-*, …
 ```
 
+In the cluster that workspace is an empty volume, so the tooling cannot live
+in it: the image ships `development` and `kli` under `/opt/kalisio`, and the
+job links them into `$KALISIO_DEVELOPMENT_DIR` before calling `k-clone`,
+which resolves everything through that directory. The image carries no
+credential — `KALISIO_GITHUB_TOKEN` (and `GITLAB_IRSN_TOKEN` for an IRSN
+workspace) is supplied at run time. A workspace that already holds the
+tooling is a developer's own checkout and is left untouched.
+
 So a repository sits two levels down, and that is what the scan looks for (a
 repository sitting directly under the root is picked up too, which is how a
 hand-made workspace is laid out). A file is identified by the repository

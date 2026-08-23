@@ -16,9 +16,9 @@ from pathlib import Path
 
 import pytest
 
-import ingestion.services.vectordb as vectordb
-import api.services.vectordb as api_vectordb
-from api.services.embeddings import QUERY_PREFIX
+import ingestion.clients.vectordb as vectordb
+import api.clients.vectordb as api_vectordb
+from api.clients.embeddings import QUERY_PREFIX
 
 # Throwaway collections; the "zz_" prefix keeps them apart from the
 # collections a developer ingests into locally.

@@ -9,7 +9,7 @@ the reading half, and the end-to-end suite runs the two together.
 import hashlib
 import uuid
 
-import ingestion.services.vectordb as vectordb
+import ingestion.clients.vectordb as vectordb
 
 # What issue #6 requires every stored chunk to carry. The commit history is
 # part of the same contract but belongs to the file, so it is stored once per

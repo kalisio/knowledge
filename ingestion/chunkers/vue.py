@@ -1,9 +1,11 @@
+"""Cuts a Vue single-file component into chunks, one per block."""
+
 import re
 from pathlib import Path
 
 from langchain_text_splitters import Language, RecursiveCharacterTextSplitter
 
-from ingestion.chunkers.locator import Locator
+from ingestion.chunkers.line_locator import LineLocator
 from ingestion.config import get_config
 
 # The opening tag of an SFC block: tag name (1), attributes (2).
@@ -20,7 +22,7 @@ _LANG_ATTRIBUTE = re.compile(r"""lang\s*=\s*["']([^"']+)["']""", re.IGNORECASE)
 def chunk_vue(text, path):
     config = get_config()
     component = _component_name(path)
-    locator = Locator(text)
+    locator = LineLocator(text)
     chunks = []
     for block_type, attributes, body_start, body_end in _iter_blocks(text):
         body = text[body_start:body_end].strip()
@@ -45,7 +47,7 @@ def chunk_vue(text, path):
 
 
 # ---------------------------------------------------------------------------
-# UTILS
+# UTILITIES
 # ---------------------------------------------------------------------------
 
 # Walk the top-level SFC blocks as (tag, attributes, body_start, body_end).

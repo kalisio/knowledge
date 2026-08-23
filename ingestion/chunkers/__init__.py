@@ -1,8 +1,10 @@
+"""Routes each file to the chunker that knows its format."""
+
 from ingestion.chunkers.markdown import chunk_markdown
 from ingestion.chunkers.javascript import chunk_javascript
 from ingestion.chunkers.vue import chunk_vue
 from ingestion.chunkers.json import chunk_json
-from ingestion.services.state import compute_file_sha1, get_file_key
+from ingestion.pipeline.change_detection import compute_file_sha1, get_file_key
 
 # Bump by hand when a chunker's splitting behaviour changes, or when the
 # stored payload does. 2: chunks carry their line range and the payload moved

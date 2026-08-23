@@ -7,26 +7,28 @@ ENV HF_HOME=/tmp/huggingface
 ENV XDG_CACHE_HOME=/tmp/.cache
 ENV SENTENCE_TRANSFORMERS_HOME=/tmp/sentence-transformers
 
-# Kalisio dev tooling (k-clone, k-pull, kli, ...). DEVELOPMENT_DIR is
-# expected to be bind-mounted at /workspace at `docker run` time, same
-# layout as on a dev workstation:
+# The Kalisio dev tooling is installed in the image, not in the workspace:
+# the workspace is a volume that starts empty, and k-clone is what fills it.
+# The job links these two directories into $KALISIO_DEVELOPMENT_DIR before
+# calling k-clone, which resolves everything through it.
+ENV KALISIO_TOOLING_DIR=/opt/kalisio
+
+# The workspace the job clones into and scans, one directory per
+# organisation, same layout as on a developer's machine:
 #
 #   /workspace/                  <- DEVELOPMENT_DIR
 #   ├── kalisio/                 <- KALISIO_DEVELOPMENT_DIR, what k-clone fills
-#   │   ├── development/         <- the tooling itself (k-clone, .kalisio)
-#   │   ├── kli/                 <- cloned by k-clone on first use
-#   │   ├── kdk/ kano/ ...       <- the repositories to index
 #   ├── irsn/  airbus/           <- the other organisations
-#
-# `source .kalisio` inside k-clone resolves through PATH, which is why the
-# scripts directory is on it.
 ENV DEVELOPMENT_DIR=/workspace
-ENV DEVELOPMENT_BIN_DIR=/workspace/kalisio/development/scripts
+ENV DEVELOPMENT_BIN_DIR=/opt/kalisio/development/scripts
 ENV KALISIO_DEVELOPMENT_DIR=/workspace/kalisio
 ENV KALISIO_DEVELOPMENT_JOBS_DIR=/workspace/kalisio
 ENV IRSN_DEVELOPMENT_DIR=/workspace/irsn
 ENV AIRBUS_DEVELOPMENT_DIR=/workspace/airbus
-ENV PATH="${PATH}:/workspace/kalisio/development/scripts"
+
+# `source .kalisio` inside k-clone resolves through PATH, which is why the
+# scripts directory is on it.
+ENV PATH="${PATH}:/opt/kalisio/development/scripts"
 
 USER root
 RUN apt-get update \
@@ -36,28 +38,67 @@ RUN apt-get update \
     && npm install -g yarn \
     && rm -rf /var/lib/apt/lists/*
 
+# The dev tooling. `development` is a private repository, so it is staged
+# into the build context by scripts/build_ingestion_job.sh from the copy the
+# CI already checked out -- no credential is needed here, and none ends up
+# in a layer of what is a public image. kli is public and cloned directly.
+COPY .build/development ${KALISIO_TOOLING_DIR}/development
+RUN git clone --depth 1 https://github.com/kalisio/kli.git ${KALISIO_TOOLING_DIR}/kli \
+    && cd ${KALISIO_TOOLING_DIR}/kli \
+    && yarn install --frozen-lockfile \
+    && yarn cache clean \
+    && chown -R mambauser:mambauser ${KALISIO_TOOLING_DIR} \
+    # yarn ran as root and left XDG_CACHE_HOME behind owned by root, which
+    # micromamba could then no longer write to.
+    && rm -rf ${XDG_CACHE_HOME}
+
+# The same environment `development/install.sh` writes into a new recruit's
+# .bashrc, minus the two tokens: the image is public, so KALISIO_GITHUB_TOKEN
+# and GITLAB_IRSN_TOKEN are supplied at run time
+# (development/workspaces/services/knowledge/knowledge.enc.env locally, the
+# namespace secret in the cluster). The urls are derived from them here so an
+# interactive shell in this container behaves like a developer's.
+RUN printf '%s\n' \
+    '# Kalisio environment, as development/install.sh sets it up.' \
+    'export DEVELOPMENT_DIR=${DEVELOPMENT_DIR:-/workspace}' \
+    'export KALISIO_DEVELOPMENT_DIR=$DEVELOPMENT_DIR/kalisio' \
+    'export KALISIO_DEVELOPMENT_JOBS_DIR=$DEVELOPMENT_DIR/kalisio' \
+    'export IRSN_DEVELOPMENT_DIR=$DEVELOPMENT_DIR/irsn' \
+    'export AIRBUS_DEVELOPMENT_DIR=$DEVELOPMENT_DIR/airbus' \
+    'export DEVELOPMENT_BIN_DIR=/opt/kalisio/development/scripts' \
+    'export PATH=$PATH:$DEVELOPMENT_BIN_DIR' \
+    'export kli="node /opt/kalisio/kli/index.js"' \
+    'if [ -n "${KALISIO_GITHUB_TOKEN:-}" ]; then' \
+    '  export KALISIO_GITHUB_URL="https://oauth2:$KALISIO_GITHUB_TOKEN@github.com"' \
+    'else' \
+    '  export KALISIO_GITHUB_URL="ssh://git@github.com"' \
+    'fi' \
+    'if [ -n "${GITLAB_IRSN_TOKEN:-}" ]; then' \
+    '  export GITLAB_IRSN_URL="https://oauth2:$GITLAB_IRSN_TOKEN@gitlab.asnr.fr"' \
+    'else' \
+    '  export GITLAB_IRSN_URL="ssh://git@gitlab.asnr.fr:30000"' \
+    'fi' \
+    > /etc/profile.d/kalisio.sh
+
 # apt-get/npm run as root with HOME=/app, which can implicitly create /app
 # owned by root; COPY --chown only chowns what it copies, not a pre-existing
 # parent dir, so force ownership before copying the app code into it.
-RUN mkdir -p ${HOME} && chown mambauser:mambauser ${HOME}
+RUN mkdir -p ${HOME} && chown mambauser:mambauser ${HOME} \
+    && ln -sf /etc/profile.d/kalisio.sh ${HOME}/.bashrc
 
-COPY --chown=mambauser:mambauser . ${HOME}
+# Named explicitly rather than `COPY .`: the build context also holds the
+# staged tooling above, which has no business being copied a second time.
+COPY --chown=mambauser:mambauser ingestion ${HOME}/ingestion
+COPY --chown=mambauser:mambauser environment.yml ${HOME}/environment.yml
 WORKDIR ${HOME}
 USER mambauser
 
-# The workspace is bind-mounted from the host, so its repositories belong to
-# another uid. Without this git refuses to read them ("detected dubious
-# ownership") and every `git ls-files` comes back empty -- the job would run
-# to completion and index nothing.
+# The repositories are cloned into a volume that belongs to another uid, and
+# git refuses to read those ("detected dubious ownership"): every
+# `git ls-files` would come back empty and the job would index nothing.
 RUN git config --global --add safe.directory '*'
 
 RUN micromamba install -y -n base -f environment.yml \
     && micromamba clean --all --yes
 
-# KALISIO_GITHUB_URL and GITLAB_IRSN_URL are derived from the tokens, which
-# are only known at run time.
-# k-clone clones into the mounted workspace, so the container needs write
-# access to it. The settings it reads -- KALISIO_GITHUB_URL and the rest --
-# come from the service environment
-# (development/workspaces/services/knowledge/knowledge.enc.env).
 CMD ["micromamba", "run", "-n", "base", "python", "-m", "ingestion.bin"]

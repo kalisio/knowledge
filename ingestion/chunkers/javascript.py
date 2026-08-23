@@ -1,8 +1,10 @@
+"""Cuts a JavaScript file into chunks, one per top-level symbol."""
+
 import re
 
 from langchain_text_splitters import Language, RecursiveCharacterTextSplitter
 
-from ingestion.chunkers.locator import Locator
+from ingestion.chunkers.line_locator import LineLocator
 from ingestion.config import get_config
 
 # A top-level declaration; the captured group is the symbol name. Anchored at
@@ -23,7 +25,7 @@ def chunk_javascript(text, path):
     splitter = RecursiveCharacterTextSplitter.from_language(
         language=Language.JS, chunk_size=config.code_chunk_size,
         chunk_overlap=config.code_chunk_overlap)
-    locator = Locator(text)
+    locator = LineLocator(text)
     symbols = _declared_symbols(text, locator)
     chunks = []
     for chunk_index, piece in enumerate(splitter.split_text(text)):
@@ -43,7 +45,7 @@ def chunk_javascript(text, path):
     return chunks
 
 # ---------------------------------------------------------------------------
-# UTILS
+# UTILITIES
 # ---------------------------------------------------------------------------
 
 # Every top-level declaration as (line, symbol), in file order.

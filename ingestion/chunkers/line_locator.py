@@ -1,21 +1,9 @@
-"""Locate a chunk back in the file it was cut from.
-
-A chunk is only useful if a developer can open the file at the right place,
-so every chunk carries the line range it covers. The splitters return text,
-not offsets, and they strip whitespace as they go -- so the text has to be
-found again in the source. Doing that naively is where line numbers go
-wrong: searching from `previous_offset + len(previous_piece)` overshoots the
-start of the next chunk whenever the splitter overlaps them, the search
-fails, and every following chunk inherits a drifting position.
-
-Locator searches forward from just after the previous match instead, which
-holds whether or not the pieces overlap.
-"""
+"""Finds the line range a chunk covers in the file it was cut from."""
 
 from bisect import bisect_right
 
 
-class Locator:
+class LineLocator:
     def __init__(self, text):
         self.text = text
         self._line_starts = [0] + [index + 1
@@ -63,7 +51,7 @@ class Locator:
         return 1, max(1, self.line_of(len(self.text) - 1))
 
     # ------------------------------------------------------------------
-    # UTILS
+    # UTILITIES
     # ------------------------------------------------------------------
 
     # Forward search, falling back to a search from the top so a piece the
@@ -76,7 +64,7 @@ class Locator:
 
 
 # ---------------------------------------------------------------------------
-# UTILS
+# UTILITIES
 # ---------------------------------------------------------------------------
 
 

@@ -6,7 +6,7 @@ test/ingestion/test_vectordb.py pins the writing half, and the end-to-end
 suite runs the two together.
 """
 
-import api.services.vectordb as vectordb
+import api.clients.vectordb as vectordb
 
 
 # A stored payload, as the ingestion job writes it.

@@ -8,7 +8,6 @@ the LLM (a recorder, so the prompt it receives can be asserted on).
 """
 
 import os
-import subprocess
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -21,16 +20,16 @@ import numpy as np
 import pytest
 
 import api.config as api_config
-import api.services.embeddings as api_embeddings
-import api.services.llm as llm
+import api.clients.embeddings as api_embeddings
+import api.clients.llm as llm
 import api.services.retrieval as retrieval
 import ingestion.config as ingestion_config
 import ingestion.logger as ingestion_logger
 import ingestion.bin as ingestion_bin
 import ingestion.main as ingestion_main
-import ingestion.services.embeddings as embeddings
-import ingestion.services.vectordb as vectordb
-import api.services.vectordb as api_vectordb
+import ingestion.clients.embeddings as embeddings
+import ingestion.clients.vectordb as vectordb
+import api.clients.vectordb as api_vectordb
 from api.main import app
 from fastapi.testclient import TestClient
 
@@ -160,16 +159,14 @@ def pipeline(tmp_path, monkeypatch, configure, knowledge_logs):
     monkeypatch.setattr(ingestion_main.embeddings, "encode_batch",
                         counted_encode_batch)
 
+    # The workspace is already laid out, so cloning it has nothing to do;
+    # the call is recorded so a test can check what it was asked to clone.
     clone_calls = []
-    real_run = subprocess.run
 
-    def run_without_kclone(command, *args, **kwargs):
-        if command[:2] == ["bash", "k-clone"]:
-            clone_calls.append(command)
-            return subprocess.CompletedProcess(command, 0)
-        return real_run(command, *args, **kwargs)
+    def record_clone(kalisio_development_dir, organization, workspace):
+        clone_calls.append(["bash", "k-clone", organization, workspace])
 
-    monkeypatch.setattr(ingestion_main.subprocess, "run", run_without_kclone)
+    monkeypatch.setattr(ingestion_main, "clone_workspace", record_clone)
 
     prompts = []
 

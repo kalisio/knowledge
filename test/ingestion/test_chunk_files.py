@@ -1,5 +1,5 @@
 from ingestion import chunkers
-from ingestion.services.state import compute_file_sha1
+from ingestion.pipeline.change_detection import compute_file_sha1
 
 JAVASCRIPT = "export function center () {\n  return [0, 0]\n}\n"
 MARKDOWN = "# Title\n\nSome prose about the map.\n"

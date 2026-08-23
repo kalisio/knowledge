@@ -2,9 +2,9 @@
 
 from fastapi import HTTPException
 
-import api.services.embeddings as embeddings
-import api.services.llm as llm
-import api.services.vectordb as vectordb
+import api.clients.embeddings as embeddings
+import api.clients.llm as llm
+import api.clients.vectordb as vectordb
 from api.config import get_config
 from api.logger import get_logger
 
@@ -47,7 +47,7 @@ def search_chunks(query, top_k):
 
 
 # ---------------------------------------------------------------------------
-# UTILS
+# UTILITIES
 # ---------------------------------------------------------------------------
 
 

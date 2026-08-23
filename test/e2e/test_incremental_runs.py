@@ -9,7 +9,7 @@ the index against what actually moved.
 import pytest
 
 import ingestion.chunkers as chunkers
-import ingestion.services.vectordb as vectordb
+import ingestion.clients.vectordb as vectordb
 
 from conftest import base_env
 from helpers import (CODE_COLLECTION, FILES_COLLECTION, METADATA_COLLECTION,
@@ -501,10 +501,10 @@ class TestRecoveringFromAPartialRun:
         before = ids_by_file()
         last_ingestion = vectordb.get_last_ingestion()
 
-        def failing_clone(command, *args, **kwargs):
-            raise subprocess.CalledProcessError(returncode=3, cmd=command)
+        def failing_clone(*args, **kwargs):
+            raise subprocess.CalledProcessError(returncode=3, cmd="k-clone")
 
-        monkeypatch.setattr(ingestion_main.subprocess, "run", failing_clone)
+        monkeypatch.setattr(ingestion_main, "clone_workspace", failing_clone)
 
         assert ingested.run() == 1
 

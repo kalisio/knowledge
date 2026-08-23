@@ -1,12 +1,4 @@
-"""Read the Kalisio corpus out of Qdrant.
-
-Read-only by design: the API never creates, fills or deletes a collection --
-that is the ingestion job's side of the contract. What both sides do share
-is the SHAPE of what is stored, described in read_payload() below and
-written by ingestion/store/vectordb.py. The end-to-end suite runs the two
-against one Qdrant, so a drift between them fails a test rather than
-silently returning empty results.
-"""
+"""Reads the Kalisio corpus out of Qdrant."""
 
 import uuid
 
@@ -100,7 +92,7 @@ def file_entry_id(repository, path):
 
 
 # ---------------------------------------------------------------------------
-# UTILS
+# UTILITIES
 # ---------------------------------------------------------------------------
 
 

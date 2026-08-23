@@ -10,7 +10,7 @@ stable file, a subject that does not survive the trip.
 import time
 
 from ingestion.config import get_config
-from ingestion.services.history import collect_commit_history, read_history
+from ingestion.pipeline.commit_history import collect_commit_history, read_history
 
 FIRST = "2026-01-01T00:00:00+00:00"
 SECOND = "2026-02-01T00:00:00+00:00"
@@ -231,7 +231,7 @@ def test_a_directory_that_is_not_a_repository_has_no_history(tmp_path):
 
 
 def test_a_missing_git_binary_is_not_an_error(repo, monkeypatch):
-    import ingestion.services.history as module
+    import ingestion.pipeline.commit_history as module
 
     def no_git(*args, **kwargs):
         raise FileNotFoundError("git")

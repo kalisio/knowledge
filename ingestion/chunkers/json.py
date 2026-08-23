@@ -1,3 +1,5 @@
+"""Cuts a JSON file into chunks, when its role is worth indexing."""
+
 import json
 import re
 
@@ -6,7 +8,7 @@ from langchain_text_splitters import (
     RecursiveJsonSplitter,
 )
 
-from ingestion.chunkers.locator import Locator
+from ingestion.chunkers.line_locator import LineLocator
 from ingestion.config import get_config
 
 # JSON roles worth indexing; package manifests and fixtures are skipped.
@@ -39,7 +41,7 @@ def chunk_json(text, path):
         units = _tree_units(data, config)
     # Chunks are numbered in file order, whatever order the units were built
     # in, so chunk_index reads like the file does.
-    locator = Locator(text)
+    locator = LineLocator(text)
     located = sorted(
         ((unit, body, _lines(text, keys, locator)) for unit, body, keys in units),
         key=lambda located_unit: located_unit[2])
@@ -48,7 +50,7 @@ def chunk_json(text, path):
 
 
 # ---------------------------------------------------------------------------
-# UTILS
+# UTILITIES
 # ---------------------------------------------------------------------------
 
 # Infer the file's role from its path and name.
@@ -122,7 +124,7 @@ def _tree_units(data, config):
 def _size_split(text, path, config):
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=config.chunk_size, chunk_overlap=config.chunk_overlap)
-    locator = Locator(text)
+    locator = LineLocator(text)
     return [_chunk(path, "<part>", piece, index,
                    locator.locate(piece) or locator.whole_file())
             for index, piece in enumerate(splitter.split_text(text))]

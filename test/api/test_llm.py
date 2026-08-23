@@ -2,9 +2,9 @@ from types import SimpleNamespace
 
 import pytest
 
-import api.services.llm as llm
+import api.clients.llm as llm
 from api.config import DEFAULT_SYSTEM_PROMPT
-from api.services.llm import _provider
+from api.clients.llm import _provider
 
 
 # --- local endpoints win over everything ----------------------------------

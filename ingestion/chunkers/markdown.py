@@ -1,3 +1,5 @@
+"""Cuts a markdown file into chunks, one per heading section."""
+
 from pathlib import Path
 
 from langchain_text_splitters import (
@@ -5,7 +7,7 @@ from langchain_text_splitters import (
     RecursiveCharacterTextSplitter,
 )
 
-from ingestion.chunkers.locator import Locator
+from ingestion.chunkers.line_locator import LineLocator
 from ingestion.config import get_config
 
 _HEADING_LEVELS = ("Header 1", "Header 2", "Header 3", "Header 4")
@@ -18,7 +20,7 @@ def chunk_markdown(text, path):
     title = _doc_title(text, Path(path).stem)
     sections = _split_prose(_merge_by_heading(atoms, config.chunk_size),
                             config)
-    locator = Locator(text)
+    locator = LineLocator(text)
     chunks = []
     for chunk_index, section in enumerate(sections):
         breadcrumb = _breadcrumb(section["metadata"], title)
@@ -38,7 +40,7 @@ def chunk_markdown(text, path):
     return chunks
 
 # ---------------------------------------------------------------------------
-# UTILS
+# UTILITIES
 # ---------------------------------------------------------------------------
 
 # Get the file's first h1 title, or `fallback` when it has none.

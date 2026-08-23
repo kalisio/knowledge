@@ -1,14 +1,4 @@
-"""Embed documents into vectors with the configured SentenceTransformer.
-
-Loads the model named by EMBEDDING_MODEL once (lazily, on first use).
-Documents are embedded AS-IS, without the retrieval instruction the API
-prepends to a query: Qwen3-Embedding is trained for that asymmetry. Vectors
-are L2-normalized, so cosine similarity in Qdrant reduces to a dot product.
-
-The ingestion job and the API must embed with the SAME model for a chunk
-vector and a query vector to be comparable -- which is why the model name
-comes from the configuration rather than being hard-coded here.
-"""
+"""Embeds document chunks into the vectors stored in Qdrant."""
 
 import time
 
@@ -30,6 +20,10 @@ _PROGRESS_SLICE = 256
 log = get_logger("embeddings")
 
 
+# Documents are embedded as-is while the API prefixes a query with a
+# retrieval instruction: Qwen3-Embedding is trained for that asymmetry.
+# Both sides must use the model named by EMBEDDING_MODEL, or a chunk
+# vector and a query vector are not comparable.
 # Embed many documents at once (no query prefix), for throughput. Progress
 # is logged as it goes, so a long run can be followed and its rate read.
 def encode_batch(texts):
@@ -57,7 +51,7 @@ def encode_batch(texts):
 
 
 # ---------------------------------------------------------------------------
-# UTILS
+# UTILITIES
 # ---------------------------------------------------------------------------
 
 

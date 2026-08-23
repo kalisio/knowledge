@@ -52,3 +52,6 @@ lib-cov
 # notebook data symlinks (machine-specific, point at sibling kalisio repos)
 /data
 /docs/experiments/data
+
+# Build staging area (scripts/build_ingestion_job.sh)
+.build/
