@@ -1,0 +1,38 @@
+{
+  "source": "sources/mapProto.js",
+  "path": "map/client/leaflet/mapProto.js",
+  "chunks": [
+    {
+      "chunk_index": 0,
+      "breadcrumb": "",
+      "start_line": 1,
+      "end_line": 1,
+      "text": "// map/client/leaflet/mapProto.js\nimport L from 'leaflet'",
+      "excerpt": "import L from 'leaflet'"
+    },
+    {
+      "chunk_index": 1,
+      "breadcrumb": "mapProto",
+      "start_line": 3,
+      "end_line": 22,
+      "text": "// map/client/leaflet/mapProto.js :: mapProto\nconst mapProto = L.extend({}, L.Map.prototype)\n\nL.Map.include({\n\n    /**\n     * Given a pixel coordinate relative to the origin pixel, returns the\n     * corresponding pixel coordinate relative to the map container.\n     *\n     * @param {L.Point} point pixel screen coordinates\n     * @returns {L.Point} transformed pixel point\n     */\n    layerPointToContainerPoint: function (point) {\n        if (!this._rotate) {\n            return mapProto.layerPointToContainerPoint.apply(this, arguments)\n        }\n        return L.point(point)\n            .add(this._getRotatePanePos())\n            .rotateFrom(this._bearing, this._getRotatePanePos())\n            .add(this._getMapPanePos())\n    },",
+      "excerpt": "const mapProto = L.extend({}, L.Map.prototype)\n\nL.Map.include({\n\n    /**\n     * Given a pixel coordinate relative to the origin pixel, returns the\n     * corresponding pixel coordinate relative to the map container.\n     *\n     * @param {L.Point} point pixel screen coordinates\n     * @returns {L.Point} transformed pixel point\n     */\n    layerPointToContainerPoint: function (point) {\n        if (!this._rotate) {\n            return mapProto.layerPointToContainerPoint.apply(this, arguments)\n        }\n        return L.point(point)\n            .add(this._getRotatePanePos())\n            .rotateFrom(this._bearing, this._getRotatePanePos())\n            .add(this._getMapPanePos())\n    },"
+    },
+    {
+      "chunk_index": 2,
+      "breadcrumb": "mapProto",
+      "start_line": 24,
+      "end_line": 48,
+      "text": "// map/client/leaflet/mapProto.js :: mapProto\n/**\n     * Converts a coordinate from the rotated pane reference system to the\n     * reference system of the not rotated map pane.\n     *\n     * @param {L.Point} point pixel screen coordinates\n     * @returns {L.Point}\n     */\n    rotatedPointToMapPanePoint: function (point) {\n        return L.point(point)\n            .rotate(this._bearing)\n            ._add(this._getRotatePanePos())\n    },\n\n    /**\n     * Converts a coordinate from the map pane reference system to the\n     * reference system of the rotated pane.\n     *\n     * @param {L.Point} point pixel screen coordinates\n     * @returns {L.Point}\n     */\n    mapPanePointToRotatedPoint: function (point) {\n        return L.point(point)\n            ._subtract(this._getRotatePanePos())\n            .rotate(-this._bearing)\n    },",
+      "excerpt": "    /**\n     * Converts a coordinate from the rotated pane reference system to the\n     * reference system of the not rotated map pane.\n     *\n     * @param {L.Point} point pixel screen coordinates\n     * @returns {L.Point}\n     */\n    rotatedPointToMapPanePoint: function (point) {\n        return L.point(point)\n            .rotate(this._bearing)\n            ._add(this._getRotatePanePos())\n    },\n\n    /**\n     * Converts a coordinate from the map pane reference system to the\n     * reference system of the rotated pane.\n     *\n     * @param {L.Point} point pixel screen coordinates\n     * @returns {L.Point}\n     */\n    mapPanePointToRotatedPoint: function (point) {\n        return L.point(point)\n            ._subtract(this._getRotatePanePos())\n            .rotate(-this._bearing)\n    },"
+    },
+    {
+      "chunk_index": 3,
+      "breadcrumb": "mapProto",
+      "start_line": 50,
+      "end_line": 71,
+      "text": "// map/client/leaflet/mapProto.js :: mapProto\n/**\n     * Offset of the specified place to the current center, in pixels.\n     *\n     * @param {L.LatLng} latlng map coordinates\n     */\n    _getCenterOffset: function (latlng) {\n        let centerOffset = mapProto._getCenterOffset.apply(this, arguments)\n        if (this._rotate) {\n            centerOffset = centerOffset.rotate(this._bearing)\n        }\n        return centerOffset\n    },\n\n    /**\n     * Current position of the rotate pane, or the origin when there is none.\n     */\n    _getRotatePanePos: function () {\n        return this._rotatePanePos || new L.Point(0, 0)\n    },\n})\n\nexport default mapProto",
+      "excerpt": "    /**\n     * Offset of the specified place to the current center, in pixels.\n     *\n     * @param {L.LatLng} latlng map coordinates\n     */\n    _getCenterOffset: function (latlng) {\n        let centerOffset = mapProto._getCenterOffset.apply(this, arguments)\n        if (this._rotate) {\n            centerOffset = centerOffset.rotate(this._bearing)\n        }\n        return centerOffset\n    },\n\n    /**\n     * Current position of the rotate pane, or the origin when there is none.\n     */\n    _getRotatePanePos: function () {\n        return this._rotatePanePos || new L.Point(0, 0)\n    },\n})\n\nexport default mapProto"
+    }
+  ]
+}

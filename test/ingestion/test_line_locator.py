@@ -133,3 +133,86 @@ def test_the_whole_file_covers_every_line():
 
 def test_the_whole_file_of_an_empty_text_is_line_one():
     assert LineLocator("").whole_file() == (1, 1)
+
+
+# --- a repeated opening line -----------------------------------------------
+
+# An object literal whose members are each introduced by the same docblock
+# opening, which is the shape a Leaflet plugin or a KDK mixin has.
+LITERAL = "\n".join([
+    "const mapProto = {",                       # 1
+    "",                                         # 2
+    "    /**",                                  # 3
+    "     * Converts a container point.",       # 4
+    "     */",                                  # 5
+    "    containerPoint: function (point) {",   # 6
+    "        return point",                     # 7
+    "    },",                                   # 8
+    "",                                         # 9
+    "    /**",                                  # 10
+    "     * Converts a rotated point.",         # 11
+    "     */",                                  # 12
+    "    rotatedPoint: function (point) {",     # 13
+    "        return point.rotate(this._bearing)",  # 14
+    "    },",                                   # 15
+    "}",                                        # 16
+])
+
+
+def test_a_piece_is_placed_by_its_own_run_when_its_first_line_repeats():
+    # The splitter strips the indentation, so the piece opens on a bare
+    # "/**" that occurs twice in the file. Anchoring on that first line puts
+    # the piece on the first docblock after the cursor -- a real function,
+    # just not this one -- and the whole chunk is then attributed to the
+    # wrong lines. The run of lines is what tells the two apart.
+    locator = LineLocator(LITERAL)
+    locator.locate("const mapProto = {")
+
+    piece = ("/**\n     * Converts a rotated point.\n     */\n"
+             "    rotatedPoint: function (point) {\n"
+             "        return point.rotate(this._bearing)\n    },")
+
+    assert locator.locate(piece) == (10, 15)
+
+
+def test_the_first_of_two_identical_openings_is_still_found():
+    locator = LineLocator(LITERAL)
+    locator.locate("const mapProto = {")
+
+    piece = ("/**\n     * Converts a container point.\n     */\n"
+             "    containerPoint: function (point) {\n"
+             "        return point\n    },")
+
+    assert locator.locate(piece) == (3, 8)
+
+
+def test_two_pieces_in_a_row_land_on_their_own_lines():
+    # What a chunker actually does: locate each piece in turn, the cursor
+    # carrying over. The second must not be dragged back onto the first.
+    locator = LineLocator(LITERAL)
+    first = locator.locate(
+        "/**\n     * Converts a container point.\n     */\n"
+        "    containerPoint: function (point) {\n        return point\n    },")
+    second = locator.locate(
+        "/**\n     * Converts a rotated point.\n     */\n"
+        "    rotatedPoint: function (point) {\n"
+        "        return point.rotate(this._bearing)\n    },")
+
+    assert (first, second) == ((3, 8), (10, 15))
+
+
+def test_a_piece_the_splitter_cut_short_still_lands_on_its_start():
+    # A piece too long for the chunk size loses its tail; what is left has
+    # to place it, and the range covers what survived.
+    locator = LineLocator(LITERAL)
+
+    piece = ("/**\n     * Converts a rotated point.\n     */\n"
+             "    rotatedPoint: function (point) {\n"
+             "        return point.rotate(this._bearing)\n"
+             "    },\n    somethingTheSplitterInvented: true")
+
+    assert locator.locate(piece) == (10, 15)
+
+
+def test_a_piece_that_is_not_in_the_file_is_not_placed():
+    assert LineLocator(LITERAL).locate("nothing like this exists") is None

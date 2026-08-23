@@ -32,6 +32,9 @@ SAMPLES = {
     "geolocation.js": "core/client/geolocation.js",
     "KLayerList.vue": "client/components/KLayerList.vue",
     "en.json": "client/i18n/en.json",
+    # An object literal whose members share the same docblock opening: the
+    # shape that used to give a chunk the line range of its neighbour.
+    "mapProto.js": "map/client/leaflet/mapProto.js",
 }
 
 
@@ -129,6 +132,42 @@ def test_the_content_of_the_range_covers_the_chunk(sample):
                 f"{sample.name} chunk {metadata['chunk_index']}: "
                 f"{line.strip()!r} is outside lines "
                 f"{metadata['start_line']}-{metadata['end_line']}")
+
+
+def test_the_range_opens_on_the_chunk_itself(sample):
+    # The strict version of the check above, and the one that catches a
+    # misplaced range: the chunk's own lines have to run down the range in
+    # order, from its first content line. A chunk opening on `/**`, `}` or
+    # `return` used to be placed on the first such line after the previous
+    # chunk instead of on its own -- the range named a real function, just
+    # not this one, and every looser check still passed.
+    #
+    # JSON units are re-serialised rather than sliced, so their text is not
+    # a run of file lines; they are located by key offset and covered by the
+    # tests above.
+    if sample.name.endswith(".json"):
+        pytest.skip("JSON units are re-serialised, not sliced from the file")
+
+    for chunk in sample.chunks:
+        metadata = chunk["metadata"]
+        window = [line.strip() for line
+                  in sample.lines[metadata["start_line"] - 1:metadata["end_line"]]
+                  if line.strip()]
+        body = [line.strip() for line in chunk["text"].splitlines()
+                if line.strip()]
+        # The generated header sits above the content; the range starts at
+        # the first body line that is also the first line of the range.
+        opening = next((index for index, line in enumerate(body)
+                        if window and line == window[0]), None)
+        assert opening is not None, (
+            f"{sample.name} chunk {metadata['chunk_index']}: lines "
+            f"{metadata['start_line']}-{metadata['end_line']} open on "
+            f"{window[0]!r}, which the chunk does not contain")
+        shared = min(len(body) - opening, len(window))
+        assert body[opening:opening + shared] == window[:shared], (
+            f"{sample.name} chunk {metadata['chunk_index']}: lines "
+            f"{metadata['start_line']}-{metadata['end_line']} do not run "
+            f"down the chunk's own content")
 
 
 # ---------------------------------------------------------------------------

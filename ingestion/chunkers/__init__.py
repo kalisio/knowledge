@@ -9,8 +9,9 @@ from ingestion.pipeline.change_detection import compute_file_sha1, get_file_key
 # Bump by hand when a chunker's splitting behaviour changes, or when the
 # stored payload does. 2: chunks carry their line range and the payload moved
 # to the path/repo/content contract. 3: the commit history left the chunk
-# payload for a per-file entry.
-CHUNKING_VERSION = 3
+# payload for a per-file entry. 4: a chunk is located by its whole run of
+# lines, so the stored line ranges change.
+CHUNKING_VERSION = 4
 
 # Which chunker handles each file extension.
 _CHUNKERS = {
