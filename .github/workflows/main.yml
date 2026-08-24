@@ -8,13 +8,13 @@ on:
         default: false
         required: false
         type: boolean
-      build_service:
-        description: "Build service"
+      build_api:
+        description: "Build api"
         default: false
         required: false
         type: boolean
-      build_ingestion_job:
-        description: "Build ingestion job"
+      build_ingestion:
+        description: "Build ingestion"
         default: false
         required: false
         type: boolean
@@ -47,8 +47,8 @@ jobs:
         env:
           SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
         run: bash ./scripts/run_tests.sh -s -r ${{ github.job }}
-  build_service:
-    name: Build service
+  build_api:
+    name: Build api
     if: ${{ !contains(github.event.head_commit.message, 'skip build') }}
     runs-on: ubuntu-22.04
     steps:
@@ -62,12 +62,12 @@ jobs:
         env:
           KALISIO_GITHUB_URL: ${{ secrets.KALISIO_GITHUB_URL }}
         run: bash ./scripts/setup_workspace.sh
-      - name: Build service
+      - name: Build api
         env:
           SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
-        run: bash ./scripts/build_service.sh -p -r ${{ github.job }}
-  build_ingestion_job:
-    name: Build ingestion job
+        run: bash ./scripts/build_api.sh -p -r ${{ github.job }}
+  build_ingestion:
+    name: Build ingestion
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout repo
@@ -80,10 +80,10 @@ jobs:
         env:
           KALISIO_GITHUB_URL: ${{ secrets.KALISIO_GITHUB_URL }}
         run: bash ./scripts/setup_workspace.sh
-      - name: Build service
+      - name: Build ingestion
         env:
           SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
-        run: bash ./scripts/build_ingestion_job.sh -p -r ${{ github.job }}
+        run: bash ./scripts/build_ingestion.sh -p -r ${{ github.job }}
   build_docs:
     name: Build docs
     if: ${{

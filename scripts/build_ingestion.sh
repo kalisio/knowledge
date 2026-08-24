@@ -13,7 +13,7 @@ WORKSPACE_DIR="$(dirname "$ROOT_DIR")"
 ##
 
 PUBLISH=false
-CI_STEP_NAME="Build ingestion job"
+CI_STEP_NAME="Build ingestion"
 while getopts "pr:" option; do
     case $option in
         p) # publish app
@@ -32,7 +32,9 @@ done
 ## Init workspace
 ##
 
-NAME="$(get_toml_value "$ROOT_DIR/pyproject.toml" 'project.name')-job"
+## Same shape as the api image (knowledge-api): the project name plus the
+## component the image runs.
+NAME="$(get_toml_value "$ROOT_DIR/pyproject.toml" 'project.name')-ingestion"
 VERSION=$(get_toml_value "$ROOT_DIR/pyproject.toml" 'project.version')
 
 echo "About to build $NAME v$VERSION ..."

@@ -13,7 +13,7 @@ WORKSPACE_DIR="$(dirname "$ROOT_DIR")"
 ##
 
 PUBLISH=false
-CI_STEP_NAME="Build service"
+CI_STEP_NAME="Build api"
 while getopts "pr:" option; do
     case $option in
         p) # publish app
@@ -32,7 +32,9 @@ done
 ## Init workspace
 ##
 
-NAME=$(get_toml_value "$ROOT_DIR/pyproject.toml" 'project.name')
+## Same shape as the ingestion image (knowledge-ingestion): the project name
+## plus the component the image runs.
+NAME="$(get_toml_value "$ROOT_DIR/pyproject.toml" 'project.name')-api"
 VERSION=$(get_toml_value "$ROOT_DIR/pyproject.toml" 'project.version')
 GIT_TAG=$(get_git_tag "$ROOT_DIR")
 

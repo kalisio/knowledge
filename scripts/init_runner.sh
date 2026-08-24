@@ -15,11 +15,11 @@ init_github_run_tests() {
     install_reqs age sops sonar_scanner_cli micromamba
 }
 
-init_github_build_service() {
+init_github_build_api() {
     install_reqs age sops
 }
 
-init_github_build_ingestion_job() {
+init_github_build_ingestion() {
     install_reqs age sops
 }
 
