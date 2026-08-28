@@ -3,9 +3,14 @@ LABEL maintainer="<contact@kalisio.xyz>"
 
 ENV HOME=/app
 ENV PYTHONUNBUFFERED=1
-ENV HF_HOME=/tmp/huggingface
 ENV XDG_CACHE_HOME=/tmp/.cache
-ENV SENTENCE_TRANSFORMERS_HOME=/tmp/sentence-transformers
+
+# The embedding model lives in the image, not in a cache the workspace has to
+# carry: the workspace is wiped between runs so the repositories are always
+# fresh, and refetching 1.2 GB from HuggingFace nightly -- unauthenticated
+# and rate-limited -- would make the job depend on a service it does not own.
+ENV HF_HOME=/opt/models/huggingface
+ENV SENTENCE_TRANSFORMERS_HOME=/opt/models/sentence-transformers
 
 # The Kalisio dev tooling is installed in the image, not in the workspace:
 # the workspace is a volume that starts empty, and k-clone is what fills it.
@@ -84,7 +89,9 @@ RUN printf '%s\n' \
 # owned by root; COPY --chown only chowns what it copies, not a pre-existing
 # parent dir, so force ownership before copying the app code into it.
 RUN mkdir -p ${HOME} && chown mambauser:mambauser ${HOME} \
-    && ln -sf /etc/profile.d/kalisio.sh ${HOME}/.bashrc
+    && ln -sf /etc/profile.d/kalisio.sh ${HOME}/.bashrc \
+    # /opt belongs to root; the model is fetched as mambauser below.
+    && mkdir -p /opt/models && chown -R mambauser:mambauser /opt/models
 
 # Named explicitly rather than `COPY .`: the build context also holds the
 # staged tooling above, which has no business being copied a second time.
@@ -100,5 +107,12 @@ RUN git config --global --add safe.directory '*'
 
 RUN micromamba install -y -n base -f environment.runtime.yml \
     && micromamba clean --all --yes
+
+# Must match the EMBEDDING_MODEL the job is configured with, and the one the
+# api queries with; another value still works, it is downloaded at first use.
+ARG EMBEDDING_MODEL=Qwen/Qwen3-Embedding-0.6B
+RUN micromamba run -n base python -c \
+    "from sentence_transformers import SentenceTransformer; \
+     SentenceTransformer('${EMBEDDING_MODEL}')"
 
 CMD ["micromamba", "run", "-n", "base", "python", "-m", "ingestion.bin"]
