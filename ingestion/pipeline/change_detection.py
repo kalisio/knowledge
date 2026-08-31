@@ -38,14 +38,24 @@ def hash_files(files):
 
 # Rebuild {(repository, path): file_sha1} from the indexed entries.
 # Empty on the first run, when nothing is indexed yet.
+#
+# Two sources, read in that order. The chunk payloads each stamp the digest
+# of the file they were cut from, and are what the index held before file
+# entries carried one. The file entries are the register proper -- one per
+# scanned file, including those that yield no chunk -- and they win: they
+# are written last in a run, so a run that died between writing the chunks
+# and writing the entries leaves the older digest here, and the file is
+# reindexed rather than wrongly considered done.
 def load_indexed_file_hashes():
     indexed = {}
-    for payload in vectordb.iter_payloads():
-        digest = payload.get("file_sha1", "")
-        if not digest:
-            continue
-        key = (payload.get("repo", ""), payload.get("path", ""))
-        indexed[key] = digest
+    for payloads in (vectordb.iter_chunk_payloads(),
+                     vectordb.iter_file_entry_payloads()):
+        for payload in payloads:
+            digest = payload.get("file_sha1", "")
+            if not digest:
+                continue
+            key = (payload.get("repo", ""), payload.get("path", ""))
+            indexed[key] = digest
     return indexed
 
 

@@ -122,23 +122,20 @@ def upsert(chunks, vectors, batch_size=64):
     return len(records)
 
 
-# Yield the payload of every stored entry, paging through the collection.
-# Used to rebuild the indexed-file state; yields nothing if the collection
-# does not exist yet (first run).
-def iter_payloads(page_size=256):
-    client = _get_qdrant_client()
-    name = get_config().qdrant_collection_code
-    if not client.collection_exists(name):
-        return
-    offset = None
-    while True:
-        records, offset = client.scroll(
-            collection_name=name, with_payload=True, with_vectors=False,
-            limit=page_size, offset=offset)
-        for record in records:
-            yield record.payload
-        if offset is None:
-            break
+# The identity and digest of every stored chunk. Only the three fields the
+# indexed-file state needs are asked for: the whole payload carries the
+# chunk text, which would mean pulling the entire corpus over the wire to
+# answer a question about hashes.
+def iter_chunk_payloads(page_size=256):
+    yield from _iter_payloads(get_config().qdrant_collection_code,
+                              ["repo", "path", "file_sha1"], page_size)
+
+
+# The same, from the file entries: one per scanned file, including the files
+# that yield no chunk and therefore appear nowhere in the code collection.
+def iter_file_entry_payloads(page_size=256):
+    yield from _iter_payloads(get_config().qdrant_collection_files,
+                              ["repo", "path", "file_sha1"], page_size)
 
 
 # Persist the last-ingestion timestamp and the indexing config used.
@@ -158,20 +155,25 @@ def set_last_ingestion(collection_name, timestamp, embedding_model, chunking_ver
     )
 
 
-# Store one entry per file holding its commit history. Keeping it here
-# rather than on every chunk is what makes a real history affordable: a file
-# cut into twenty chunks used to carry twenty copies of it.
-def upsert_file_entries(histories, batch_size=64):
+# Store one entry per file holding its commit history and its digest.
+# Keeping the history here rather than on every chunk is what makes a real
+# history affordable: a file cut into twenty chunks used to carry twenty
+# copies of it. The digest rides along because this is the only record a
+# file that yields no chunk ever gets -- `file_hashes` maps (repo, path) to
+# the digest of what was just scanned.
+def upsert_file_entries(histories, file_hashes=None, batch_size=64):
     if not histories:
         return 0
     client = _get_qdrant_client()
     name = get_config().qdrant_collection_files
+    file_hashes = file_hashes or {}
     points = [
         PointStruct(
             id=file_entry_id(repo, path),
             vector=[0.0],
             payload={"repo": repo, "path": path,
-                     "commit_history": list(subjects)},
+                     "commit_history": list(subjects),
+                     "file_sha1": file_hashes.get((repo, path), "")},
         )
         for (repo, path), subjects in histories.items()
     ]
@@ -270,6 +272,23 @@ def _get_qdrant_client():
                 f"cannot reach Qdrant at {url}: {exc}") from exc
         _client = client
     return _client
+
+
+# Page through a collection, yielding the named payload fields of every
+# entry. Yields nothing when the collection does not exist yet (first run).
+def _iter_payloads(name, fields, page_size):
+    client = _get_qdrant_client()
+    if not client.collection_exists(name):
+        return
+    offset = None
+    while True:
+        records, offset = client.scroll(
+            collection_name=name, with_payload=fields, with_vectors=False,
+            limit=page_size, offset=offset)
+        for record in records:
+            yield record.payload
+        if offset is None:
+            break
 
 
 # Assemble the id + vector + payload into the PointStruct we upsert.

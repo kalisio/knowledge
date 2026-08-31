@@ -24,9 +24,18 @@ def test_compute_file_sha1_changes_with_content():
 
 # --- load_indexed_file_hashes: rebuild the state from stored payloads -----
 
+# Stub the two sources load_indexed_file_hashes reads: the chunk payloads
+# and the file entries.
+def _stub_index(monkeypatch, chunks=(), file_entries=()):
+    monkeypatch.setattr(indexed_file_state.vectordb, "iter_chunk_payloads",
+                        lambda: list(chunks))
+    monkeypatch.setattr(indexed_file_state.vectordb, "iter_file_entry_payloads",
+                        lambda: list(file_entries))
+
+
 def test_load_indexed_file_hashes_keys_on_repository_and_path(
         monkeypatch):
-    monkeypatch.setattr(indexed_file_state.vectordb, "iter_payloads", lambda: [
+    _stub_index(monkeypatch, chunks=[
         {"repo": "kdk", "path": "map/x.js", "file_sha1": "aaa"},
         {"repo": "kano", "path": "map/x.js", "file_sha1": "bbb"},
     ])
@@ -39,7 +48,7 @@ def test_load_indexed_file_hashes_keys_on_repository_and_path(
 def test_load_indexed_file_hashes_shares_one_entry_per_file(monkeypatch):
     # Every chunk of a file carries the same file_sha1, so many payloads
     # collapse into a single entry.
-    monkeypatch.setattr(indexed_file_state.vectordb, "iter_payloads", lambda: [
+    _stub_index(monkeypatch, chunks=[
         {"repo": "kdk", "path": "map/x.js", "file_sha1": "aaa"},
         {"repo": "kdk", "path": "map/x.js", "file_sha1": "aaa"},
     ])
@@ -48,7 +57,7 @@ def test_load_indexed_file_hashes_shares_one_entry_per_file(monkeypatch):
 
 
 def test_load_indexed_file_hashes_skips_payloads_without_a_digest(monkeypatch):
-    monkeypatch.setattr(indexed_file_state.vectordb, "iter_payloads", lambda: [
+    _stub_index(monkeypatch, chunks=[
         {"repo": "kdk", "path": "map/x.js", "file_sha1": ""},
         {"repo": "kdk", "path": "map/y.js"},
     ])
@@ -56,9 +65,40 @@ def test_load_indexed_file_hashes_skips_payloads_without_a_digest(monkeypatch):
 
 
 def test_load_indexed_file_hashes_is_empty_on_the_first_run(monkeypatch):
-    monkeypatch.setattr(
-        indexed_file_state.vectordb, "iter_payloads", lambda: [])
+    _stub_index(monkeypatch)
     assert indexed_file_state.load_indexed_file_hashes() == {}
+
+
+def test_load_indexed_file_hashes_reads_the_files_that_yield_no_chunk(
+        monkeypatch):
+    # A .prettierrc.json produces nothing searchable, so it appears in no
+    # chunk payload. Without its file entry it would come back as new on
+    # every single run, and be re-read and re-chunked for nothing.
+    _stub_index(
+        monkeypatch,
+        chunks=[{"repo": "kdk", "path": "map/x.js", "file_sha1": "aaa"}],
+        file_entries=[
+            {"repo": "kdk", "path": "map/x.js", "file_sha1": "aaa"},
+            {"repo": "kdk", "path": ".prettierrc.json", "file_sha1": "ccc"},
+        ])
+    assert indexed_file_state.load_indexed_file_hashes() == {
+        ("kdk", "map/x.js"): "aaa",
+        ("kdk", ".prettierrc.json"): "ccc",
+    }
+
+
+def test_load_indexed_file_hashes_prefers_the_file_entry(monkeypatch):
+    # The entries are written after the chunks, so a run that died in
+    # between leaves the older digest on the entry. Trusting it reindexes
+    # the file, where trusting the chunk would declare it done on a write
+    # that never finished.
+    _stub_index(
+        monkeypatch,
+        chunks=[{"repo": "kdk", "path": "map/x.js", "file_sha1": "new"}],
+        file_entries=[{"repo": "kdk", "path": "map/x.js",
+                       "file_sha1": "old"}])
+    assert indexed_file_state.load_indexed_file_hashes() == {
+        ("kdk", "map/x.js"): "old"}
 
 
 # --- get_file_key: the identity the whole index is keyed on ---------------

@@ -111,9 +111,12 @@ def _ingest(config, log, started):
         log.info("  repositories: %s", _repository_list(repositories))
         log.info("  by type: %s", _by_extension(indexable_files))
 
-        scanned_file_keys = {get_file_key(path, workspace_root)
-                             for path in indexable_files}
         scanned_file_hashes = hash_files(indexable_files)
+        # The same digests keyed the way the index identifies a file. Step 7
+        # stores them, which is how a file that yields no chunk is recorded.
+        hashes_by_file_key = {get_file_key(path, workspace_root): digest
+                              for path, digest in scanned_file_hashes.items()}
+        scanned_file_keys = set(hashes_by_file_key)
         indexed_file_hashes = load_indexed_file_hashes()
         log.info("  already indexed: %d files", len(indexed_file_hashes))
 
@@ -166,7 +169,7 @@ def _ingest(config, log, started):
     # touched still has to let its oldest commits go.
     with step(log, 7, _STEPS, "refreshing the commit history"):
         histories = collect_commit_history(scanned_file_keys, repositories)
-        vectordb.upsert_file_entries(histories)
+        vectordb.upsert_file_entries(histories, hashes_by_file_key)
         subjects = sum(len(entry) for entry in histories.values())
         log.info("  commit histories refreshed: %d (subjects: %d)",
                  len(histories), subjects)
@@ -245,9 +248,10 @@ def _log_change_breakdown(log, files_to_index, workspace_root, indexed,
              new, len(files_to_index) - new, len(scanned) - len(files_to_index))
 
 
-# Files that were selected but produced nothing. They are not indexed, so
-# nothing records that they were looked at, and they come back as "new" on
-# every run -- worth naming rather than leaving as an unexplained count.
+# Files that were selected but produced nothing searchable. Their digest is
+# still recorded at step 7, so they are not looked at again until they
+# change -- but a count with no explanation is what makes a run puzzling
+# afterwards, so name a few of them.
 def _log_barren_files(log, files_to_index, chunks, workspace_root):
     chunked = {(chunk["metadata"]["repo"], chunk["metadata"]["path"])
                for chunk in chunks}
@@ -256,7 +260,7 @@ def _log_barren_files(log, files_to_index, chunks, workspace_root):
     if not barren:
         return
     names = ", ".join(f"{repo}/{path}" for repo, path in barren[:5])
-    log.info("  %d file(s) yielded no chunk and stay unindexed "
+    log.info("  %d file(s) yielded no chunk and are not searchable "
              "(empty, or a role the chunker skips): %s%s",
              len(barren), names, " ..." if len(barren) > 5 else "")
 def _log_outcome(config, log, files, chunks):

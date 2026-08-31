@@ -98,6 +98,53 @@ def test_the_file_entry_id_is_deterministic_and_distinct_per_file():
             != vectordb.payload_id("kdk", "map/base.js", 0, "text"))
 
 
+# --- upsert_file_entries: the register of what has been scanned -----------
+
+# Captures the points a call would upsert, without a Qdrant.
+class _RecordingClient:
+    def __init__(self):
+        self.points = []
+
+    def upsert(self, collection_name, points):
+        self.points.extend(points)
+
+
+def _upsert_file_entries(monkeypatch, histories, file_hashes=None):
+    client = _RecordingClient()
+    monkeypatch.setattr(vectordb, "_get_qdrant_client", lambda: client)
+    vectordb.upsert_file_entries(histories, file_hashes)
+    return {point.payload["path"]: point.payload for point in client.points}
+
+
+def test_the_file_entry_carries_the_digest_of_the_scanned_file(monkeypatch):
+    payloads = _upsert_file_entries(
+        monkeypatch,
+        {("kdk", "map/base.js"): ["fix: something"]},
+        {("kdk", "map/base.js"): "abc123"})
+
+    assert payloads["map/base.js"]["file_sha1"] == "abc123"
+    assert payloads["map/base.js"]["commit_history"] == ["fix: something"]
+
+
+def test_the_file_entry_records_a_file_that_yielded_no_chunk(monkeypatch):
+    # The whole point of holding the digest here: a .prettierrc.json is
+    # scanned but produces nothing searchable, so the code collection knows
+    # nothing about it and only this entry can say it was already looked at.
+    payloads = _upsert_file_entries(
+        monkeypatch,
+        {("kdk", ".prettierrc.json"): []},
+        {("kdk", ".prettierrc.json"): "ccc"})
+
+    assert payloads[".prettierrc.json"]["file_sha1"] == "ccc"
+
+
+def test_the_file_entry_digest_is_empty_when_it_is_not_known(monkeypatch):
+    payloads = _upsert_file_entries(
+        monkeypatch, {("kdk", "map/base.js"): []})
+
+    assert payloads["map/base.js"]["file_sha1"] == ""
+
+
 # --- the digests -----------------------------------------------------------
 
 def test_the_content_digest_is_the_sha1_of_the_chunk_text():
