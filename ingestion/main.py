@@ -14,8 +14,8 @@ from ingestion.logger import format_duration, get_logger, step
 from ingestion.pipeline.commit_history import collect_commit_history
 from ingestion.pipeline.workspace_scanner import find_repositories, scan_indexable_files
 from ingestion.pipeline.change_detection import (
-    find_deleted_files, get_file_key, hash_files, load_indexed_file_hashes,
-    select_changed_files)
+    find_deleted_files, get_file_key, hash_files, load_barren_file_hashes,
+    load_indexed_file_hashes, select_changed_files)
 from ingestion.pipeline.workspace_clone import clone_workspace
 
 _STEPS = 7
@@ -117,8 +117,15 @@ def _ingest(config, log, started):
         hashes_by_file_key = {get_file_key(path, workspace_root): digest
                               for path, digest in scanned_file_hashes.items()}
         scanned_file_keys = set(hashes_by_file_key)
-        indexed_file_hashes = load_indexed_file_hashes()
-        log.info("  already indexed: %d files", len(indexed_file_hashes))
+        # A file needs no work if its chunks are indexed, or if it is on
+        # record as producing none. The chunks win where both know it: they
+        # are the searchable half, and a lost code collection has to mean a
+        # reindex, not a corpus that no run will ever rebuild.
+        barren_file_hashes = load_barren_file_hashes()
+        indexed_file_hashes = {**barren_file_hashes,
+                               **load_indexed_file_hashes()}
+        log.info("  already indexed: %d files (%d yielding no chunk)",
+                 len(indexed_file_hashes), len(barren_file_hashes))
 
         deleted_file_keys = find_deleted_files(indexed_file_hashes,
                                                scanned_file_keys)
@@ -141,7 +148,9 @@ def _ingest(config, log, started):
                  len(files_to_index), len(chunks_to_index))
         if chunks_to_index:
             log.info("  chunks by type: %s", _chunks_by_type(chunks_to_index))
-        _log_barren_files(log, files_to_index, chunks_to_index, workspace_root)
+        barren_file_keys = _barren_file_keys(files_to_index, chunks_to_index,
+                                             workspace_root)
+        _log_barren_files(log, barren_file_keys)
 
     # Step 6: embed and store
     with step(log, 6, _STEPS,
@@ -169,7 +178,15 @@ def _ingest(config, log, started):
     # touched still has to let its oldest commits go.
     with step(log, 7, _STEPS, "refreshing the commit history"):
         histories = collect_commit_history(scanned_file_keys, repositories)
-        vectordb.upsert_file_entries(histories, hashes_by_file_key)
+        # Only a file with nothing to index carries its digest here; every
+        # other file is described by its chunks. The files this run did not
+        # look at keep the standing on their entry.
+        reindexed = {get_file_key(path, workspace_root)
+                     for path in files_to_index}
+        barren = (set(barren_file_hashes) - reindexed) | set(barren_file_keys)
+        vectordb.upsert_file_entries(
+            histories, {key: hashes_by_file_key[key] for key in barren
+                        if key in hashes_by_file_key})
         subjects = sum(len(entry) for entry in histories.values())
         log.info("  commit histories refreshed: %d (subjects: %d)",
                  len(histories), subjects)
@@ -248,15 +265,20 @@ def _log_change_breakdown(log, files_to_index, workspace_root, indexed,
              new, len(files_to_index) - new, len(scanned) - len(files_to_index))
 
 
-# Files that were selected but produced nothing searchable. Their digest is
-# still recorded at step 7, so they are not looked at again until they
-# change -- but a count with no explanation is what makes a run puzzling
-# afterwards, so name a few of them.
-def _log_barren_files(log, files_to_index, chunks, workspace_root):
+# The files this run looked at that produced nothing searchable. Step 7
+# records their digest, which is the only thing that keeps them from being
+# selected again on every later run.
+def _barren_file_keys(files_to_index, chunks, workspace_root):
     chunked = {(chunk["metadata"]["repo"], chunk["metadata"]["path"])
                for chunk in chunks}
-    barren = [get_file_key(path, workspace_root) for path in files_to_index]
-    barren = [key for key in barren if key not in chunked]
+    return [key for key in (get_file_key(path, workspace_root)
+                            for path in files_to_index)
+            if key not in chunked]
+
+
+# A count with no explanation is what makes a run puzzling afterwards, so
+# name a few of them.
+def _log_barren_files(log, barren):
     if not barren:
         return
     names = ", ".join(f"{repo}/{path}" for repo, path in barren[:5])

@@ -285,21 +285,35 @@ class TestMarkdownAndJson:
 
         assert (file_key(source_path) in points_by_file()) is indexed
 
-    # A JSON file that yields no chunk is re-selected on every later run:
-    # nothing about it is stored, so nothing says it was already looked at.
-    # Harmless today (it embeds nothing), but the file is re-read and its
-    # chunks re-deleted forever.
+    # A JSON file that yields no chunk appears in no stored chunk, so its
+    # file entry is the only record that it was ever looked at. With it, a
+    # later run leaves the file alone; without it, the file came back as new
+    # on every run, to be re-read and re-chunked forever.
     @requires_qdrant
-    def test_a_never_indexed_json_is_reconsidered_on_every_run(
-            self, pipeline):
+    def test_a_never_indexed_json_is_not_reconsidered(self, pipeline):
         pipeline.workspace.commit("kdk/test/data/fixture.json", '{"a": 1}')
         assert pipeline.run() == 0
         pipeline.logs.clear()
 
         assert pipeline.run() == 0
 
+        assert "files to index: 0" in pipeline.logs.text
+        assert pipeline.embed_batches == []
+
+    # Recorded, not forgotten: editing it selects it again, so a file that
+    # starts yielding chunks is not skipped forever.
+    @requires_qdrant
+    def test_an_edited_json_is_reconsidered_even_with_nothing_indexed(
+            self, pipeline):
+        fixture = "kdk/test/data/fixture.json"
+        pipeline.workspace.commit(fixture, '{"a": 1}')
+        assert pipeline.run() == 0
+        pipeline.workspace.commit(fixture, '{"a": 2}')
+        pipeline.logs.clear()
+
+        assert pipeline.run() == 0
+
         assert "files to index: 1" in pipeline.logs.text
-        assert pipeline.embed_batches == []      # but nothing is re-embedded
 
 
 @pytest.mark.Robustness

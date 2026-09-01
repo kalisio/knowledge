@@ -36,27 +36,22 @@ def hash_files(files):
             for path in files}
 
 
-# Rebuild {(repository, path): file_sha1} from the indexed entries.
-# Empty on the first run, when nothing is indexed yet.
-#
-# Two sources, read in that order. The chunk payloads each stamp the digest
-# of the file they were cut from, and are what the index held before file
-# entries carried one. The file entries are the register proper -- one per
-# scanned file, including those that yield no chunk -- and they win: they
-# are written last in a run, so a run that died between writing the chunks
-# and writing the entries leaves the older digest here, and the file is
-# reindexed rather than wrongly considered done.
+# Rebuild {(repository, path): file_sha1} from the stored chunks, each of
+# which stamps the digest of the file it was cut from. Empty on the first
+# run, and empty again if the code collection is ever lost -- which is what
+# makes losing it reindex the corpus instead of trusting a digest that
+# outlived the chunks it described.
 def load_indexed_file_hashes():
-    indexed = {}
-    for payloads in (vectordb.iter_chunk_payloads(),
-                     vectordb.iter_file_entry_payloads()):
-        for payload in payloads:
-            digest = payload.get("file_sha1", "")
-            if not digest:
-                continue
-            key = (payload.get("repo", ""), payload.get("path", ""))
-            indexed[key] = digest
-    return indexed
+    return _digests(vectordb.iter_chunk_payloads())
+
+
+# The same, for the files on record as yielding no chunk at all. They appear
+# in no chunk payload, so their file entry is the only trace that they were
+# ever looked at -- without it they come back as new on every run, and are
+# re-read and re-chunked forever. Only such a file carries a digest on its
+# entry, so everything this returns is a file with nothing to index.
+def load_barren_file_hashes():
+    return _digests(vectordb.iter_file_entry_payloads())
 
 
 # The scanned files that are new or whose content changed. A file is
@@ -75,6 +70,17 @@ def find_deleted_files(indexed, current_files):
 # ---------------------------------------------------------------------------
 # UTILITIES
 # ---------------------------------------------------------------------------
+
+
+# {(repository, path): file_sha1} for the payloads carrying a digest.
+def _digests(payloads):
+    indexed = {}
+    for payload in payloads:
+        digest = payload.get("file_sha1", "")
+        if not digest:
+            continue
+        indexed[(payload.get("repo", ""), payload.get("path", ""))] = digest
+    return indexed
 
 
 # The nearest directory at or above `directory` holding a .git, stopping at

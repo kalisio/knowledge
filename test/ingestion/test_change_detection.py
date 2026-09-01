@@ -69,36 +69,42 @@ def test_load_indexed_file_hashes_is_empty_on_the_first_run(monkeypatch):
     assert indexed_file_state.load_indexed_file_hashes() == {}
 
 
-def test_load_indexed_file_hashes_reads_the_files_that_yield_no_chunk(
-        monkeypatch):
-    # A .prettierrc.json produces nothing searchable, so it appears in no
-    # chunk payload. Without its file entry it would come back as new on
-    # every single run, and be re-read and re-chunked for nothing.
+def test_load_indexed_file_hashes_ignores_the_file_entries(monkeypatch):
+    # The chunks are the only source here. A file entry outlives the chunks
+    # it described -- losing the code collection leaves every entry
+    # standing -- so reading one would declare a file indexed that nothing
+    # can retrieve any more, and no later run would ever rebuild it.
     _stub_index(
         monkeypatch,
-        chunks=[{"repo": "kdk", "path": "map/x.js", "file_sha1": "aaa"}],
-        file_entries=[
-            {"repo": "kdk", "path": "map/x.js", "file_sha1": "aaa"},
-            {"repo": "kdk", "path": ".prettierrc.json", "file_sha1": "ccc"},
-        ])
-    assert indexed_file_state.load_indexed_file_hashes() == {
-        ("kdk", "map/x.js"): "aaa",
-        ("kdk", ".prettierrc.json"): "ccc",
-    }
-
-
-def test_load_indexed_file_hashes_prefers_the_file_entry(monkeypatch):
-    # The entries are written after the chunks, so a run that died in
-    # between leaves the older digest on the entry. Trusting it reindexes
-    # the file, where trusting the chunk would declare it done on a write
-    # that never finished.
-    _stub_index(
-        monkeypatch,
-        chunks=[{"repo": "kdk", "path": "map/x.js", "file_sha1": "new"}],
+        chunks=[],
         file_entries=[{"repo": "kdk", "path": "map/x.js",
-                       "file_sha1": "old"}])
-    assert indexed_file_state.load_indexed_file_hashes() == {
-        ("kdk", "map/x.js"): "old"}
+                       "file_sha1": "aaa"}])
+    assert indexed_file_state.load_indexed_file_hashes() == {}
+
+
+# --- load_barren_file_hashes: the files that yield nothing to index -------
+
+def test_load_barren_file_hashes_reads_the_file_entries(monkeypatch):
+    # A .prettierrc.json produces nothing searchable, so it appears in no
+    # chunk payload. Its entry is the only record that it was looked at;
+    # without it the file comes back as new on every single run.
+    _stub_index(
+        monkeypatch,
+        file_entries=[{"repo": "kdk", "path": ".prettierrc.json",
+                       "file_sha1": "ccc"}])
+    assert indexed_file_state.load_barren_file_hashes() == {
+        ("kdk", ".prettierrc.json"): "ccc"}
+
+
+def test_load_barren_file_hashes_skips_the_entries_without_a_digest(
+        monkeypatch):
+    # Only a file with nothing to index carries a digest on its entry, so
+    # an entry without one belongs to a file the chunks already describe.
+    _stub_index(
+        monkeypatch,
+        file_entries=[{"repo": "kdk", "path": "map/x.js", "file_sha1": ""},
+                      {"repo": "kdk", "path": "map/y.js"}])
+    assert indexed_file_state.load_barren_file_hashes() == {}
 
 
 # --- get_file_key: the identity the whole index is keyed on ---------------
