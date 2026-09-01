@@ -201,19 +201,31 @@ def test_one_app_can_be_started_twice(monkeypatch):
             assert started.get("/health").status_code == 200
 
 
-def test_the_endpoint_is_mcp_with_a_trailing_slash(client):
-    # Mounted, so the sub-app answers under /mcp/ and the router redirects
-    # /mcp onto it. Every MCP client follows it; nothing else may hide it.
+def test_both_spellings_of_the_endpoint_answer_without_a_redirect(client):
+    # /mcp used to 307 onto /mcp/, which is what broke the deployed server:
+    # the Location carried the scheme uvicorn sees (http), nginx bounced it
+    # back to /mcp without the slash, and the client looped until it failed
+    # with TooManyRedirects. Neither spelling may redirect.
     payload = {"jsonrpc": "2.0", "id": 1, "method": "tools/list"}
     headers = {**HEADERS, "Authorization": f"Bearer {token()}"}
 
-    direct = client.post("/mcp/", json=payload, headers=headers)
-    redirected = client.post("/mcp", json=payload, headers=headers,
-                             follow_redirects=False)
+    for path in ("/mcp", "/mcp/"):
+        response = client.post(path, json=payload, headers=headers,
+                               follow_redirects=False)
 
-    assert direct.status_code == 200
-    assert redirected.status_code == 307
-    assert redirected.headers["location"].endswith("/mcp/")
+        assert response.status_code == 200, path
+        assert response.json()["result"]["tools"][0]["name"] == "search_code"
+
+
+def test_an_unauthenticated_call_is_refused_before_any_redirect(client):
+    # The token is checked in front of the mount, so a missing one is a 401
+    # on both spellings -- never a redirect that leaks the path elsewhere.
+    for path in ("/mcp", "/mcp/"):
+        response = client.post(path, json={"jsonrpc": "2.0", "id": 1,
+                                           "method": "tools/list"},
+                               headers=HEADERS, follow_redirects=False)
+
+        assert response.status_code == 401, path
 
 
 def test_the_mount_leaves_the_rest_of_the_api_alone(client):

@@ -14,6 +14,9 @@ from api.schemas import Chunk
 from api.services.security import verify_jwt
 
 
+# Where the transport is mounted on the API.
+MOUNT_PATH = "/mcp"
+
 SEARCH_CODE_DESCRIPTION = (
     "Search the Kalisio codebase and documentation. Call this BEFORE "
     "reading any `.js`, `.vue`, `.json`, or `.md` file when you need to "
@@ -48,6 +51,18 @@ def build_http_app():
         streamable_http_path="/", stateless_http=True, json_response=True,
         transport_security=TransportSecuritySettings(
             enable_dns_rebinding_protection=False))
+
+
+# Serves `path` as if it were `path/`, so the mount answers both spellings.
+class TrailingSlashMiddleware:
+    def __init__(self, app, path):
+        self.app = app
+        self.path = path
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] == "http" and scope["path"] == self.path:
+            scope = {**scope, "path": self.path + "/"}
+        await self.app(scope, receive, send)
 
 
 # Checks the Bearer token in front of the mounted MCP app.

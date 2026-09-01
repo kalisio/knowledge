@@ -12,7 +12,9 @@ from api.logger import configure_logging, get_logger
 def run():
     config = get_config()
     configure_logging(config.log_level)
-    uvicorn.run("api.main:app", host=config.host, port=config.port)
+    # Behind the ingress, uvicorn trusts only 127.0.0.1 by
+    uvicorn.run("api.main:app", host=config.host, port=config.port,
+                proxy_headers=True, forwarded_allow_ips="*")
 
 
 def main():

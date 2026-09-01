@@ -97,7 +97,13 @@ def create_app():
     async def mcp_app(scope, receive, send):
         await app.state.mcp_app(scope, receive, send)
 
-    app.mount("/mcp", mcp_server.BearerJWTMiddleware(mcp_app))
+    app.mount(mcp_server.MOUNT_PATH,
+              mcp_server.BearerJWTMiddleware(mcp_app))
+
+    # A mount only matches below itself, so /mcp would be redirected onto
+    # /mcp/ -- and that redirect is fatal behind the ingress
+    app.add_middleware(mcp_server.TrailingSlashMiddleware,
+                       path=mcp_server.MOUNT_PATH)
     return app
 
 
