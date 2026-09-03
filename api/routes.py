@@ -2,8 +2,10 @@
 
 from fastapi import APIRouter, Depends
 
+import api.services.dependencies as dependencies
 import api.services.retrieval as retrieval
-from api.schemas import AskRequest, AskResponse, Chunk, SearchRequest
+from api.schemas import (AskRequest, AskResponse, Chunk, Dependents,
+                         DependentsRequest, SearchRequest)
 from api.services.security import verify_jwt
 
 router = APIRouter()
@@ -46,3 +48,18 @@ def ask(request: AskRequest):
 )
 def search(request: SearchRequest):
     return retrieval.search_chunks(request.query, request.top_k)
+
+
+@router.post(
+    "/dependents",
+    response_model=Dependents,
+    summary="List the files that import a given file",
+    description=(
+        "Read the import graph the ingestion job builds: which files "
+        "depend on this one, and which ones it depends on. Answers the "
+        "blast radius of a change, which retrieval cannot."
+    ),
+    dependencies=[Depends(verify_jwt)],
+)
+def dependents(request: DependentsRequest):
+    return dependencies.get_dependents(request.repo, request.path)

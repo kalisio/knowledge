@@ -62,6 +62,12 @@ class Config:
     max_answer_tokens: int = field(
         default_factory=lambda: env_int("MAX_ANSWER_TOKENS", 1024))
 
+    # How many dependents a single answer names. The count stays exact; the
+    # list is cut because a very central file has well over a hundred, and
+    # the first fifty already say that it is load-bearing.
+    max_dependents: int = field(
+        default_factory=lambda: env_int("MAX_DEPENDENTS", 50))
+
     # Service binding: 8187 is knowledge's port (team Bruno collection).
     host: str = field(default_factory=lambda: env_str("HOST", "127.0.0.1"))
     port: int = field(default_factory=lambda: env_int("PORT", 8187))

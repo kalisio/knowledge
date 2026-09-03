@@ -18,6 +18,19 @@ class Chunk(BaseModel):
     chunk_index: int | None = None
 
 
+# What "who imports this file?" answers. `indexed` separates a file nothing
+# imports from a file the corpus has never seen: both have no dependents,
+# and only one of them means a refactor is safe.
+class Dependents(BaseModel):
+    repo: str
+    path: str
+    dependents: list[str] = []
+    dependent_count: int = 0
+    truncated: bool = False
+    dependencies: list[str] = []
+    indexed: bool = False
+
+
 class AskRequest(BaseModel):
     question: str = Field(..., min_length=1, max_length=2000)
 
@@ -27,6 +40,11 @@ class AskResponse(BaseModel):
     sources: list[Chunk]
     provider: str
     model: str
+
+
+class DependentsRequest(BaseModel):
+    repo: str = Field(..., min_length=1, max_length=100)
+    path: str = Field(..., min_length=1, max_length=500)
 
 
 class SearchRequest(BaseModel):

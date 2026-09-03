@@ -155,25 +155,34 @@ def set_last_ingestion(collection_name, timestamp, embedding_model, chunking_ver
     )
 
 
-# Store one entry per file holding its commit history and its digest.
-# Keeping the history here rather than on every chunk is what makes a real
-# history affordable: a file cut into twenty chunks used to carry twenty
-# copies of it. The digest rides along because this is the only record a
-# file that yields no chunk ever gets -- `file_hashes` maps (repo, path) to
-# the digest of what was just scanned.
-def upsert_file_entries(histories, file_hashes=None, batch_size=64):
+# Store one entry per file: its commit history, its digest, and the two
+# directions of the dependency graph. One point per file, keyed on
+# (repo, path), is what makes all three affordable -- a file cut into twenty
+# chunks used to carry twenty copies of its history -- and what lets the API
+# answer "who imports this?" with a retrieve by id rather than a scan.
+#
+# `file_hashes` maps (repo, path) to the digest of what was just scanned,
+# for the files that yield no chunk; `graph` maps it to
+# {"dependents": [...], "dependencies": [...]}.
+def upsert_file_entries(histories, file_hashes=None, graph=None,
+                        batch_size=64):
     if not histories:
         return 0
     client = _get_qdrant_client()
     name = get_config().qdrant_collection_files
     file_hashes = file_hashes or {}
+    graph = graph or {}
     points = [
         PointStruct(
             id=file_entry_id(repo, path),
             vector=[0.0],
             payload={"repo": repo, "path": path,
                      "commit_history": list(subjects),
-                     "file_sha1": file_hashes.get((repo, path), "")},
+                     "file_sha1": file_hashes.get((repo, path), ""),
+                     "dependents": graph.get((repo, path), {})
+                                        .get("dependents", []),
+                     "dependencies": graph.get((repo, path), {})
+                                          .get("dependencies", [])},
         )
         for (repo, path), subjects in histories.items()
     ]
@@ -229,7 +238,7 @@ def payload_id(repository, path, chunk_index, text):
 
 
 # api/clients/vectordb.py reads this shape back. The end-to-end suite runs
-# both against one Qdrant, so a drift between them fails a test rather than
+# both against one Qdrant, ENVso a drift between them fails a test rather than
 # silently returning nothing.
 # Build the payload stored alongside a chunk's vector (everything but the
 # vector). The commit history is NOT part of it: it belongs to the file, not

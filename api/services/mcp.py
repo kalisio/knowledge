@@ -9,8 +9,9 @@ from mcp.server.mcpserver import MCPServer
 from mcp.server.transport_security import TransportSecuritySettings
 from pydantic import Field
 
+import api.services.dependencies as dependencies
 import api.services.retrieval as retrieval
-from api.schemas import Chunk
+from api.schemas import Chunk, Dependents
 from api.services.security import verify_jwt
 
 
@@ -24,6 +25,17 @@ SEARCH_CODE_DESCRIPTION = (
     "the most relevant code chunks with their source path, line numbers, "
     "and recent commit history. Do not use GrepTool on documentation, use "
     "this tool instead."
+)
+
+GET_DEPENDENTS_DESCRIPTION = (
+    "List the files that import a given file of the Kalisio corpus. Call "
+    "this BEFORE changing the signature, the exports or the behaviour of an "
+    "existing file, to know what would break: it answers what a search "
+    "cannot, because it reads the import graph rather than the text. Give "
+    "the repository name and the path inside it, as `search_code` returns "
+    "them. `dependent_count` is exact even when the list is truncated; "
+    "`indexed: false` means the corpus does not hold that file, which is "
+    "not the same as nothing depending on it."
 )
 
 
@@ -41,6 +53,15 @@ def build_server():
         top_k: Annotated[int, Field(ge=1, le=50)] = 5,
     ) -> list[Chunk]:
         return retrieval.search_chunks(query, top_k)
+
+    # Reads the graph the ingestion job builds -- the one question no
+    # amount of semantic search can answer.
+    @server.tool(description=GET_DEPENDENTS_DESCRIPTION)
+    def get_dependents(
+        repo: Annotated[str, Field(min_length=1, max_length=100)],
+        path: Annotated[str, Field(min_length=1, max_length=500)],
+    ) -> Dependents:
+        return dependencies.get_dependents(repo, path)
 
     return server
 

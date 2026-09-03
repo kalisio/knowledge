@@ -12,13 +12,14 @@ import ingestion.clients.vectordb as vectordb
 from ingestion.config import get_config
 from ingestion.logger import format_duration, get_logger, step
 from ingestion.pipeline.commit_history import collect_commit_history
+from ingestion.pipeline.dependency_graph import build_dependency_graph
 from ingestion.pipeline.workspace_scanner import find_repositories, scan_indexable_files
 from ingestion.pipeline.change_detection import (
     find_deleted_files, get_file_key, hash_files, load_barren_file_hashes,
     load_indexed_file_hashes, select_changed_files)
 from ingestion.pipeline.workspace_clone import clone_workspace
 
-_STEPS = 7
+_STEPS = 8
 
 
 # Raised when a step leaves the run nothing to continue on. It travels up
@@ -173,10 +174,18 @@ def _ingest(config, log, started):
                 log.info("  %d chunks written to '%s'", len(chunks_to_index),
                          config.qdrant_collection_code)
 
-    # Step 7: refresh the commit history of every scanned file, not only the
+    # Step 7: rebuild the import graph. Whole, not incrementally: a renamed
+    # file changes the edges of every file importing it, and those files did
+    # not change, so no incremental selection would ever revisit them.
+    with step(log, 7, _STEPS, "building the dependency graph"):
+        graph = build_dependency_graph(indexable_files, workspace_root,
+                                       repositories)
+
+    # Step 8: refresh the commit history of every scanned file, not only the
     # files being reindexed: the window slides on its own, so a file nobody
-    # touched still has to let its oldest commits go.
-    with step(log, 7, _STEPS, "refreshing the commit history"):
+    # touched still has to let its oldest commits go. The graph is written
+    # in the same pass -- one point per file carries both.
+    with step(log, 8, _STEPS, "refreshing the file entries"):
         histories = collect_commit_history(scanned_file_keys, repositories)
         # Only a file with nothing to index carries its digest here; every
         # other file is described by its chunks. The files this run did not
@@ -186,7 +195,7 @@ def _ingest(config, log, started):
         barren = (set(barren_file_hashes) - reindexed) | set(barren_file_keys)
         vectordb.upsert_file_entries(
             histories, {key: hashes_by_file_key[key] for key in barren
-                        if key in hashes_by_file_key})
+                        if key in hashes_by_file_key}, graph)
         subjects = sum(len(entry) for entry in histories.values())
         log.info("  commit histories refreshed: %d (subjects: %d)",
                  len(histories), subjects)

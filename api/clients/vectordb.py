@@ -69,6 +69,20 @@ def get_commit_histories(file_keys):
             for record in records}
 
 
+# The stored entry of one file, or None when the file is not indexed. The id
+# is deterministic, so this is a retrieve by key -- never a scan of the
+# collection, whatever the size of the corpus.
+def get_file_entry(repository, path):
+    client = _get_client()
+    name = get_config().qdrant_collection_files
+    if not client.collection_exists(name):
+        return None
+    records = client.retrieve(collection_name=name,
+                              ids=[file_entry_id(repository, path)],
+                              with_payload=True, with_vectors=False)
+    return records[0].payload if records else None
+
+
 # Turn a stored payload and its similarity score into a search result. This
 # is the shape callers see, and the reading half of the contract with the
 # ingestion job: the line range is rendered as "45-78", the way an editor
