@@ -7,8 +7,10 @@ import pytest
 from starlette.testclient import TestClient
 
 import api.main as main
+import api.services.dependencies as dependencies
 import api.services.retrieval as retrieval
-from api.services.mcp import SEARCH_CODE_DESCRIPTION
+from api.services.mcp import (GET_DEPENDENTS_DESCRIPTION,
+                              SEARCH_CODE_DESCRIPTION)
 
 SECRET = "test-secret-please-use-32-plus-bytes"
 
@@ -69,12 +71,15 @@ def call_tool(client, name, arguments):
 
 
 def test_the_tool_list_is_the_contract(client):
-    tools = list_tools(client)
+    tools = {tool["name"]: tool for tool in list_tools(client)}
 
-    # One tool exactly: adding or dropping one must be a conscious change.
-    assert [tool["name"] for tool in tools] == ["search_code"]
-    assert tools[0]["description"] == SEARCH_CODE_DESCRIPTION
-    properties = tools[0]["inputSchema"]["properties"]
+    # These tools exactly: every added one costs the agent context on every
+    # single conversation, called or not, so adding one is a decision.
+    assert set(tools) == {"search_code", "get_dependents"}
+    assert tools["search_code"]["description"] == SEARCH_CODE_DESCRIPTION
+    assert tools["get_dependents"]["description"] == GET_DEPENDENTS_DESCRIPTION
+
+    properties = tools["search_code"]["inputSchema"]["properties"]
     assert set(properties) == {"query", "top_k"}
     assert properties["top_k"]["default"] == 5
 
@@ -83,6 +88,34 @@ def test_the_tool_list_is_the_contract(client):
     assert properties["top_k"]["minimum"] == 1
     assert properties["top_k"]["maximum"] == 50
     assert properties["query"]["maxLength"] == 2000
+
+
+def test_get_dependents_takes_the_identity_search_code_returns(client):
+    # An agent chains the two: search_code hands back repo and path, and
+    # those go straight into get_dependents. A different spelling on either
+    # side would break the chain silently.
+    tools = {tool["name"]: tool for tool in list_tools(client)}
+    properties = tools["get_dependents"]["inputSchema"]["properties"]
+
+    assert set(properties) == {"repo", "path"}
+    assert tools["get_dependents"]["inputSchema"]["required"] == ["repo", "path"]
+
+
+def test_a_dependents_call_passes_through_to_the_service(client, monkeypatch):
+    calls = []
+    answer = {"repo": "kdk", "path": "core/client/store.js",
+              "dependents": ["kano/src/main.js"], "dependent_count": 1,
+              "truncated": False, "dependencies": [], "indexed": True}
+    monkeypatch.setattr(
+        dependencies, "get_dependents",
+        lambda repo, path: calls.append((repo, path)) or answer)
+
+    response = call_tool(client, "get_dependents",
+                         {"repo": "kdk", "path": "core/client/store.js"})
+
+    assert response.status_code == 200
+    assert calls == [("kdk", "core/client/store.js")]
+    assert response.json()["result"]["structuredContent"] == answer
 
 
 def test_a_call_passes_through_to_the_retrieval_service(client, monkeypatch):

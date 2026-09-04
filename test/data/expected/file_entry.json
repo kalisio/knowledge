@@ -1,0 +1,19 @@
+{
+  "id": "0da8ef0c-a079-564d-8d84-4b99989cde9d",
+  "vector": [
+    0.0
+  ],
+  "payload": {
+    "repo": "kdk",
+    "path": "core/client/store.js",
+    "commit_history": [
+      "chore: change"
+    ],
+    "file_sha1": "",
+    "dependents": [
+      "kdk/core.client.js",
+      "kdk/core/client/api.js"
+    ],
+    "dependencies": []
+  }
+}

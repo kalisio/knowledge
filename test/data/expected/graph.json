@@ -1,0 +1,29 @@
+{
+  "kano/client/components/KLayerList.vue": {
+    "dependents": [],
+    "dependencies": [
+      "kdk/core.client.js"
+    ]
+  },
+  "kdk/core.client.js": {
+    "dependents": [
+      "kano/client/components/KLayerList.vue"
+    ],
+    "dependencies": [
+      "kdk/core/client/store.js"
+    ]
+  },
+  "kdk/core/client/api.js": {
+    "dependents": [],
+    "dependencies": [
+      "kdk/core/client/store.js"
+    ]
+  },
+  "kdk/core/client/store.js": {
+    "dependents": [
+      "kdk/core.client.js",
+      "kdk/core/client/api.js"
+    ],
+    "dependencies": []
+  }
+}

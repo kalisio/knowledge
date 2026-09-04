@@ -41,6 +41,7 @@ SAMPLES = {
 }
 
 _SAMPLES_DIR = Path(__file__).resolve().parent.parent / "data" / "sources"
+_GRAPH_DIR = Path(__file__).resolve().parent.parent / "data" / "graph"
 
 _TOKEN = re.compile(r"[a-z0-9]+")
 
@@ -189,6 +190,13 @@ class Workspace:
 # Read one of the sample files shipped in test/samples.
 def read_sample(name):
     return (_SAMPLES_DIR / name).read_text(encoding="utf-8")
+
+
+# A source from test/data/graph -- the files whose imports the dependency
+# graph is built from, kept apart from the chunking samples because they are
+# read for their import statements, not for the chunks they produce.
+def read_graph_sample(name):
+    return (_GRAPH_DIR / name).read_text(encoding="utf-8")
 
 
 # (repository, repo-relative path) key of a workspace-relative path.
