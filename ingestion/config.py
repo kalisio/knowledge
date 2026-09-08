@@ -49,8 +49,11 @@ class Config:
     # is simply skipped.
     indexed_repositories: str = field(default_factory=lambda: env_str("INDEXED_REPOSITORIES", ""))
 
-    # File extensions to index
-    supported_file_extensions: str = field(default_factory=lambda: env_str("SUPPORTED_FILE_EXTENSIONS", "md,js,mjs,cjs,vue,json"))
+    # File extensions to index. The DevOps side -- charts, cluster
+    # configurations, CI workflows, kash -- is yaml, yml, yaml.gotmpl and sh:
+    # without it, a question about deploying an app is answered with a
+    # translation file (issue #12).
+    supported_file_extensions: str = field(default_factory=lambda: env_str("SUPPORTED_FILE_EXTENSIONS", "md,js,mjs,cjs,vue,json,yaml,yml,gotmpl,sh"))
 
     # Commit history kept per file (stored once per file, not per chunk).
     # The window slides: older commits drop off, new ones come in. The floor
@@ -70,9 +73,13 @@ class Config:
 
     # File scanning filters
     max_file_size: int = field(default_factory=lambda: env_int("MAX_FILE_SIZE", 100_000))
-    ignored_directories: str = field(default_factory=lambda: env_str("IGNORED_DIRECTORIES", ".git,.svn,.hg,node_modules,bower_components,.yarn,.pnpm-store,dist,build,.output,.next,.nuxt,.vite,coverage,.nyc_output,.c8,__pycache__,.cache,.parcel-cache,.turbo,.github,.gitlab,.vscode,.idea"))
-    ignored_filenames: str = field(default_factory=lambda: env_str("IGNORED_FILENAMES", "package.json,package-lock.json,CHANGELOG.md,changelog.md,CHANGES.md,LICENSE.md"))
-    ignored_file_pattern: str = field(default_factory=lambda: env_str("IGNORED_FILE_PATTERN", r"\.(min|bundle|chunk)\.\w+$|-lock\.json$"))
+    # .github is not ignored: it holds the CI workflows, which are what a
+    # question about the CI is looking for.
+    ignored_directories: str = field(default_factory=lambda: env_str("IGNORED_DIRECTORIES", ".git,.svn,.hg,node_modules,bower_components,.yarn,.pnpm-store,dist,build,.output,.next,.nuxt,.vite,coverage,.nyc_output,.c8,__pycache__,.cache,.parcel-cache,.turbo,.gitlab,.vscode,.idea"))
+    ignored_filenames: str = field(default_factory=lambda: env_str("IGNORED_FILENAMES", "package.json,package-lock.json,pnpm-lock.yaml,CHANGELOG.md,changelog.md,CHANGES.md,LICENSE.md"))
+    # .enc.* is a SOPS-encrypted secret and .dec.* its decrypted twin: the
+    # first is noise, the second must never reach an index.
+    ignored_file_pattern: str = field(default_factory=lambda: env_str("IGNORED_FILE_PATTERN", r"\.(min|bundle|chunk)\.\w+$|-lock\.(json|yaml)$|\.(enc|dec)\.\w+$"))
 
     # Per-file entries (commit history). Derived from the code collection by
     # default, so an existing deployment needs no new variable.

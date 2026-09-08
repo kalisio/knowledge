@@ -4,6 +4,8 @@ from ingestion.chunkers.markdown import chunk_markdown
 from ingestion.chunkers.javascript import chunk_javascript
 from ingestion.chunkers.vue import chunk_vue
 from ingestion.chunkers.json import chunk_json
+from ingestion.chunkers.yaml import chunk_yaml
+from ingestion.chunkers.shell import chunk_shell
 from ingestion.pipeline.change_detection import compute_file_sha1, get_file_key
 
 # Bump by hand when a chunker's splitting behaviour changes, or when the
@@ -21,6 +23,12 @@ _CHUNKERS = {
     ".cjs": chunk_javascript,
     ".vue": chunk_vue,
     ".json": chunk_json,
+    ".yaml": chunk_yaml,
+    ".yml": chunk_yaml,
+    # values.yaml.gotmpl: the suffix is .gotmpl, the content is YAML that
+    # helmfile has not rendered yet. Every .gotmpl in the corpus is one.
+    ".gotmpl": chunk_yaml,
+    ".sh": chunk_shell,
 }
 
 

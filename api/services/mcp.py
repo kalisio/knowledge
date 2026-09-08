@@ -19,11 +19,13 @@ from api.services.security import verify_jwt
 MOUNT_PATH = "/mcp"
 
 SEARCH_CODE_DESCRIPTION = (
-    "Search the Kalisio codebase and documentation. Call this BEFORE "
-    "reading any `.js`, `.vue`, `.json`, or `.md` file when you need to "
-    "understand how a module, API, function, or convention works. Returns "
-    "the most relevant code chunks with their source path, line numbers, "
-    "and recent commit history. Do not use GrepTool on documentation, use "
+    "Search the Kalisio codebase, documentation and DevOps configuration. "
+    "Call this BEFORE reading any `.js`, `.vue`, `.json`, `.md`, `.yaml`, "
+    "`.yaml.gotmpl` or `.sh` file when you need to understand how a "
+    "module, API, function, convention, Helm chart, cluster configuration, "
+    "CI workflow or kash script works. Returns the most relevant chunks "
+    "with their source path, line numbers, and recent commit history. "
+    "Does not cover Python. Do not use GrepTool on documentation, use "
     "this tool instead."
 )
 
