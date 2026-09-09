@@ -35,6 +35,12 @@ SAMPLES = {
     # An object literal whose members share the same docblock opening: the
     # shape that used to give a chunk the line range of its neighbour.
     "mapProto.js": "map/client/leaflet/mapProto.js",
+    # The DevOps side (issue #12): a helmfile values file, a CI workflow, a
+    # multi-document Helm template with a Go comment, and a kash script.
+    "values.yaml.gotmpl": "namespaces/dev/configs/knowledge-api/values.yaml.gotmpl",
+    "ci.yaml": ".github/workflows/main.yaml",
+    "cronjob.yaml": "charts/kargo/templates/_krestarter-cronjob.yaml",
+    "kash.sh": "kash.sh",
 }
 
 

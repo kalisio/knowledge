@@ -1,0 +1,50 @@
+{{/*
+Builds a cronjob to restart specified workloads (deployments, statefulsets).
+Useful for services that silently lose their database connection and stay
+in Running state while being unusable.
+A dedicated ServiceAccount with a namespaced Role (get/patch on workloads)
+is created alongside the cronjob (least privilege, no kubeconfig needed).
+@param .context   The caller's context
+@param .args      The parameters for the restarter cronjob:
+  - name            The name to give to the cronjob
+  - cron            The schedule expression "0 6 * * *"
+  - targets         The workloads to restart, eg "deployment/kano statefulset/mongo"
+*/}}
+{{- define "kargo.krestarter-cronjob" -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .args.name }}
+  namespace: {{ .context.Release.Namespace | quote }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .args.name }}
+  namespace: {{ .context.Release.Namespace | quote }}
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets"]
+    verbs: ["get", "patch"]
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .args.name }}
+spec:
+  schedule: {{ .args.cron | quote }}
+  # A restart that overlaps the previous one would double the rollout.
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: {{ .args.name }}
+          restartPolicy: Never
+          containers:
+            - name: restarter
+              image: bitnami/kubectl:latest
+              command: ["/bin/sh", "-c"]
+              args:
+                - kubectl rollout restart {{ .args.targets }}
+{{- end }}

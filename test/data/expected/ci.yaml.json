@@ -1,0 +1,30 @@
+{
+  "source": "sources/ci.yaml",
+  "path": ".github/workflows/main.yaml",
+  "chunks": [
+    {
+      "chunk_index": 0,
+      "breadcrumb": "name, on",
+      "start_line": 1,
+      "end_line": 10,
+      "text": "# .github/workflows/main.yaml :: name, on\nname: ci\non:\n  push:\n  workflow_dispatch:\n    inputs:\n      run_tests:\n        description: \"Run tests\"\n        default: false\n        required: false\n        type: boolean",
+      "excerpt": "name: ci\non:\n  push:\n  workflow_dispatch:\n    inputs:\n      run_tests:\n        description: \"Run tests\"\n        default: false\n        required: false\n        type: boolean"
+    },
+    {
+      "chunk_index": 1,
+      "breadcrumb": "jobs > run_tests",
+      "start_line": 13,
+      "end_line": 34,
+      "text": "# .github/workflows/main.yaml :: jobs > run_tests\n  run_tests:\n    name: Run tests\n    if: ${{\n      github.event_name == 'workflow_dispatch' && inputs.run_tests ||\n      github.event_name == 'push' && !contains(github.event.head_commit.message, 'skip tests')\n      }}\n    runs-on: ubuntu-22.04\n    steps:\n      - name: Checkout repo\n        uses: actions/checkout@v4\n        with:\n          submodules: true\n      - name: Init runner\n        run: bash ./scripts/init_runner.sh ${{ github.job }}\n      - name: Setup workspace\n        env:\n          KALISIO_GITHUB_URL: ${{ secrets.KALISIO_GITHUB_URL }}\n        run: bash ./scripts/setup_workspace.sh\n      - name: Run tests\n        env:\n          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}\n        run: bash ./scripts/run_tests.sh -s -r ${{ github.job }}",
+      "excerpt": "  run_tests:\n    name: Run tests\n    if: ${{\n      github.event_name == 'workflow_dispatch' && inputs.run_tests ||\n      github.event_name == 'push' && !contains(github.event.head_commit.message, 'skip tests')\n      }}\n    runs-on: ubuntu-22.04\n    steps:\n      - name: Checkout repo\n        uses: actions/checkout@v4\n        with:\n          submodules: true\n      - name: Init runner\n        run: bash ./scripts/init_runner.sh ${{ github.job }}\n      - name: Setup workspace\n        env:\n          KALISIO_GITHUB_URL: ${{ secrets.KALISIO_GITHUB_URL }}\n        run: bash ./scripts/setup_workspace.sh\n      - name: Run tests\n        env:\n          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}\n        run: bash ./scripts/run_tests.sh -s -r ${{ github.job }}"
+    },
+    {
+      "chunk_index": 2,
+      "breadcrumb": "jobs > build_docs",
+      "start_line": 36,
+      "end_line": 48,
+      "text": "# .github/workflows/main.yaml :: jobs > build_docs\n  build_docs:\n    name: Build docs\n    if: ${{ github.event_name == 'push' && !contains(github.event.head_commit.message, 'skip docs') }}\n    runs-on: ubuntu-22.04\n    steps:\n      - name: Checkout repo\n        uses: actions/checkout@v4\n        with:\n          submodules: true\n      - name: Init runner\n        run: bash ./scripts/init_runner.sh ${{ github.job }}\n      - name: Build docs\n        run: bash ./scripts/build_docs.sh -p -r ${{ github.job }}",
+      "excerpt": "  build_docs:\n    name: Build docs\n    if: ${{ github.event_name == 'push' && !contains(github.event.head_commit.message, 'skip docs') }}\n    runs-on: ubuntu-22.04\n    steps:\n      - name: Checkout repo\n        uses: actions/checkout@v4\n        with:\n          submodules: true\n      - name: Init runner\n        run: bash ./scripts/init_runner.sh ${{ github.job }}\n      - name: Build docs\n        run: bash ./scripts/build_docs.sh -p -r ${{ github.job }}"
+    }
+  ]
+}

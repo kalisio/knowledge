@@ -1,0 +1,22 @@
+{
+  "source": "sources/values.yaml.gotmpl",
+  "path": "namespaces/dev/configs/knowledge-api/values.yaml.gotmpl",
+  "chunks": [
+    {
+      "chunk_index": 0,
+      "breadcrumb": "image, forceRestart, replicaCount, hostOverride, …",
+      "start_line": 1,
+      "end_line": 8,
+      "text": "# namespaces/dev/configs/knowledge-api/values.yaml.gotmpl :: image, forceRestart, replicaCount, hostOverride, …\nimage:\n  tag: latest\nforceRestart: true\nreplicaCount: 1\nhostOverride: knowledge\ningress:\n  enabled: true\n  className: nginx",
+      "excerpt": "image:\n  tag: latest\nforceRestart: true\nreplicaCount: 1\nhostOverride: knowledge\ningress:\n  enabled: true\n  className: nginx"
+    },
+    {
+      "chunk_index": 1,
+      "breadcrumb": "env, resources",
+      "start_line": 9,
+      "end_line": 27,
+      "text": "# namespaces/dev/configs/knowledge-api/values.yaml.gotmpl :: env, resources\nenv:\n  qdrantUrl: \"http://qdrant:6333\"\n  qdrantCollectionCode: \"kalisio_code\"\n  qdrantCollectionMetadata: \"knowledge_metadata\"\n  # must stay in step with knowledge-ingestion\n  embeddingModel: \"Qwen/Qwen3-Embedding-0.6B\"\n  llmEndpoint: \"https://api.anthropic.com/v1/\"\n  llmModel: \"claude-sonnet-4-6\"\n  llmApiKey:\n    key: knowledge-llm-api-key\n  appSecret:\n    key: knowledge-app-secret\n  logLevel: \"INFO\"\nresources:\n  requests:\n    cpu: \"500m\"\n    memory: \"2Gi\"\n  limits:\n    memory: \"4Gi\"",
+      "excerpt": "env:\n  qdrantUrl: \"http://qdrant:6333\"\n  qdrantCollectionCode: \"kalisio_code\"\n  qdrantCollectionMetadata: \"knowledge_metadata\"\n  # must stay in step with knowledge-ingestion\n  embeddingModel: \"Qwen/Qwen3-Embedding-0.6B\"\n  llmEndpoint: \"https://api.anthropic.com/v1/\"\n  llmModel: \"claude-sonnet-4-6\"\n  llmApiKey:\n    key: knowledge-llm-api-key\n  appSecret:\n    key: knowledge-app-secret\n  logLevel: \"INFO\"\nresources:\n  requests:\n    cpu: \"500m\"\n    memory: \"2Gi\"\n  limits:\n    memory: \"4Gi\""
+    }
+  ]
+}

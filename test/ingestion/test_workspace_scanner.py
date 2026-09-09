@@ -91,6 +91,46 @@ def test_scan_drops_generated_artefacts(tmp_path, ingestion_env):
 
 # --- size limit -----------------------------------------------------------
 
+def test_scan_keeps_the_devops_files(tmp_path, ingestion_env):
+    # Issue #12: charts, cluster configurations, CI workflows and kash. The
+    # .github directory is not ignored, because that is where the CI lives.
+    ingestion_env()
+    _write(tmp_path, "kargo/charts/kapp/values.yaml")
+    _write(tmp_path, "klusters/namespaces/dev/configs/kapp/values.yaml.gotmpl")
+    _write(tmp_path, "kdk/.github/workflows/main.yaml")
+    _write(tmp_path, "kdk/docker-compose.yml")
+    _write(tmp_path, "kash/kash.sh")
+
+    assert _kept_names(tmp_path) == {"values.yaml", "values.yaml.gotmpl",
+                                     "main.yaml", "docker-compose.yml",
+                                     "kash.sh"}
+
+
+def test_scan_never_indexes_a_secret_or_its_decrypted_twin(
+        tmp_path, ingestion_env):
+    # .enc.* is SOPS-encrypted noise; .dec.* is the plain secret a developer
+    # decrypted to edit it. Neither has any business in an index, whatever
+    # its extension.
+    ingestion_env()
+    _write(tmp_path, "klusters/clusters/staging/kubeconfig.enc.yaml")
+    _write(tmp_path, "klusters/clusters/staging/kubeconfig.dec.yaml")
+    _write(tmp_path, "klusters/namespaces/dev/secrets.enc.yml")
+    _write(tmp_path, "kdk/scripts/token.dec.sh")
+    _write(tmp_path, "klusters/namespaces/dev/values.yaml")
+
+    assert _kept_names(tmp_path) == {"values.yaml"}
+
+
+def test_scan_drops_a_pnpm_lock_however_small(tmp_path, ingestion_env):
+    # The real ones are 500 KB and fall under the size limit anyway; the
+    # name is excluded so a trimmed one cannot slip through as YAML.
+    ingestion_env()
+    _write(tmp_path, "kdk/pnpm-lock.yaml")
+    _write(tmp_path, "kdk/values.yaml")
+
+    assert _kept_names(tmp_path) == {"values.yaml"}
+
+
 def test_scan_drops_files_over_the_size_limit(tmp_path, ingestion_env):
     ingestion_env(MAX_FILE_SIZE=50)
     _write(tmp_path, "kdk/small.md", "x" * 10)

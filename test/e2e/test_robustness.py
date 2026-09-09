@@ -354,19 +354,22 @@ class TestScanningTheWorkspace:
 
         assert {repository for repository, _ in points_by_file()} == {"kdk"}
 
-    # The scan filters: build output, dependencies, manifests and generated
-    # bundles are all kept out of the corpus.
+    # The scan filters: build output, dependencies, manifests, generated
+    # bundles and secrets -- encrypted or, worse, decrypted -- are all kept
+    # out of the corpus.
     @requires_qdrant
     @pytest.mark.parametrize("source_path", [
         "kdk/node_modules/left-pad/index.js",
         "kdk/dist/bundle.js",
         "kdk/coverage/report.md",
-        "kdk/.github/workflows/notes.md",
         "kdk/package.json",
         "kdk/CHANGELOG.md",
         "kdk/core/client/app.min.js",
         "kdk/core/client/vendor.bundle.js",
         "kdk/yarn-lock.json",
+        "kdk/pnpm-lock.yaml",
+        "kdk/clusters/staging/kubeconfig.enc.yaml",
+        "kdk/clusters/staging/kubeconfig.dec.yaml",
     ])
     def test_the_scan_filters_keep_a_file_out(self, pipeline, source_path):
         pipeline.workspace.commit(GUIDE, "# Guide\n\nProse.\n")
@@ -375,6 +378,26 @@ class TestScanningTheWorkspace:
         assert pipeline.run() == 0
 
         assert file_key(source_path) not in points_by_file()
+
+    # Issue #12: the DevOps side is indexed -- and .github with it, since
+    # that is where the CI workflows live.
+    @requires_qdrant
+    @pytest.mark.parametrize("source_path, text", [
+        ("kdk/.github/workflows/main.yaml",
+         "name: ci\non:\n  push:\njobs:\n  test:\n    runs-on: ubuntu\n"),
+        ("kargo/charts/kapp/values.yaml",
+         "image:\n  tag: latest\nreplicaCount: 2\n"),
+        ("klusters/namespaces/dev/configs/kapp/values.yaml.gotmpl",
+         "env:\n  logLevel: INFO\nresources:\n  limits:\n    memory: 1Gi\n"),
+        ("kash/kash.sh",
+         "# Install yq\ninstall_yq() {\n  curl -O yq\n}\n"),
+    ])
+    def test_a_devops_file_is_indexed(self, pipeline, source_path, text):
+        pipeline.workspace.commit(source_path, text)
+
+        assert pipeline.run() == 0
+
+        assert file_key(source_path) in points_by_file()
 
     # An unsupported extension is left alone.
     @requires_qdrant

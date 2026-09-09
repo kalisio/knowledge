@@ -11,7 +11,9 @@ import pytest
 from ingestion.chunkers.javascript import chunk_javascript
 from ingestion.chunkers.json import chunk_json
 from ingestion.chunkers.markdown import chunk_markdown
+from ingestion.chunkers.shell import chunk_shell
 from ingestion.chunkers.vue import chunk_vue
+from ingestion.chunkers.yaml import chunk_yaml
 from ingestion.config import get_config
 
 MARKDOWN = ("# Base map\n\nThe mixin centers the view.\n\n"
@@ -20,6 +22,8 @@ JAVASCRIPT = "export function center () {\n  return [0, 0]\n}\n"
 VUE = ("<template>\n  <div class=\"map\" />\n</template>\n\n"
        "<script>\nexport default { name: 'KMapPanel' }\n</script>\n")
 JSON = '{\n  "KMapPanel": {"TITLE": "Map"},\n  "LABEL": "Layers"\n}'
+YAML = "image:\n  tag: latest\nreplicaCount: 1\nenv:\n  logLevel: INFO\n"
+SHELL = "#!/usr/bin/env bash\n\n# Say hello\nhello() {\n  echo hi\n}\n"
 
 # Each chunker with a file it is meant to handle. The JSON chunker only
 # indexes a few roles, so its sample sits at a path it recognises.
@@ -28,6 +32,8 @@ CHUNKERS = [
     pytest.param(chunk_javascript, "map/base.js", JAVASCRIPT, id="javascript"),
     pytest.param(chunk_vue, "map/KMapPanel.vue", VUE, id="vue"),
     pytest.param(chunk_json, "i18n/en.json", JSON, id="json"),
+    pytest.param(chunk_yaml, "configs/values.yaml.gotmpl", YAML, id="yaml"),
+    pytest.param(chunk_shell, "scripts/build.sh", SHELL, id="shell"),
 ]
 
 
@@ -345,3 +351,165 @@ def test_json_lines_point_at_the_key_of_the_section():
     section = next(chunk["metadata"] for chunk in chunks
                    if chunk["metadata"]["breadcrumb"] == "KMapPanel")
     assert '"KMapPanel"' in lines[section["start_line"] - 1]
+
+
+# --- yaml ------------------------------------------------------------------
+
+# Small top-level keys are gathered into one chunk rather than one each: a
+# values file opens on half a dozen one-liners, and six one-line chunks say
+# nothing on their own.
+def test_yaml_merges_small_adjacent_keys():
+    chunks = chunk_yaml(YAML, "values.yaml")
+
+    assert len(chunks) == 1
+    assert chunks[0]["metadata"]["breadcrumb"] == "image, replicaCount, env"
+    assert (chunks[0]["metadata"]["start_line"],
+            chunks[0]["metadata"]["end_line"]) == (1, 5)
+
+
+def test_yaml_cuts_a_large_key_on_its_children():
+    step = "\n".join(f"      - run: echo step {index}" for index in range(30))
+    text = (f"jobs:\n  build:\n    steps:\n{step}\n"
+            f"  deploy:\n    steps:\n{step}\n")
+
+    chunks = chunk_yaml(text, ".github/workflows/ci.yaml")
+
+    assert [c["metadata"]["breadcrumb"] for c in chunks] == [
+        "jobs > build", "jobs > deploy"]
+    # `jobs:` itself is nobody's chunk; its name travels in the breadcrumb.
+    assert chunks[0]["metadata"]["start_line"] == 2
+
+
+def test_yaml_attaches_a_comment_to_the_key_below_it():
+    text = ("image:\n  tag: latest\n"
+            "# must stay in step with the api\n"
+            "embeddingModel: Qwen\n")
+
+    chunks = chunk_yaml(text, "values.yaml")
+
+    assert "# must stay in step" in chunks[0]["text"]
+    assert chunks[0]["text"].index("# must stay") < chunks[0]["text"].index(
+        "embeddingModel:")
+
+
+def test_yaml_names_a_document_by_its_kind():
+    text = ("apiVersion: v1\nkind: ServiceAccount\nmetadata:\n  name: x\n"
+            "---\n"
+            "apiVersion: batch/v1\nkind: CronJob\nmetadata:\n  name: x\n")
+
+    chunks = chunk_yaml(text, "templates/cronjob.yaml")
+
+    assert [c["metadata"]["breadcrumb"] for c in chunks] == [
+        "ServiceAccount > apiVersion, kind, metadata",
+        "CronJob > apiVersion, kind, metadata"]
+
+
+def test_yaml_treats_a_go_template_comment_as_a_comment():
+    # The lines inside {{/* ... */}} look like keys ("Note: ..." has a
+    # colon) and must not become chunks of their own.
+    text = ("{{/*\nNote: this emits two resources.\n@param .args   The args\n*/}}\n"
+            "{{- define \"x\" -}}\napiVersion: v1\nkind: Role\n{{- end }}\n")
+
+    chunks = chunk_yaml(text, "templates/_role.yaml")
+
+    assert len(chunks) == 1
+    assert chunks[0]["metadata"]["breadcrumb"] == "Role > apiVersion, kind"
+    assert chunks[0]["metadata"]["start_line"] == 1
+
+
+def test_yaml_detaches_a_header_longer_than_a_chunk():
+    # A twenty-line file header describes the file, not its first key: left
+    # attached, it would push that key over the size limit and have it cut
+    # on characters under a breadcrumb it does not deserve.
+    config = get_config()
+    header = "# " + "x" * (config.chunk_size + 10) + "\n"
+    text = header + "apiVersion: v1\nkind: Role\n"
+
+    chunks = chunk_yaml(text, "templates/_role.yaml")
+
+    assert len(chunks) >= 2
+    assert chunks[-1]["metadata"]["breadcrumb"] == "Role > apiVersion, kind"
+    assert chunks[-1]["metadata"]["start_line"] == 2
+
+
+def test_yaml_header_names_the_file_and_the_keys():
+    chunks = chunk_yaml(YAML, "configs/values.yaml.gotmpl")
+
+    assert chunks[0]["text"].startswith(
+        "# configs/values.yaml.gotmpl :: image, replicaCount, env\n")
+
+
+# --- shell -----------------------------------------------------------------
+
+def test_shell_breadcrumb_is_the_function_name():
+    # Nothing but comments sits above `hello`, so the whole file is its
+    # chunk -- shebang included, it is two dozen characters.
+    chunks = chunk_shell(SHELL, "scripts/build.sh")
+
+    assert [c["metadata"]["breadcrumb"] for c in chunks] == ["hello"]
+
+
+def test_shell_keeps_the_comment_above_a_function_with_it():
+    text = "set -e\n\n# Say hello\nhello() {\n  echo hi\n}\n"
+
+    chunks = chunk_shell(text, "scripts/build.sh")
+
+    hello = chunks[-1]
+    assert hello["text"].splitlines()[1] == "# Say hello"
+    assert hello["metadata"]["start_line"] == 3
+
+
+def test_shell_leaves_a_header_longer_than_a_chunk_to_the_file():
+    # A licence block above the first function describes the file, not the
+    # function: it stays top-level rather than being filed under `hello`.
+    config = get_config()
+    licence = "# " + "x" * (config.code_chunk_size + 10) + "\n"
+    text = licence + "hello() {\n  echo hi\n}\n"
+
+    chunks = chunk_shell(text, "scripts/build.sh")
+
+    assert [c["metadata"]["breadcrumb"] for c in chunks][-1] == "hello"
+    assert chunks[-1]["metadata"]["start_line"] == 2
+    assert chunks[0]["metadata"]["breadcrumb"] == ""
+
+
+def test_shell_carries_a_section_title_to_the_function_under_it():
+    # `### Secrets`, a blank line, then the function's own comment: the
+    # title belongs to the function, not to a one-line chunk of its own.
+    text = ("a() {\n  :\n}\n\n### Secrets\n\n# Load them\nload() {\n  :\n}\n")
+
+    chunks = chunk_shell(text, "kash.sh")
+
+    assert [c["metadata"]["breadcrumb"] for c in chunks] == ["a", "load"]
+    assert "### Secrets" in chunks[1]["text"]
+
+
+def test_shell_gathers_top_level_code_between_functions():
+    text = ("a() {\n  :\n}\n\nexport PATH=$HOME/bin:$PATH\n\nb() {\n  :\n}\n")
+
+    chunks = chunk_shell(text, "kash.sh")
+
+    assert [c["metadata"]["breadcrumb"] for c in chunks] == ["a", "", "b"]
+    assert "export PATH" in chunks[1]["text"]
+
+
+def test_shell_ignores_a_function_defined_inside_another():
+    text = ("outer() {\n  inner() {\n    :\n  }\n  inner\n}\n")
+
+    chunks = chunk_shell(text, "kash.sh")
+
+    assert [c["metadata"]["breadcrumb"] for c in chunks] == ["outer"]
+
+
+def test_shell_accepts_the_function_keyword():
+    text = "function build {\n  :\n}\n"
+
+    chunks = chunk_shell(text, "kash.sh")
+
+    assert chunks[0]["metadata"]["breadcrumb"] == "build"
+
+
+def test_shell_header_names_the_file_and_the_function():
+    chunks = chunk_shell(SHELL, "scripts/build.sh")
+
+    assert chunks[-1]["text"].startswith("# scripts/build.sh :: hello\n")

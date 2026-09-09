@@ -1,0 +1,46 @@
+{
+  "source": "sources/cronjob.yaml",
+  "path": "charts/kargo/templates/_krestarter-cronjob.yaml",
+  "chunks": [
+    {
+      "chunk_index": 0,
+      "breadcrumb": "ServiceAccount",
+      "start_line": 1,
+      "end_line": 13,
+      "text": "# charts/kargo/templates/_krestarter-cronjob.yaml :: ServiceAccount\n{{/*\nBuilds a cronjob to restart specified workloads (deployments, statefulsets).\nUseful for services that silently lose their database connection and stay\nin Running state while being unusable.\nA dedicated ServiceAccount with a namespaced Role (get/patch on workloads)\nis created alongside the cronjob (least privilege, no kubeconfig needed).\n@param .context   The caller's context\n@param .args      The parameters for the restarter cronjob:\n  - name            The name to give to the cronjob\n  - cron            The schedule expression \"0 6 * * *\"\n  - targets         The workloads to restart, eg \"deployment/kano statefulset/mongo\"\n*/}}\n{{- define \"kargo.krestarter-cronjob\" -}}",
+      "excerpt": "{{/*\nBuilds a cronjob to restart specified workloads (deployments, statefulsets).\nUseful for services that silently lose their database connection and stay\nin Running state while being unusable.\nA dedicated ServiceAccount with a namespaced Role (get/patch on workloads)\nis created alongside the cronjob (least privilege, no kubeconfig needed).\n@param .context   The caller's context\n@param .args      The parameters for the restarter cronjob:\n  - name            The name to give to the cronjob\n  - cron            The schedule expression \"0 6 * * *\"\n  - targets         The workloads to restart, eg \"deployment/kano statefulset/mongo\"\n*/}}\n{{- define \"kargo.krestarter-cronjob\" -}}"
+    },
+    {
+      "chunk_index": 1,
+      "breadcrumb": "ServiceAccount > apiVersion, kind, metadata",
+      "start_line": 14,
+      "end_line": 18,
+      "text": "# charts/kargo/templates/_krestarter-cronjob.yaml :: ServiceAccount > apiVersion, kind, metadata\napiVersion: v1\nkind: ServiceAccount\nmetadata:\n  name: {{ .args.name }}\n  namespace: {{ .context.Release.Namespace | quote }}",
+      "excerpt": "apiVersion: v1\nkind: ServiceAccount\nmetadata:\n  name: {{ .args.name }}\n  namespace: {{ .context.Release.Namespace | quote }}"
+    },
+    {
+      "chunk_index": 2,
+      "breadcrumb": "Role > apiVersion, kind, metadata, rules",
+      "start_line": 20,
+      "end_line": 28,
+      "text": "# charts/kargo/templates/_krestarter-cronjob.yaml :: Role > apiVersion, kind, metadata, rules\napiVersion: rbac.authorization.k8s.io/v1\nkind: Role\nmetadata:\n  name: {{ .args.name }}\n  namespace: {{ .context.Release.Namespace | quote }}\nrules:\n  - apiGroups: [\"apps\"]\n    resources: [\"deployments\", \"statefulsets\"]\n    verbs: [\"get\", \"patch\"]",
+      "excerpt": "apiVersion: rbac.authorization.k8s.io/v1\nkind: Role\nmetadata:\n  name: {{ .args.name }}\n  namespace: {{ .context.Release.Namespace | quote }}\nrules:\n  - apiGroups: [\"apps\"]\n    resources: [\"deployments\", \"statefulsets\"]\n    verbs: [\"get\", \"patch\"]"
+    },
+    {
+      "chunk_index": 3,
+      "breadcrumb": "CronJob > apiVersion, kind, metadata",
+      "start_line": 30,
+      "end_line": 33,
+      "text": "# charts/kargo/templates/_krestarter-cronjob.yaml :: CronJob > apiVersion, kind, metadata\napiVersion: batch/v1\nkind: CronJob\nmetadata:\n  name: {{ .args.name }}",
+      "excerpt": "apiVersion: batch/v1\nkind: CronJob\nmetadata:\n  name: {{ .args.name }}"
+    },
+    {
+      "chunk_index": 4,
+      "breadcrumb": "CronJob > spec",
+      "start_line": 34,
+      "end_line": 50,
+      "text": "# charts/kargo/templates/_krestarter-cronjob.yaml :: CronJob > spec\nspec:\n  schedule: {{ .args.cron | quote }}\n  # A restart that overlaps the previous one would double the rollout.\n  concurrencyPolicy: Forbid\n  jobTemplate:\n    spec:\n      template:\n        spec:\n          serviceAccountName: {{ .args.name }}\n          restartPolicy: Never\n          containers:\n            - name: restarter\n              image: bitnami/kubectl:latest\n              command: [\"/bin/sh\", \"-c\"]\n              args:\n                - kubectl rollout restart {{ .args.targets }}\n{{- end }}",
+      "excerpt": "spec:\n  schedule: {{ .args.cron | quote }}\n  # A restart that overlaps the previous one would double the rollout.\n  concurrencyPolicy: Forbid\n  jobTemplate:\n    spec:\n      template:\n        spec:\n          serviceAccountName: {{ .args.name }}\n          restartPolicy: Never\n          containers:\n            - name: restarter\n              image: bitnami/kubectl:latest\n              command: [\"/bin/sh\", \"-c\"]\n              args:\n                - kubectl rollout restart {{ .args.targets }}\n{{- end }}"
+    }
+  ]
+}
