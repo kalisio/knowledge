@@ -155,18 +155,20 @@ def set_last_ingestion(collection_name, timestamp, embedding_model, chunking_ver
     )
 
 
-# Store one entry per file: its commit history, its digest, and the two
-# directions of the dependency graph. One point per file, keyed on
-# (repo, path), is what makes all three affordable -- a file cut into twenty
-# chunks used to carry twenty copies of its history -- and what lets the API
-# answer "who imports this?" with a retrieve by id rather than a scan.
+# Store one entry per file: what git knows about it (its commits, its
+# churn, the files that change with it), its digest, and the two directions
+# of the dependency graph. One point per file, keyed on (repo, path), is
+# what makes all of it affordable -- a file cut into twenty chunks used to
+# carry twenty copies of its history -- and what lets the API answer "what
+# do I risk touching this file?" with a retrieve by id rather than a scan.
 #
-# `file_hashes` maps (repo, path) to the digest of what was just scanned,
-# for the files that yield no chunk; `graph` maps it to
-# {"dependents": [...], "dependencies": [...]}.
-def upsert_file_entries(histories, file_hashes=None, graph=None,
+# `file_history` is what collect_file_history returns; `file_hashes` maps
+# (repo, path) to the digest of what was just scanned, for the files that
+# yield no chunk; `graph` maps it to {"dependents": [...],
+# "dependencies": [...]}.
+def upsert_file_entries(file_history, file_hashes=None, graph=None,
                         batch_size=64):
-    if not histories:
+    if not file_history:
         return 0
     client = _get_qdrant_client()
     name = get_config().qdrant_collection_files
@@ -177,14 +179,16 @@ def upsert_file_entries(histories, file_hashes=None, graph=None,
             id=file_entry_id(repo, path),
             vector=[0.0],
             payload={"repo": repo, "path": path,
-                     "commit_history": list(subjects),
+                     "commit_history": list(history["commit_history"]),
+                     "churn": history.get("churn", 0),
+                     "cochange_partners": history.get("cochange_partners", []),
                      "file_sha1": file_hashes.get((repo, path), ""),
                      "dependents": graph.get((repo, path), {})
                                         .get("dependents", []),
                      "dependencies": graph.get((repo, path), {})
                                           .get("dependencies", [])},
         )
-        for (repo, path), subjects in histories.items()
+        for (repo, path), history in file_history.items()
     ]
     for start in range(0, len(points), batch_size):
         client.upsert(collection_name=name,

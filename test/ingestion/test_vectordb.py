@@ -116,14 +116,34 @@ def _upsert_file_entries(monkeypatch, histories, file_hashes=None):
     return {point.payload["path"]: point.payload for point in client.points}
 
 
+# What collect_file_history hands over for one file.
+def history(subjects=(), churn=0, partners=()):
+    return {"commit_history": list(subjects), "churn": churn,
+            "cochange_partners": list(partners)}
+
+
 def test_the_file_entry_carries_the_digest_of_the_scanned_file(monkeypatch):
     payloads = _upsert_file_entries(
         monkeypatch,
-        {("kdk", "map/base.js"): ["fix: something"]},
+        {("kdk", "map/base.js"): history(["fix: something"])},
         {("kdk", "map/base.js"): "abc123"})
 
     assert payloads["map/base.js"]["file_sha1"] == "abc123"
     assert payloads["map/base.js"]["commit_history"] == ["fix: something"]
+
+
+def test_the_file_entry_carries_what_git_knows(monkeypatch):
+    # Churn and co-change partners ride on the same point as the history:
+    # they answer the same question -- what do I risk touching this file --
+    # and one retrieve should bring all of it back.
+    partners = [{"path": "kdk/map/globe.js", "count": 31}]
+    payloads = _upsert_file_entries(
+        monkeypatch,
+        {("kdk", "map/base.js"): history(["fix: x"], churn=87,
+                                         partners=partners)})
+
+    assert payloads["map/base.js"]["churn"] == 87
+    assert payloads["map/base.js"]["cochange_partners"] == partners
 
 
 def test_the_file_entry_records_a_file_that_yielded_no_chunk(monkeypatch):
@@ -132,7 +152,7 @@ def test_the_file_entry_records_a_file_that_yielded_no_chunk(monkeypatch):
     # nothing about it and only this entry can say it was already looked at.
     payloads = _upsert_file_entries(
         monkeypatch,
-        {("kdk", ".prettierrc.json"): []},
+        {("kdk", ".prettierrc.json"): history()},
         {("kdk", ".prettierrc.json"): "ccc"})
 
     assert payloads[".prettierrc.json"]["file_sha1"] == "ccc"
@@ -140,7 +160,7 @@ def test_the_file_entry_records_a_file_that_yielded_no_chunk(monkeypatch):
 
 def test_the_file_entry_digest_is_empty_when_it_is_not_known(monkeypatch):
     payloads = _upsert_file_entries(
-        monkeypatch, {("kdk", "map/base.js"): []})
+        monkeypatch, {("kdk", "map/base.js"): history()})
 
     assert payloads["map/base.js"]["file_sha1"] == ""
 

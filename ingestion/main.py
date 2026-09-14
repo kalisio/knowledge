@@ -11,7 +11,7 @@ import ingestion.clients.embeddings as embeddings
 import ingestion.clients.vectordb as vectordb
 from ingestion.config import get_config
 from ingestion.logger import format_duration, get_logger, step
-from ingestion.pipeline.commit_history import collect_commit_history
+from ingestion.pipeline.commit_history import collect_file_history
 from ingestion.pipeline.dependency_graph import build_dependency_graph
 from ingestion.pipeline.workspace_scanner import find_repositories, scan_indexable_files
 from ingestion.pipeline.change_detection import (
@@ -181,12 +181,12 @@ def _ingest(config, log, started):
         graph = build_dependency_graph(indexable_files, workspace_root,
                                        repositories)
 
-    # Step 8: refresh the commit history of every scanned file, not only the
+    # Step 8: refresh what git knows about every scanned file, not only the
     # files being reindexed: the window slides on its own, so a file nobody
     # touched still has to let its oldest commits go. The graph is written
-    # in the same pass -- one point per file carries both.
+    # in the same pass -- one point per file carries all of it.
     with step(log, 8, _STEPS, "refreshing the file entries"):
-        histories = collect_commit_history(scanned_file_keys, repositories)
+        histories = collect_file_history(scanned_file_keys, repositories)
         # Only a file with nothing to index carries its digest here; every
         # other file is described by its chunks. The files this run did not
         # look at keep the standing on their entry.
@@ -196,12 +196,16 @@ def _ingest(config, log, started):
         vectordb.upsert_file_entries(
             histories, {key: hashes_by_file_key[key] for key in barren
                         if key in hashes_by_file_key}, graph)
-        subjects = sum(len(entry) for entry in histories.values())
+        subjects = sum(len(entry["commit_history"])
+                       for entry in histories.values())
+        coupled = sum(1 for entry in histories.values()
+                      if entry["cochange_partners"])
         log.info("  commit histories refreshed: %d (subjects: %d)",
                  len(histories), subjects)
         log.info("  window: %d days, at least %d commits per file",
                  config.commit_history_max_age_days,
                  config.commit_history_min_commits)
+        log.info("  co-change partners recorded for %d files", coupled)
 
     vectordb.set_last_ingestion(
         config.qdrant_collection_metadata, ingestion_started,

@@ -10,7 +10,9 @@ stable file, a subject that does not survive the trip.
 import time
 
 from ingestion.config import get_config
-from ingestion.pipeline.commit_history import collect_commit_history, read_history
+from ingestion.pipeline.commit_history import (
+    COCHANGE_MAX_FILES, collect_commit_history, collect_file_history,
+    read_history)
 
 FIRST = "2026-01-01T00:00:00+00:00"
 SECOND = "2026-02-01T00:00:00+00:00"
@@ -266,3 +268,89 @@ def test_a_repository_that_is_not_on_disk_collects_an_empty_history():
     # A file keyed on a repository the scan did not report is not a crash.
     assert collect_commit_history([("gone", "map/x.js")], {}) == {
         ("gone", "map/x.js"): []}
+
+
+# --- co-change: the files that move together ---------------------------------
+
+# Commit several files at once, the way a real change lands.
+def commit_together(repo, files, date, message="change"):
+    for path, text in files.items():
+        file_path = repo.file(path)
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_path.write_text(text)
+    repo.git("add", "-A")
+    repo.git("commit", "-q", "-m", message, date=date)
+
+
+def context_of(repo, path):
+    return collect_file_history([("kdk", path)], {"kdk": repo.path})[("kdk", path)]
+
+
+def test_files_committed_together_are_partners(repo):
+    commit_together(repo, {"map/globe.js": "a", "map/base.js": "a"}, days_ago(3))
+    commit_together(repo, {"map/globe.js": "b", "map/base.js": "b"}, days_ago(2))
+    repo.commit("map/base.js", "c", days_ago(1), "alone")
+
+    assert context_of(repo, "map/base.js")["cochange_partners"] == [
+        {"path": "kdk/map/globe.js", "count": 2}]
+    assert context_of(repo, "map/globe.js")["cochange_partners"] == [
+        {"path": "kdk/map/base.js", "count": 2}]
+
+
+def test_partners_are_ranked_by_how_often_they_move_together(repo):
+    commit_together(repo, {"a.js": "1", "b.js": "1", "c.js": "1"}, days_ago(5))
+    commit_together(repo, {"a.js": "2", "b.js": "2"}, days_ago(4))
+    commit_together(repo, {"a.js": "3", "b.js": "3"}, days_ago(3))
+
+    assert context_of(repo, "a.js")["cochange_partners"] == [
+        {"path": "kdk/b.js", "count": 3}, {"path": "kdk/c.js", "count": 1}]
+
+
+def test_a_file_never_committed_with_another_has_no_partner(repo):
+    repo.commit("a.js", "1", days_ago(2))
+    repo.commit("b.js", "1", days_ago(1))
+
+    assert context_of(repo, "a.js")["cochange_partners"] == []
+
+
+def test_a_sweeping_commit_is_not_coupling(repo):
+    # A reformat touches every file at once. Counting it would make every
+    # file a partner of every other, which is the same as no partners.
+    sweep = {f"src/f{index}.js": "x" for index in range(COCHANGE_MAX_FILES + 1)}
+    commit_together(repo, sweep, days_ago(2), "style: reformat")
+    commit_together(repo, {"src/f0.js": "y", "src/f1.js": "y"}, days_ago(1))
+
+    assert context_of(repo, "src/f0.js")["cochange_partners"] == [
+        {"path": "kdk/src/f1.js", "count": 1}]
+
+
+def test_the_partner_list_is_capped(repo):
+    for index in range(15):
+        commit_together(repo, {"hub.js": str(index), f"spoke{index}.js": "x"},
+                        days_ago(20 - index))
+
+    partners = context_of(repo, "hub.js")["cochange_partners"]
+
+    assert len(partners) == 10
+
+
+def test_churn_counts_every_commit_over_the_whole_history(repo, ingestion_env):
+    # The history is windowed; the churn is not. A stable file whose
+    # commits are all outside the window still reports how often it moved.
+    ingestion_env(COMMIT_HISTORY_MAX_AGE_DAYS=30, COMMIT_HISTORY_MIN_COMMITS=1)
+    for index in range(4):
+        repo.commit("old.js", str(index), days_ago(400 - index), f"change {index}")
+
+    context = context_of(repo, "old.js")
+
+    assert context["churn"] == 4
+    assert len(context["commit_history"]) == 1
+
+
+def test_a_renamed_file_keeps_its_partners(repo):
+    commit_together(repo, {"old.js": "1", "peer.js": "1"}, days_ago(3))
+    repo.git("mv", "old.js", "new.js")
+    repo.git("commit", "-q", "-m", "rename", date=days_ago(2))
+
+    assert context_of(repo, "new.js")["cochange_partners"] == [
+        {"path": "kdk/peer.js", "count": 1}]
