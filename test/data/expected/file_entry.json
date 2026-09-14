@@ -7,7 +7,14 @@
     "repo": "kdk",
     "path": "core/client/store.js",
     "commit_history": [
-      "chore: change"
+      "feat: add the store and its api"
+    ],
+    "churn": 1,
+    "cochange_partners": [
+      {
+        "path": "kdk/core/client/api.js",
+        "count": 1
+      }
     ],
     "file_sha1": "",
     "dependents": [

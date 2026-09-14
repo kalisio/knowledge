@@ -2,10 +2,10 @@
 
 from fastapi import APIRouter, Depends
 
-import api.services.dependencies as dependencies
+import api.services.file_context as file_context
 import api.services.retrieval as retrieval
-from api.schemas import (AskRequest, AskResponse, Chunk, Dependents,
-                         DependentsRequest, SearchRequest)
+from api.schemas import (AskRequest, AskResponse, Chunk, FileContext,
+                         FileContextRequest, SearchRequest)
 from api.services.security import verify_jwt
 
 router = APIRouter()
@@ -51,15 +51,17 @@ def search(request: SearchRequest):
 
 
 @router.post(
-    "/dependents",
-    response_model=Dependents,
-    summary="List the files that import a given file",
+    "/file-context",
+    response_model=FileContext,
+    summary="What the index knows about a file before you change it",
     description=(
-        "Read the import graph the ingestion job builds: which files "
-        "depend on this one, and which ones it depends on. Answers the "
-        "blast radius of a change, which retrieval cannot."
+        "Read what the ingestion job stored about one file: the files that "
+        "import it, the files that historically change in the same commits "
+        "-- coupling no import declares -- how often it moves, and its "
+        "recent commit subjects. Answers the blast radius of a change, "
+        "which retrieval cannot."
     ),
     dependencies=[Depends(verify_jwt)],
 )
-def dependents(request: DependentsRequest):
-    return dependencies.get_dependents(request.repo, request.path)
+def file_context_of(request: FileContextRequest):
+    return file_context.get_file_context(request.repo, request.path)

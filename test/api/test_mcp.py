@@ -7,9 +7,9 @@ import pytest
 from starlette.testclient import TestClient
 
 import api.main as main
-import api.services.dependencies as dependencies
+import api.services.file_context as file_context
 import api.services.retrieval as retrieval
-from api.services.mcp import (GET_DEPENDENTS_DESCRIPTION,
+from api.services.mcp import (GET_FILE_CONTEXT_DESCRIPTION,
                               SEARCH_CODE_DESCRIPTION)
 
 SECRET = "test-secret-please-use-32-plus-bytes"
@@ -75,9 +75,9 @@ def test_the_tool_list_is_the_contract(client):
 
     # These tools exactly: every added one costs the agent context on every
     # single conversation, called or not, so adding one is a decision.
-    assert set(tools) == {"search_code", "get_dependents"}
+    assert set(tools) == {"search_code", "get_file_context"}
     assert tools["search_code"]["description"] == SEARCH_CODE_DESCRIPTION
-    assert tools["get_dependents"]["description"] == GET_DEPENDENTS_DESCRIPTION
+    assert tools["get_file_context"]["description"] == GET_FILE_CONTEXT_DESCRIPTION
 
     properties = tools["search_code"]["inputSchema"]["properties"]
     assert set(properties) == {"query", "top_k"}
@@ -90,27 +90,29 @@ def test_the_tool_list_is_the_contract(client):
     assert properties["query"]["maxLength"] == 2000
 
 
-def test_get_dependents_takes_the_identity_search_code_returns(client):
+def test_get_file_context_takes_the_identity_search_code_returns(client):
     # An agent chains the two: search_code hands back repo and path, and
-    # those go straight into get_dependents. A different spelling on either
+    # those go straight into get_file_context. A different spelling on either
     # side would break the chain silently.
     tools = {tool["name"]: tool for tool in list_tools(client)}
-    properties = tools["get_dependents"]["inputSchema"]["properties"]
+    properties = tools["get_file_context"]["inputSchema"]["properties"]
 
     assert set(properties) == {"repo", "path"}
-    assert tools["get_dependents"]["inputSchema"]["required"] == ["repo", "path"]
+    assert tools["get_file_context"]["inputSchema"]["required"] == ["repo", "path"]
 
 
-def test_a_dependents_call_passes_through_to_the_service(client, monkeypatch):
+def test_a_file_context_call_passes_through_to_the_service(client, monkeypatch):
     calls = []
-    answer = {"repo": "kdk", "path": "core/client/store.js",
+    answer = {"repo": "kdk", "path": "core/client/store.js", "indexed": True,
               "dependents": ["kano/src/main.js"], "dependent_count": 1,
-              "truncated": False, "dependencies": [], "indexed": True}
+              "truncated": False, "dependencies": [],
+              "cochange_partners": [{"path": "kdk/x.js", "count": 3}],
+              "churn": 12, "commit_history": ["fix: x"]}
     monkeypatch.setattr(
-        dependencies, "get_dependents",
+        file_context, "get_file_context",
         lambda repo, path: calls.append((repo, path)) or answer)
 
-    response = call_tool(client, "get_dependents",
+    response = call_tool(client, "get_file_context",
                          {"repo": "kdk", "path": "core/client/store.js"})
 
     assert response.status_code == 200

@@ -18,17 +18,27 @@ class Chunk(BaseModel):
     chunk_index: int | None = None
 
 
-# What "who imports this file?" answers. `indexed` separates a file nothing
-# imports from a file the corpus has never seen: both have no dependents,
-# and only one of them means a refactor is safe.
-class Dependents(BaseModel):
+# A file that historically changes in the same commits as the one asked
+# about, and how often. Coupling no import declares.
+class CochangePartner(BaseModel):
+    path: str
+    count: int
+
+
+# What "what do I risk touching this file?" answers. `indexed` separates a
+# file nothing depends on from a file the index has never seen: both have
+# no dependents, and only one of them means a refactor is safe.
+class FileContext(BaseModel):
     repo: str
     path: str
+    indexed: bool = False
     dependents: list[str] = []
     dependent_count: int = 0
     truncated: bool = False
     dependencies: list[str] = []
-    indexed: bool = False
+    cochange_partners: list[CochangePartner] = []
+    churn: int = 0
+    commit_history: list[str] = []
 
 
 class AskRequest(BaseModel):
@@ -42,7 +52,7 @@ class AskResponse(BaseModel):
     model: str
 
 
-class DependentsRequest(BaseModel):
+class FileContextRequest(BaseModel):
     repo: str = Field(..., min_length=1, max_length=100)
     path: str = Field(..., min_length=1, max_length=500)
 

@@ -1,4 +1,4 @@
-"""Answering "who imports this file", from the stored graph.
+"""Answering "what do I risk touching this file", from the stored entry.
 
 The caller acts on this: an agent reads dependent_count to decide whether a
 change is safe. The two zeroes must therefore never look alike -- a file
@@ -6,7 +6,7 @@ nothing imports, and a file the corpus has never seen.
 """
 
 import api.clients.vectordb as vectordb
-import api.services.dependencies as dependencies
+import api.services.file_context as file_context
 
 
 ENTRY = {
@@ -16,6 +16,8 @@ ENTRY = {
     "file_sha1": "abc123",
     "dependents": ["kdk/core/client/api.js", "kano/src/main.js"],
     "dependencies": ["kdk/core/client/events.js"],
+    "churn": 87,
+    "cochange_partners": [{"path": "kdk/core/client/api.js", "count": 31}],
 }
 
 
@@ -28,7 +30,7 @@ def stub_entry(monkeypatch, payload):
 def test_the_dependents_are_returned(monkeypatch):
     stub_entry(monkeypatch, ENTRY)
 
-    answer = dependencies.get_dependents("kdk", "core/client/store.js")
+    answer = file_context.get_file_context("kdk", "core/client/store.js")
 
     assert answer["dependents"] == ["kdk/core/client/api.js",
                                     "kano/src/main.js"]
@@ -42,7 +44,7 @@ def test_the_dependencies_travel_along(monkeypatch):
     # call: what this file itself would break against.
     stub_entry(monkeypatch, ENTRY)
 
-    answer = dependencies.get_dependents("kdk", "core/client/store.js")
+    answer = file_context.get_file_context("kdk", "core/client/store.js")
 
     assert answer["dependencies"] == ["kdk/core/client/events.js"]
 
@@ -50,7 +52,7 @@ def test_the_dependencies_travel_along(monkeypatch):
 def test_a_file_nobody_imports_is_indexed_with_no_dependents(monkeypatch):
     stub_entry(monkeypatch, {**ENTRY, "dependents": []})
 
-    answer = dependencies.get_dependents("kdk", "core/client/store.js")
+    answer = file_context.get_file_context("kdk", "core/client/store.js")
 
     assert answer["dependent_count"] == 0
     assert answer["indexed"] is True
@@ -60,7 +62,7 @@ def test_a_file_the_corpus_never_saw_says_so(monkeypatch):
     # Same zero, opposite meaning: nothing can be concluded about a change.
     stub_entry(monkeypatch, None)
 
-    answer = dependencies.get_dependents("kdk", "nowhere.js")
+    answer = file_context.get_file_context("kdk", "nowhere.js")
 
     assert answer["dependent_count"] == 0
     assert answer["indexed"] is False
@@ -76,7 +78,7 @@ def test_a_long_list_is_cut_but_the_count_stays_exact(monkeypatch):
     many = [f"kano/src/file{index}.js" for index in range(10)]
     stub_entry(monkeypatch, {**ENTRY, "dependents": many})
 
-    answer = dependencies.get_dependents("kdk", "core/client/store.js")
+    answer = file_context.get_file_context("kdk", "core/client/store.js")
 
     assert answer["dependents"] == many[:3]
     assert answer["dependent_count"] == 10
@@ -93,7 +95,7 @@ def test_an_entry_written_before_the_graph_existed_says_it_does_not_know(
     stub_entry(monkeypatch, {"repo": "kdk", "path": "old.js",
                              "commit_history": [], "file_sha1": "aaa"})
 
-    answer = dependencies.get_dependents("kdk", "old.js")
+    answer = file_context.get_file_context("kdk", "old.js")
 
     assert answer["dependents"] == []
     assert answer["indexed"] is False
@@ -104,7 +106,20 @@ def test_a_file_the_graph_covers_with_no_dependent_is_indexed(monkeypatch):
     # wrote is an answer, and must not be confused with the case above.
     stub_entry(monkeypatch, {**ENTRY, "dependents": [], "dependencies": []})
 
-    answer = dependencies.get_dependents("kdk", "core/client/store.js")
+    answer = file_context.get_file_context("kdk", "core/client/store.js")
 
     assert answer["dependents"] == []
     assert answer["indexed"] is True
+
+
+def test_what_git_knows_travels_along(monkeypatch):
+    # The partners and the churn answer the same question as the graph, at
+    # the same moment: one call brings the three of them back.
+    stub_entry(monkeypatch, ENTRY)
+
+    answer = file_context.get_file_context("kdk", "core/client/store.js")
+
+    assert answer["cochange_partners"] == [
+        {"path": "kdk/core/client/api.js", "count": 31}]
+    assert answer["churn"] == 87
+    assert answer["commit_history"] == ["fix: something"]

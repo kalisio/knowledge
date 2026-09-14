@@ -46,8 +46,15 @@ SOURCES = {
 # second repository imports the first one by package name.
 @pytest.fixture
 def linked(pipeline):
+    # store.js and api.js land in one commit, the way a change to a store
+    # and its consumer does: that is what makes them co-change partners.
+    pipeline.workspace.path(STORE).parent.mkdir(parents=True, exist_ok=True)
+    pipeline.workspace.path(STORE).write_text(read_graph_sample("store.js"))
+    pipeline.workspace.commit(API, read_graph_sample("api.js"),
+                              message="feat: add the store and its api")
     for source_path, sample in SOURCES.items():
-        pipeline.workspace.commit(source_path, read_graph_sample(sample))
+        if source_path not in (STORE, API):
+            pipeline.workspace.commit(source_path, read_graph_sample(sample))
     assert pipeline.run() == 0
     return pipeline
 
@@ -56,7 +63,7 @@ def linked(pipeline):
 def dependents_of(pipeline, source_path):
     repository, path = source_path.split("/", 1)
     response = pipeline.client.post(
-        "/dependents", json={"repo": repository, "path": path})
+        "/file-context", json={"repo": repository, "path": path})
     assert response.status_code == 200
     return response.json()
 
@@ -133,6 +140,25 @@ class TestServingTheGraph:
             reference_path.write_text(
                 json.dumps(stored, indent=2, ensure_ascii=False) + "\n")
         assert stored == json.loads(reference_path.read_text())
+
+    @requires_qdrant
+    def test_files_committed_together_are_reported_as_partners(self, linked):
+        # store.js and api.js were committed separately by the fixture; two
+        # commits touching both make them partners, with no import needed
+        # in either direction to say so.
+        for text in ("// pass 1", "// pass 2"):
+            linked.workspace.path(STORE).write_text(
+                read_graph_sample("store.js") + f"\n{text}\n")
+            linked.workspace.commit(API, read_graph_sample("api.js") + f"\n{text}\n",
+                                    message=f"refactor: {text}")
+        assert linked.run() == 0
+
+        context = dependents_of(linked, STORE)
+
+        # one from the fixture, two from above
+        assert context["cochange_partners"][0] == {"path": API, "count": 3}
+        assert context["churn"] == 3
+        assert context["commit_history"][0] == "refactor: // pass 2"
 
     @requires_qdrant
     def test_a_removed_import_disappears_from_the_graph(self, linked):
