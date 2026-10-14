@@ -84,18 +84,18 @@ def _ingest(config, log, started):
 
     # Step 3: clone the workspace
     with step(log, 3, _STEPS,
-              f"cloning the workspace (k-clone {config.kli_organization} "
+              f"cloning the workspace (k-clone-date {config.kli_organization} "
               f"{config.kli_workspace})"):
         try:
             clone_workspace(config.kalisio_development_dir,
                             config.kli_organization, config.kli_workspace)
         except subprocess.CalledProcessError as exc:
-            log.error("k-clone %s %s failed (exit code %d) -- is the tooling "
+            log.error("k-clone-date %s %s failed (exit code %d) -- is the tooling "
                       "on PATH and the git token set?",
                       config.kli_organization, config.kli_workspace,
                       exc.returncode)
             raise IngestionAborted(
-                f"k-clone {config.kli_organization} {config.kli_workspace} "
+                f"k-clone-date {config.kli_organization} {config.kli_workspace} "
                 f"failed with exit code {exc.returncode}") from exc
 
     # Step 4: scan the workspace and compare it with the index
