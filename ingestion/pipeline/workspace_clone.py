@@ -29,12 +29,34 @@ def clone_workspace(kalisio_development_dir, organization, workspace, date=""):
     _warn_on_missing_token(organization)
     command = ["bash", "k-clone-date", organization, workspace, date] if date \
         else ["bash", "k-clone", organization, workspace]
-    subprocess.run(command, check=True, timeout=CLONE_TIMEOUT)
+    subprocess.run(command, check=True, timeout=CLONE_TIMEOUT,
+                   env=_clone_environment())
 
 
 # ---------------------------------------------------------------------------
 # UTILITIES
 # ---------------------------------------------------------------------------
+
+
+# The environment k-clone is given, with the clone urls the workspace files
+# read from it.
+#
+# The image writes those urls into /etc/profile.d/kalisio.sh, which only an
+# interactive login shell sources -- never the one a job runs. Without them
+# kli falls back to a bare https://github.com, and every *private* repository
+# dies on "could not read Username" while the public ones sail through: a
+# partial corpus, reported as five clone errors among sixty.
+def _clone_environment():
+    environment = dict(os.environ)
+    tokens = (("KALISIO_GITHUB_TOKEN", "KALISIO_GITHUB_URL", "github.com"),
+              ("GITLAB_IRSN_TOKEN", "GITLAB_IRSN_URL", "gitlab.asnr.fr"))
+    for token_name, url_name, host in tokens:
+        token = environment.get(token_name)
+        # An url already in the environment wins: a deployment may point the
+        # job at a mirror, and ssh is the fallback when there is no token.
+        if token and not environment.get(url_name):
+            environment[url_name] = f"https://oauth2:{token}@{host}"
+    return environment
 
 
 # Point the workspace at the tooling shipped in the image. k-clone resolves
