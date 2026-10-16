@@ -82,21 +82,22 @@ def _ingest(config, log, started):
     # success: a failed run must not move it forward and skip files.
     ingestion_started = datetime.now(timezone.utc).isoformat()
 
-    # Step 3: clone the workspace
-    with step(log, 3, _STEPS,
-              f"cloning the workspace (k-clone-date {config.kli_organization} "
-              f"{config.kli_workspace})"):
+    # Step 3: clone the workspace. With a date, the corpus is frozen there
+    # instead of following HEAD -- the banner says which, because a run that
+    # silently indexed the wrong point in time is the hard kind to notice.
+    cloning = " ".join(filter(None, [
+        "k-clone-date" if config.kli_date else "k-clone",
+        config.kli_organization, config.kli_workspace, config.kli_date]))
+    with step(log, 3, _STEPS, f"cloning the workspace ({cloning})"):
         try:
             clone_workspace(config.kalisio_development_dir,
-                            config.kli_organization, config.kli_workspace)
+                            config.kli_organization, config.kli_workspace,
+                            config.kli_date)
         except subprocess.CalledProcessError as exc:
-            log.error("k-clone-date %s %s failed (exit code %d) -- is the tooling "
-                      "on PATH and the git token set?",
-                      config.kli_organization, config.kli_workspace,
-                      exc.returncode)
+            log.error("%s failed (exit code %d) -- is the tooling on PATH and "
+                      "the git token set?", cloning, exc.returncode)
             raise IngestionAborted(
-                f"k-clone-date {config.kli_organization} {config.kli_workspace} "
-                f"failed with exit code {exc.returncode}") from exc
+                f"{cloning} failed with exit code {exc.returncode}") from exc
 
     # Step 4: scan the workspace and compare it with the index
     with step(log, 4, _STEPS, "scanning the workspace"):
