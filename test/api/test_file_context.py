@@ -1,8 +1,8 @@
 """Answering "what do I risk touching this file", from the stored entry.
 
-The caller acts on this: an agent reads dependent_count to decide whether a
-change is safe. The two zeroes must therefore never look alike -- a file
-nothing imports, and a file the corpus has never seen.
+The caller acts on this: an agent reads the co-change partners to decide
+whether a change is safe. The two silences must therefore never look alike
+-- a file nothing is coupled to, and a file the corpus has never seen.
 """
 
 import api.clients.vectordb as vectordb
@@ -14,8 +14,6 @@ ENTRY = {
     "path": "core/client/store.js",
     "commit_history": ["fix: something"],
     "file_sha1": "abc123",
-    "dependents": ["kdk/core/client/api.js", "kano/src/main.js"],
-    "dependencies": ["kdk/core/client/events.js"],
     "churn": 87,
     "cochange_partners": [{"path": "kdk/core/client/api.js", "count": 31}],
 }
@@ -27,99 +25,52 @@ def stub_entry(monkeypatch, payload):
                         lambda repo, path: payload)
 
 
-def test_the_dependents_are_returned(monkeypatch):
+def test_the_stored_signals_are_returned(monkeypatch):
     stub_entry(monkeypatch, ENTRY)
 
     answer = file_context.get_file_context("kdk", "core/client/store.js")
 
-    assert answer["dependents"] == ["kdk/core/client/api.js",
-                                    "kano/src/main.js"]
-    assert answer["dependent_count"] == 2
-    assert answer["truncated"] is False
     assert answer["indexed"] is True
-
-
-def test_the_dependencies_travel_along(monkeypatch):
-    # The other direction lets an agent walk up one step without a second
-    # call: what this file itself would break against.
-    stub_entry(monkeypatch, ENTRY)
-
-    answer = file_context.get_file_context("kdk", "core/client/store.js")
-
-    assert answer["dependencies"] == ["kdk/core/client/events.js"]
-
-
-def test_a_file_nobody_imports_is_indexed_with_no_dependents(monkeypatch):
-    stub_entry(monkeypatch, {**ENTRY, "dependents": []})
-
-    answer = file_context.get_file_context("kdk", "core/client/store.js")
-
-    assert answer["dependent_count"] == 0
-    assert answer["indexed"] is True
-
-
-def test_a_file_the_corpus_never_saw_says_so(monkeypatch):
-    # Same zero, opposite meaning: nothing can be concluded about a change.
-    stub_entry(monkeypatch, None)
-
-    answer = file_context.get_file_context("kdk", "nowhere.js")
-
-    assert answer["dependent_count"] == 0
-    assert answer["indexed"] is False
-    assert answer["repo"] == "kdk"
-    assert answer["path"] == "nowhere.js"
-
-
-def test_a_long_list_is_cut_but_the_count_stays_exact(monkeypatch):
-    # kdk/core.client.js has 114 dependents, well over a thousand tokens of
-    # them. The agent needs to know it is load-bearing, not to read every
-    # name.
-    monkeypatch.setenv("MAX_DEPENDENTS", "3")
-    many = [f"kano/src/file{index}.js" for index in range(10)]
-    stub_entry(monkeypatch, {**ENTRY, "dependents": many})
-
-    answer = file_context.get_file_context("kdk", "core/client/store.js")
-
-    assert answer["dependents"] == many[:3]
-    assert answer["dependent_count"] == 10
-    assert answer["truncated"] is True
-
-
-def test_an_entry_written_before_the_graph_existed_says_it_does_not_know(
-        monkeypatch):
-    # A file entry from an ingestion older than the graph carries a history
-    # and a digest, and no graph at all. Reporting it as "no dependents"
-    # would tell every agent that every refactor is safe -- and that is the
-    # state of the whole corpus between deploying this and the first run
-    # that rebuilds it.
-    stub_entry(monkeypatch, {"repo": "kdk", "path": "old.js",
-                             "commit_history": [], "file_sha1": "aaa"})
-
-    answer = file_context.get_file_context("kdk", "old.js")
-
-    assert answer["dependents"] == []
-    assert answer["indexed"] is False
-
-
-def test_a_file_the_graph_covers_with_no_dependent_is_indexed(monkeypatch):
-    # The other side of the same coin: an empty list that the graph really
-    # wrote is an answer, and must not be confused with the case above.
-    stub_entry(monkeypatch, {**ENTRY, "dependents": [], "dependencies": []})
-
-    answer = file_context.get_file_context("kdk", "core/client/store.js")
-
-    assert answer["dependents"] == []
-    assert answer["indexed"] is True
-
-
-def test_what_git_knows_travels_along(monkeypatch):
-    # The partners and the churn answer the same question as the graph, at
-    # the same moment: one call brings the three of them back.
-    stub_entry(monkeypatch, ENTRY)
-
-    answer = file_context.get_file_context("kdk", "core/client/store.js")
-
-    assert answer["cochange_partners"] == [
-        {"path": "kdk/core/client/api.js", "count": 31}]
     assert answer["churn"] == 87
     assert answer["commit_history"] == ["fix: something"]
+    assert answer["cochange_partners"] == [
+        {"path": "kdk/core/client/api.js", "count": 31}]
+
+
+# Coupling no import declares is the whole point of this endpoint: two files
+# that keep changing in the same commit are bound even when neither mentions
+# the other.
+def test_the_cochange_partners_survive(monkeypatch):
+    partners = [{"path": "kdk/a.js", "count": 9},
+                {"path": "kdk/b.js", "count": 4}]
+    stub_entry(monkeypatch, {**ENTRY, "cochange_partners": partners})
+
+    answer = file_context.get_file_context("kdk", "core/client/store.js")
+
+    assert answer["cochange_partners"] == partners
+
+
+# A file the corpus holds, that simply never moved with anything else.
+def test_a_file_coupled_to_nothing_is_still_indexed(monkeypatch):
+    stub_entry(monkeypatch, {**ENTRY, "cochange_partners": [], "churn": 0})
+
+    answer = file_context.get_file_context("kdk", "core/client/store.js")
+
+    assert answer["indexed"] is True
+    assert answer["cochange_partners"] == []
+    assert answer["churn"] == 0
+
+
+# And a file it has never seen. Same shape, but `indexed` is false: an agent
+# must not read this as "nothing is coupled to it".
+def test_an_unknown_file_is_not_indexed(monkeypatch):
+    stub_entry(monkeypatch, None)
+
+    answer = file_context.get_file_context("kdk", "does/not/exist.js")
+
+    assert answer["indexed"] is False
+    assert answer["cochange_partners"] == []
+    assert answer["churn"] == 0
+    assert answer["commit_history"] == []
+    assert answer["repo"] == "kdk"
+    assert answer["path"] == "does/not/exist.js"

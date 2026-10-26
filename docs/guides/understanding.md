@@ -20,4 +20,3 @@ knowledge gives every coding agent the same structured context, through a ready-
 
 - **[Semantic code search](./semantic-search.md)** : the Kalisio codebase is chunked and embedded into [Qdrant](https://qdrant.tech/).
 - **[Git intelligence](./git-intelligence.md)** : commit history is parsed into hotspot scores, co-change patterns & bus-factor risk.
-- **[Dependency graph](./dependency-graph.md)** : static AST analysis maps every import to know what depends on what.

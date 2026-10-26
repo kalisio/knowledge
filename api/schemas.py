@@ -27,15 +27,10 @@ class CochangePartner(BaseModel):
 
 # What "what do I risk touching this file?" answers. `indexed` separates a
 # file nothing depends on from a file the index has never seen: both have
-# no dependents, and only one of them means a refactor is safe.
 class FileContext(BaseModel):
     repo: str
     path: str
     indexed: bool = False
-    dependents: list[str] = []
-    dependent_count: int = 0
-    truncated: bool = False
-    dependencies: list[str] = []
     cochange_partners: list[CochangePartner] = []
     churn: int = 0
     commit_history: list[str] = []

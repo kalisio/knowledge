@@ -18,8 +18,6 @@ features:
     details: The Kalisio codebase is chunked and embedded into Qdrant
   - title: Git intelligence
     details: Commit history is parsed into hotspot scores, co-change patterns & bus-factor risk
-  - title: Dependency graph
-    details: Static AST analysis maps every import to know what depends on what
 ---
 
 <ClientOnly>
