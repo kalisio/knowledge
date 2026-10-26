@@ -2,10 +2,8 @@
 
 from fastapi import APIRouter, Depends
 
-import api.services.file_context as file_context
 import api.services.retrieval as retrieval
-from api.schemas import (AskRequest, AskResponse, Chunk, FileContext,
-                         FileContextRequest, SearchRequest)
+from api.schemas import AskRequest, AskResponse, Chunk, SearchRequest
 from api.services.security import verify_jwt
 
 router = APIRouter()
@@ -48,20 +46,3 @@ def ask(request: AskRequest):
 )
 def search(request: SearchRequest):
     return retrieval.search_chunks(request.query, request.top_k)
-
-
-@router.post(
-    "/file-context",
-    response_model=FileContext,
-    summary="What the index knows about a file before you change it",
-    description=(
-        "Read what the ingestion job stored about one file: the files that "
-        "import it, the files that historically change in the same commits "
-        "-- coupling no import declares -- how often it moves, and its "
-        "recent commit subjects. Answers the blast radius of a change, "
-        "which retrieval cannot."
-    ),
-    dependencies=[Depends(verify_jwt)],
-)
-def file_context_of(request: FileContextRequest):
-    return file_context.get_file_context(request.repo, request.path)

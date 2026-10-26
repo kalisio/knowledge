@@ -18,24 +18,6 @@ class Chunk(BaseModel):
     chunk_index: int | None = None
 
 
-# A file that historically changes in the same commits as the one asked
-# about, and how often. Coupling no import declares.
-class CochangePartner(BaseModel):
-    path: str
-    count: int
-
-
-# What "what do I risk touching this file?" answers. `indexed` separates a
-# file nothing depends on from a file the index has never seen: both have
-class FileContext(BaseModel):
-    repo: str
-    path: str
-    indexed: bool = False
-    cochange_partners: list[CochangePartner] = []
-    churn: int = 0
-    commit_history: list[str] = []
-
-
 class AskRequest(BaseModel):
     question: str = Field(..., min_length=1, max_length=2000)
 
@@ -45,11 +27,6 @@ class AskResponse(BaseModel):
     sources: list[Chunk]
     provider: str
     model: str
-
-
-class FileContextRequest(BaseModel):
-    repo: str = Field(..., min_length=1, max_length=100)
-    path: str = Field(..., min_length=1, max_length=500)
 
 
 class SearchRequest(BaseModel):
