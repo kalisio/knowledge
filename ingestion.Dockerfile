@@ -57,6 +57,21 @@ RUN git clone --depth 1 https://github.com/kalisio/kli.git ${KALISIO_TOOLING_DIR
     # micromamba could then no longer write to.
     && rm -rf ${XDG_CACHE_HOME}
 
+# kli is cloned from master, so a change there lands in this image without a
+# commit moving in this repository -- which is how 1.6.0, moving the command
+# line out of index.js and behind a main-module test, stopped k-clone dead.
+# There is nothing to pin to: the v1.6.0 tag and the published package both
+# predate the pnpm support the workspaces now need. So assert the contract
+# instead. k-clone runs `node $KALISIO_DEVELOPMENT_DIR/kli/index.js`, and
+# _install_tooling makes that path a symlink, which is what defeats the
+# main-module test -- so the check has to go through a link too. An entry
+# point that prints nothing here is a job that clones nothing and reports
+# success, and that is worth failing a build over.
+RUN ln -s ${KALISIO_TOOLING_DIR}/kli /tmp/kli-entrypoint-check \
+    && NODE_OPTIONS=--preserve-symlinks-main \
+       node /tmp/kli-entrypoint-check/index.js --version | grep -q . \
+    && rm /tmp/kli-entrypoint-check
+
 # The same environment `development/install.sh` writes into a new recruit's
 # .bashrc, minus the two tokens: the image is public, so KALISIO_GITHUB_TOKEN
 # and GITLAB_IRSN_TOKEN are supplied at run time

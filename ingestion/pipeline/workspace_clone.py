@@ -53,7 +53,23 @@ def _clone_environment():
         # job at a mirror, and ssh is the fallback when there is no token.
         if token and not environment.get(url_name):
             environment[url_name] = f"https://oauth2:{token}@{host}"
+    _preserve_symlinked_tooling(environment)
     return environment
+
+
+# kli 1.6.0 turned index.js into a library entry point and put its command
+# line behind `import.meta.url == f"file://{process.argv[1]}"`. The tooling is
+# symlinked into the workspace by _install_tooling, and Node resolves the
+# first of those to the real path while leaving the second as it was written:
+# through a link they never match, so the command line never runs. kli then
+# exits 0 having done nothing, k-clone reports success, and the run goes on to
+# scan an empty workspace -- silently, reporting success over an empty index.
+# --preserve-symlinks-main keeps argv[1] unresolved, and the two agree again.
+def _preserve_symlinked_tooling(environment):
+    options = environment.get("NODE_OPTIONS", "")
+    if "--preserve-symlinks-main" in options:
+        return
+    environment["NODE_OPTIONS"] = f"{options} --preserve-symlinks-main".strip()
 
 
 # Point the workspace at the tooling shipped in the image. k-clone resolves
