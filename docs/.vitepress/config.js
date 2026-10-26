@@ -64,7 +64,6 @@ function getGuidesSidebar () {
     { text: 'Getting started', link: '/guides/getting-started' },
     { text: 'Semantic code search', link: '/guides/semantic-search' },
     { text: 'Git intelligence', link: '/guides/git-intelligence' },
-    { text: 'Dependency graph', link: '/guides/dependency-graph' },
     {
       text: 'Agent configuration',
       collapsed: true,
@@ -93,8 +92,7 @@ function getArchitectureSidebar () {
   return [
     { text: 'Overview', link: '/architecture/introduction' },
     { text: 'Ingestion job', link: '/architecture/ingestion' },
-    { text: 'API', link: '/architecture/api' },
-    { text: 'MCP server', link: '/architecture/mcp' }
+    { text: 'API', link: '/architecture/api' }
   ]
 }
 

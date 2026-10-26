@@ -13,7 +13,6 @@ from api.routes import router
 from api.clients.llm import LLMUnreachable
 from api.clients.vectordb import QdrantUnreachable
 import api.clients.vectordb as vectordb
-import api.services.mcp as mcp_server
 
 
 # Startup checks: fail fast on a broken auth configuration, then log the
@@ -46,13 +45,7 @@ async def lifespan(app):
     except Exception as exc:
         log.warning("startup banner skipped: %s", exc)
 
-    # The MCP sub-app starts its session manager in its own lifespan, which
-    # mounting does not run -- delegate to it for the server's lifetime. One
-    # sub-app per startup: a session manager cannot be started twice.
-    mcp_app = mcp_server.build_http_app()
-    app.state.mcp_app = mcp_app
-    async with mcp_app.router.lifespan_context(mcp_app):
-        yield
+    yield
 
 
 # Build the application. A factory rather than a module-level app, so a test
@@ -91,19 +84,6 @@ def create_app():
         return JSONResponse(status_code=503, content={"detail": str(exc)})
 
     app.include_router(router)
-
-    # The same retrieval service, spoken as MCP, behind the same token.
-    # The lifespan owns the sub-app, so the mount reads it per request.
-    async def mcp_app(scope, receive, send):
-        await app.state.mcp_app(scope, receive, send)
-
-    app.mount(mcp_server.MOUNT_PATH,
-              mcp_server.BearerJWTMiddleware(mcp_app))
-
-    # A mount only matches below itself, so /mcp would be redirected onto
-    # /mcp/ -- and that redirect is fatal behind the ingress
-    app.add_middleware(mcp_server.TrailingSlashMiddleware,
-                       path=mcp_server.MOUNT_PATH)
     return app
 
 

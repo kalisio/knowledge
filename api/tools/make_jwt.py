@@ -7,7 +7,7 @@ prints a signed HS256 JWT to stdout.
 
 Usage:
     python -m api.tools.make_jwt
-    python -m api.tools.make_jwt --days 30 --subject mcp-server
+    python -m api.tools.make_jwt --days 30 --subject docs
 
 Set ``KNOWLEDGE_API_URL`` (default ``http://localhost:8187``) then test with:
     curl -H "Authorization: Bearer $(python -m api.tools.make_jwt)" \\
