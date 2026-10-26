@@ -21,15 +21,12 @@ TOOLED_DIRECTORIES = ("development", "kli")
 CLONE_TIMEOUT = 3600
 
 
-# Clone `organization`'s `workspace` into `kalisio_development_dir`. Given a
-# `date`, k-clone-date is used instead and every repository ends up on its last
-# commit before that date rather than on HEAD.
-def clone_workspace(kalisio_development_dir, organization, workspace, date=""):
+# Clone `organization`'s `workspace` into `kalisio_development_dir`.
+def clone_workspace(kalisio_development_dir, organization, workspace):
     _install_tooling(Path(kalisio_development_dir))
     _warn_on_missing_token(organization)
-    command = ["bash", "k-clone-date", organization, workspace, date] if date \
-        else ["bash", "k-clone", organization, workspace]
-    subprocess.run(command, check=True, timeout=CLONE_TIMEOUT,
+    subprocess.run(["bash", "k-clone", organization, workspace],
+                   check=True, timeout=CLONE_TIMEOUT,
                    env=_clone_environment())
 
 

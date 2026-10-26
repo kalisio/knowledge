@@ -33,12 +33,6 @@ class Config:
     kli_organization: str = field(default_factory=lambda: env_str("KLI_ORGANIZATION", "kalisio"))
     kli_workspace: str = field(default_factory=lambda: env_str("KLI_WORKSPACE", "apps"))
 
-    # Freeze the corpus at a date, by cloning through k-clone-date instead of
-    # k-clone: every repository lands on its last commit before it. The index
-    # is otherwise rebuilt from HEAD every night, so two runs a month apart are
-    # not comparable -- which is exactly what measuring retrieval needs them to
-    # be. Empty means the usual k-clone run, and nothing changes.
-    kli_date: str = field(default_factory=lambda: env_str("KLI_DATE", ""))
 
     # Where the dev tooling lives. k-clone reads
     # $KALISIO_DEVELOPMENT_DIR/development whichever organisation it clones,

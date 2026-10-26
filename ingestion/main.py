@@ -82,17 +82,13 @@ def _ingest(config, log, started):
     # success: a failed run must not move it forward and skip files.
     ingestion_started = datetime.now(timezone.utc).isoformat()
 
-    # Step 3: clone the workspace. With a date, the corpus is frozen there
-    # instead of following HEAD -- the banner says which, because a run that
-    # silently indexed the wrong point in time is the hard kind to notice.
-    cloning = " ".join(filter(None, [
-        "k-clone-date" if config.kli_date else "k-clone",
-        config.kli_organization, config.kli_workspace, config.kli_date]))
+    # Step 3: clone the workspace.
+    cloning = " ".join(["k-clone", config.kli_organization,
+                        config.kli_workspace])
     with step(log, 3, _STEPS, f"cloning the workspace ({cloning})"):
         try:
             clone_workspace(config.kalisio_development_dir,
-                            config.kli_organization, config.kli_workspace,
-                            config.kli_date)
+                            config.kli_organization, config.kli_workspace)
         except subprocess.CalledProcessError as exc:
             log.error("%s failed (exit code %d) -- is the tooling on PATH and "
                       "the git token set?", cloning, exc.returncode)
