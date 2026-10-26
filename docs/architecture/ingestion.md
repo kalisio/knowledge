@@ -25,11 +25,6 @@ flowchart TD
 ```
 
 
-
-
-
-
-
     # TODO incremental ingestion plan:
     #
     # 1. Clone / update repos via k-clone if needed:
@@ -76,7 +71,6 @@ flowchart TD
     #
     # The final reindexation decision should rely on file_sha1, not on git log:
     # git history is useful to reduce the scan perimeter and to enrich
-    # commit_history, but the hash is the reliable state-based check.
     #
     # 5. Synchronize the vector store
     #
@@ -122,21 +116,3 @@ workspace, so `repo` stays `kano` and not `kalisio/kano`.
 
 ## Commit history
 
-The commit history of a file is stored **once per file**, in its own
-collection (`QDRANT_COLLECTION_FILES`, derived from the code collection by
-default), and joined back onto every chunk of that file when a search
-returns it. Storing it on each chunk instead multiplies it by the number of
-chunks — eight times more on the kdk corpus.
-
-What is kept is a sliding window: commits older than
-`COMMIT_HISTORY_MAX_AGE_DAYS` (180) drop off on their own and new ones come
-in, with a floor of `COMMIT_HISTORY_MIN_COMMITS` (5) kept whatever their age
-— without it, 84% of the kdk files would carry no history at all, and those
-are the stable files whose intent is hardest to recover from the code.
-`COMMIT_HISTORY_DEPTH` (0, no cap) can bound a very active file.
-
-The window is rebuilt from git on every run, for every scanned file and not
-only the ones being reindexed, so a file nobody touched still lets its
-oldest commits go. It costs one `git log` pass per repository — 2.4 s over
-the 70 repositories of the workspace, against about four minutes if git were
-asked per file.

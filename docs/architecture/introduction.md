@@ -31,10 +31,9 @@ api/                          ingestion/
 │   ├── retrieval.py          ├── pipeline/    what the job does
 │   └── security.py           │   ├── workspace_clone.py   fills the workspace
 └── clients/   what it talks  │   ├── workspace_scanner.py files git tracks
-    ├── llm.py     to         │   ├── change_detection.py  digests, what moved
-    ├── embeddings.py         │   └── commit_history.py    commit history
-    └── vectordb.py           └── clients/     what it talks to
-                                  ├── embeddings.py
+    ├── llm.py     to         │   └── change_detection.py  digests, what moved
+    ├── embeddings.py         └── clients/     what it talks to
+    └── vectordb.py               ├── embeddings.py
                                   └── vectordb.py
 ```
 

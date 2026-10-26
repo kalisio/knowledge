@@ -15,7 +15,7 @@ from conftest import base_env
 from helpers import (CODE_COLLECTION, FILES_COLLECTION, METADATA_COLLECTION,
                      SAMPLES,
                      VECTOR_SIZE, chunks_of, code_points, file_key,
-                     days_ago, history_of, points_by_file, read_sample,
+                     days_ago, points_by_file, read_sample,
                      requires_qdrant, sha1)
 
 GUIDE = "kdk/docs/catalog/guide.md"
@@ -149,67 +149,6 @@ class TestOneFileChanged:
         assert all("GeolocationTracker" not in result["content"]
                    for result in results)
 
-    # The commit that changed the file is what the chunk now reports,
-    # newest first.
-    @requires_qdrant
-    def test_the_commit_history_follows_the_file(self, ingested):
-        ingested.workspace.commit(
-            GEOLOCATION, NEW_JS, "refactor(geo): rewrite the helpers")
-        assert ingested.run() == 0
-
-        assert history_of(GEOLOCATION) == [
-            "refactor(geo): rewrite the helpers", "feat: import the corpus"]
-
-    # Only the most recent commits are kept, newest first. The depth is
-    # capped because this history is copied onto every chunk of the file.
-    @requires_qdrant
-    def test_the_commit_history_is_capped_at_the_configured_depth(
-            self, ingested, configure):
-        configure(**{**base_env(ingested.development_dir, ingested.qdrant_url),
-                     "COMMIT_HISTORY_DEPTH": 4})
-        for index in range(6):
-            ingested.workspace.commit(
-                GEOLOCATION, NEW_JS + f"// edit {index}\n",
-                f"chore: edit {index}")
-        assert ingested.run() == 0
-
-        history = history_of(GEOLOCATION)
-        assert len(history) == 4
-        assert history[0] == "chore: edit 5"
-
-    # However many chunks a file has, its history is stored once and served
-    # with every one of them.
-    @requires_qdrant
-    def test_a_file_has_one_history_whatever_its_chunk_count(self, ingested):
-        assert len(chunks_of(GUIDE)) > 1
-
-        response = ingested.client.post(
-            "/search", json={"query": "layer catalog", "top_k": 50})
-        served = [result["commit_history"] for result in response.json()
-                  if result["path"] == "docs/catalog/guide.md"]
-
-        assert len(served) == len(chunks_of(GUIDE))
-        assert all(history == ["feat: import the corpus"]
-                   for history in served)
-
-    # Commit subjects are stored verbatim, whatever they look like: prefixed
-    # or not, misspelled, chores, version bumps, accents and quotes.
-    @requires_qdrant
-    @pytest.mark.parametrize("subject", [
-        "fix(map): corrige l'affichage des tuiles",
-        'feat: add "quoted" support & <angle> brackets',
-        "wip:RAG pipeline:general structure #6 - test(api): cover the budget",
-        "refactore: rename the helper — accents éàü included",
-        "updated the loading indicator without any prefix",
-        "chore: bumped kano to 2.8.0",
-        "2.8.0",
-    ])
-    def test_a_commit_subject_is_stored_verbatim(self, ingested, subject):
-        ingested.workspace.commit(GEOLOCATION, NEW_JS, subject)
-        assert ingested.run() == 0
-
-        assert history_of(GEOLOCATION)[0] == subject
-
 
 @pytest.mark.Incremental
 class TestTwoFilesChanged:
@@ -323,8 +262,6 @@ class TestFilesRemoved:
         indexed = set(points_by_file())
         assert ("kano", "client/components/KLayerList.vue") not in indexed
         assert ("kano", "client/components/KLayersList.vue") in indexed
-        assert history_of("kano/client/components/KLayersList.vue") == [
-            "refactor: rename", "feat: import the corpus"]
 
     # Emptying a file is not the same as deleting it: it yields no chunk,
     # and its old chunks must still go.
@@ -335,76 +272,6 @@ class TestFilesRemoved:
 
         assert file_key(GEOLOCATION) not in points_by_file()
         assert len(points_by_file()) == len(SAMPLES) - 1
-
-
-@pytest.mark.Incremental
-class TestTheCommitHistoryWindow:
-    # The history lives in its own collection, one entry per file.
-    @requires_qdrant
-    def test_the_history_is_stored_in_its_own_collection(self, ingested):
-        assert vectordb.check_collection_exists(FILES_COLLECTION)
-
-        client = vectordb._get_qdrant_client()
-        entries, _ = client.scroll(collection_name=FILES_COLLECTION,
-                                   limit=100, with_payload=True)
-        assert {(entry.payload["repo"], entry.payload["path"])
-                for entry in entries} == {file_key(path) for path in SAMPLES}
-
-    # A commit that falls out of the window is dropped on the next run, even
-    # though the file itself did not change.
-    @requires_qdrant
-    def test_a_commit_leaving_the_window_is_dropped(self, pipeline, configure):
-        pipeline.workspace.install_samples(
-            "feat: import the corpus", date=days_ago(400))
-        pipeline.workspace.commit(
-            GEOLOCATION, NEW_JS, "fix(geo): the one that matters",
-            date=days_ago(2))
-        assert pipeline.run() == 0
-        # The old commit is held above the window by the floor.
-        assert history_of(GEOLOCATION) == [
-            "fix(geo): the one that matters", "feat: import the corpus"]
-
-        # Nothing changes on disk; only the window and its floor narrow.
-        configure(**{**base_env(pipeline.development_dir, pipeline.qdrant_url),
-                     "COMMIT_HISTORY_MAX_AGE_DAYS": 30,
-                     "COMMIT_HISTORY_MIN_COMMITS": 1})
-        assert pipeline.run() == 0
-
-        assert history_of(GEOLOCATION) == ["fix(geo): the one that matters"]
-
-    # A stable file keeps a history: the floor holds it above the window.
-    @requires_qdrant
-    def test_a_file_nobody_touches_keeps_its_history(self, ingested,
-                                                     configure):
-        configure(**{**base_env(ingested.development_dir, ingested.qdrant_url),
-                     "COMMIT_HISTORY_MAX_AGE_DAYS": 1,
-                     "COMMIT_HISTORY_MIN_COMMITS": 1})
-
-        assert ingested.run() == 0
-
-        assert history_of(GUIDE) == ["feat: import the corpus"]
-
-    # A new commit joins the window without the file being re-embedded for
-    # it: the history is refreshed on every run.
-    @requires_qdrant
-    def test_a_new_commit_joins_the_history(self, ingested):
-        ingested.workspace.commit(
-            GEOLOCATION, NEW_JS, "fix(geo): a later fix")
-
-        assert ingested.run() == 0
-
-        assert history_of(GEOLOCATION) == [
-            "fix(geo): a later fix", "feat: import the corpus"]
-
-    # A deleted file takes its history entry with it.
-    @requires_qdrant
-    def test_a_deleted_file_loses_its_history_entry(self, ingested):
-        assert history_of(COMPONENT)
-
-        ingested.workspace.remove(COMPONENT, "chore: drop the component")
-        assert ingested.run() == 0
-
-        assert history_of(COMPONENT) == []
 
 
 @pytest.mark.Incremental

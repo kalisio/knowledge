@@ -1,6 +1,6 @@
 # About
 
-**knowledge** is an AI developer assistant for the Kalisio ecosystem. It indexes the corpus into a vector database ([Qdrant](https://qdrant.tech/)) and extracts git intelligence from commit history (hotspots, co-changes, bus factor).
+**knowledge** is an AI developer assistant for the Kalisio ecosystem. It indexes the corpus into a vector database ([Qdrant](https://qdrant.tech/)) and answers questions over it.
 
 ![architecture overwiew](/images/architecture-overwiew.png)
 

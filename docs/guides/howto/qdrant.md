@@ -123,7 +123,6 @@ Each point is one chunk: its embedding vector plus a payload. The payload fields
 | `file_type` | file extension without the dot |
 | `chunk_index` | chunk position within the file |
 | `breadcrumb` | heading / symbol context |
-| `commit_history` | recent commit subjects for the file |
 | `text_sha1` / `file_sha1` | hashes for idempotent upsert and change detection |
 
 Vectors use cosine distance; the vector size is the embedding model's dimension (1024 for the

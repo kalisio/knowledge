@@ -51,8 +51,7 @@ Returns a bare list of chunks, best match first:
     "path": "src/store/layers.js",
     "lines": "45-78",
     "score": 0.92,
-    "content": "…",
-    "commit_history": ["fix: …", "feat: …"]
+    "content": "…"
   }
 ]
 ```
@@ -63,7 +62,6 @@ Returns a bare list of chunks, best match first:
 | `lines` | string | Line range the chunk covers, e.g. `45-78` (a single number for a one-line chunk) |
 | `score` | float | Cosine similarity with the query, between 0 and 1 |
 | `content` | string | The chunk itself, headed by its source and symbol |
-| `commit_history` | string[] | Commit subjects for that file, newest first — a sliding window (`COMMIT_HISTORY_MAX_AGE_DAYS`, 180 days) with a floor (`COMMIT_HISTORY_MIN_COMMITS`, 5) so a stable file keeps its history |
 | `repo` | string | Repository the file belongs to |
 | `breadcrumb` | string | Heading path, symbol or component the chunk belongs to |
 | `chunk_index` | integer | Position of the chunk within its file |

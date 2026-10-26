@@ -7,8 +7,7 @@ Issue #6 pins the agent-facing contract:
         "path": "src/store/layers.js",
         "lines": "45-78",
         "score": 0.92,
-        "content": "...",
-        "commit_history": ["fix: ...", "feat: ..."]
+        "content": "..."
       },
       ...
     ]
@@ -24,7 +23,7 @@ import pytest
 
 from helpers import SAMPLES, requires_qdrant
 
-CONTRACT_FIELDS = ["path", "lines", "score", "content", "commit_history"]
+CONTRACT_FIELDS = ["path", "lines", "score", "content"]
 
 
 # The corpus ingested, with a second commit on one file so the history has
@@ -117,20 +116,6 @@ class TestFieldValues:
     def test_the_content_is_the_chunk_text(self, results):
         for result in results:
             assert result["content"].strip()
-
-    # commit_history is a list of subjects, newest first.
-    @requires_qdrant
-    def test_the_commit_history_is_a_list_of_subjects_newest_first(
-            self, results):
-        edited = [result for result in results
-                  if result["path"] == "core/client/geolocation.js"]
-        assert edited
-
-        for result in edited:
-            assert result["commit_history"] == [
-                "fix(geo): guard against a missing position",
-                "feat: import the corpus"]
-
     # top_k is honoured.
     @requires_qdrant
     def test_top_k_caps_the_number_of_results(self, served):
@@ -184,7 +169,6 @@ class TestLinesPointAtTheFile:
         assert isinstance(rendered["lines"], str)
         assert isinstance(rendered["score"], float)
         assert isinstance(rendered["content"], str)
-        assert isinstance(rendered["commit_history"], list)
 
 
 # ---------------------------------------------------------------------------

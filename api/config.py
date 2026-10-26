@@ -86,13 +86,6 @@ class Config:
     jwt_issuer: str = field(
         default_factory=lambda: env_str("JWT_ISSUER", "kalisio"))
 
-    # Per-file entries (commit history). Derived from the code collection by
-    # default, so an existing deployment needs no new variable.
-    @property
-    def qdrant_collection_files(self):
-        return env_str("QDRANT_COLLECTION_FILES",
-                       f"{self.qdrant_collection_code}_files")
-
 
 _config = None
 

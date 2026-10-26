@@ -56,15 +56,6 @@ class Config:
     # translation file (issue #12).
     supported_file_extensions: str = field(default_factory=lambda: env_str("SUPPORTED_FILE_EXTENSIONS", "md,js,mjs,cjs,vue,json,yaml,yml,gotmpl,sh"))
 
-    # Commit history kept per file (stored once per file, not per chunk).
-    # The window slides: older commits drop off, new ones come in. The floor
-    # keeps a stable file from ending up with no history at all -- 84% of the
-    # kdk files have no commit in the last six months. The depth is an
-    # optional cap for a very active file; 0 means no cap.
-    commit_history_max_age_days: int = field(default_factory=lambda: env_int("COMMIT_HISTORY_MAX_AGE_DAYS", 180))
-    commit_history_min_commits: int = field(default_factory=lambda: env_int("COMMIT_HISTORY_MIN_COMMITS", 5))
-    commit_history_depth: int = field(default_factory=lambda: env_int("COMMIT_HISTORY_DEPTH", 0))
-
     # Chunking. Prose (markdown, JSON) is cut smaller than code: a paragraph
     # carries its meaning in fewer characters than a function does.
     chunk_size: int = field(default_factory=lambda: env_int("CHUNK_SIZE", 500))

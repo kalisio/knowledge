@@ -23,7 +23,7 @@ REQUIRED_PAYLOAD_FIELDS = {
 def make_chunk(text="export function center () {}", repo="kdk",
                path="map/mixin.base-map.js", chunk_index=3,
                breadcrumb="baseMapMixin > center", start_line=45,
-               end_line=78, commit_history=None, file_sha1="abc123"):
+               end_line=78, file_sha1="abc123"):
     metadata = {
         "path": path,
         "chunk_index": chunk_index,
@@ -33,8 +33,6 @@ def make_chunk(text="export function center () {}", repo="kdk",
         "repo": repo,
         "file_sha1": file_sha1,
     }
-    if commit_history is not None:
-        metadata["commit_history"] = commit_history
     return {"text": text, "metadata": metadata}
 
 
@@ -80,14 +78,6 @@ def test_the_payload_defaults_the_optional_metadata():
     assert payload["file_sha1"] == ""
 
 
-def test_the_chunk_payload_does_not_carry_the_commit_history():
-    # It belongs to the file: storing it here would copy it once per chunk.
-    payload = vectordb.build_payload(
-        make_chunk(commit_history=["fix: something"]))
-
-    assert "commit_history" not in payload
-
-
 def test_the_file_entry_id_is_deterministic_and_distinct_per_file():
     assert (vectordb.file_entry_id("kdk", "map/base.js")
             == vectordb.file_entry_id("kdk", "map/base.js"))
@@ -109,60 +99,30 @@ class _RecordingClient:
         self.points.extend(points)
 
 
-def _upsert_file_entries(monkeypatch, histories, file_hashes=None):
+def _upsert_file_entries(monkeypatch, file_hashes):
     client = _RecordingClient()
     monkeypatch.setattr(vectordb, "_get_qdrant_client", lambda: client)
-    vectordb.upsert_file_entries(histories, file_hashes)
+    vectordb.upsert_file_entries(file_hashes)
     return {point.payload["path"]: point.payload for point in client.points}
 
 
-# What collect_file_history hands over for one file.
-def history(subjects=(), churn=0, partners=()):
-    return {"commit_history": list(subjects), "churn": churn,
-            "cochange_partners": list(partners)}
-
-
-def test_the_file_entry_carries_the_digest_of_the_scanned_file(monkeypatch):
-    payloads = _upsert_file_entries(
-        monkeypatch,
-        {("kdk", "map/base.js"): history(["fix: something"])},
-        {("kdk", "map/base.js"): "abc123"})
-
-    assert payloads["map/base.js"]["file_sha1"] == "abc123"
-    assert payloads["map/base.js"]["commit_history"] == ["fix: something"]
-
-
-def test_the_file_entry_carries_what_git_knows(monkeypatch):
-    # Churn and co-change partners ride on the same point as the history:
-    # they answer the same question -- what do I risk touching this file --
-    # and one retrieve should bring all of it back.
-    partners = [{"path": "kdk/map/globe.js", "count": 31}]
-    payloads = _upsert_file_entries(
-        monkeypatch,
-        {("kdk", "map/base.js"): history(["fix: x"], churn=87,
-                                         partners=partners)})
-
-    assert payloads["map/base.js"]["churn"] == 87
-    assert payloads["map/base.js"]["cochange_partners"] == partners
-
-
 def test_the_file_entry_records_a_file_that_yielded_no_chunk(monkeypatch):
-    # The whole point of holding the digest here: a .prettierrc.json is
-    # scanned but produces nothing searchable, so the code collection knows
-    # nothing about it and only this entry can say it was already looked at.
+    # The whole point of this entry: a .prettierrc.json is scanned but
+    # produces nothing searchable, so the code collection knows nothing
+    # about it and only this entry can say it was already looked at.
     payloads = _upsert_file_entries(
-        monkeypatch,
-        {("kdk", ".prettierrc.json"): history()},
-        {("kdk", ".prettierrc.json"): "ccc"})
+        monkeypatch, {("kdk", ".prettierrc.json"): "ccc"})
 
     assert payloads[".prettierrc.json"]["file_sha1"] == "ccc"
+    assert payloads[".prettierrc.json"]["repo"] == "kdk"
 
 
-def test_the_file_entry_digest_is_empty_when_it_is_not_known(monkeypatch):
-    payloads = _upsert_file_entries(
-        monkeypatch, {("kdk", "map/base.js"): history()})
+def test_nothing_is_written_when_every_file_yielded_a_chunk(monkeypatch):
+    client = _RecordingClient()
+    monkeypatch.setattr(vectordb, "_get_qdrant_client", lambda: client)
 
-    assert payloads["map/base.js"]["file_sha1"] == ""
+    assert vectordb.upsert_file_entries({}) == 0
+    assert client.points == []
 
 
 # --- the digests -----------------------------------------------------------

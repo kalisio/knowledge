@@ -11,7 +11,6 @@ import ingestion.clients.embeddings as embeddings
 import ingestion.clients.vectordb as vectordb
 from ingestion.config import get_config
 from ingestion.logger import format_duration, get_logger, step
-from ingestion.pipeline.commit_history import collect_file_history
 from ingestion.pipeline.workspace_scanner import find_repositories, scan_indexable_files
 from ingestion.pipeline.change_detection import (
     find_deleted_files, get_file_key, hash_files, load_barren_file_hashes,
@@ -170,30 +169,18 @@ def _ingest(config, log, started):
                 log.info("  %d chunks written to '%s'", len(chunks_to_index),
                          config.qdrant_collection_code)
 
-    # Step 7: refresh what git knows about every scanned file, not only the
-    # files being reindexed: the window slides on its own, so a file nobody
-    # touched still has to let its oldest commits go.
-    with step(log, 7, _STEPS, "refreshing the file entries"):
-        histories = collect_file_history(scanned_file_keys, repositories)
-        # Only a file with nothing to index carries its digest here; every
-        # other file is described by its chunks. The files this run did not
-        # look at keep the standing on their entry.
+    # Step 7: record the digest of the files that yield no chunk. They
+    # appear in no chunk payload, so this entry is the only trace that they
+    # were ever looked at -- without it they come back as new on every run
+    # and are re-read forever.
+    with step(log, 7, _STEPS, "recording the files with nothing to index"):
         reindexed = {get_file_key(path, workspace_root)
                      for path in files_to_index}
         barren = (set(barren_file_hashes) - reindexed) | set(barren_file_keys)
-        vectordb.upsert_file_entries(
-            histories, {key: hashes_by_file_key[key] for key in barren
-                        if key in hashes_by_file_key})
-        subjects = sum(len(entry["commit_history"])
-                       for entry in histories.values())
-        coupled = sum(1 for entry in histories.values()
-                      if entry["cochange_partners"])
-        log.info("  commit histories refreshed: %d (subjects: %d)",
-                 len(histories), subjects)
-        log.info("  window: %d days, at least %d commits per file",
-                 config.commit_history_max_age_days,
-                 config.commit_history_min_commits)
-        log.info("  co-change partners recorded for %d files", coupled)
+        digests = {key: hashes_by_file_key[key] for key in barren
+                   if key in hashes_by_file_key}
+        vectordb.upsert_file_entries(digests)
+        log.info("  files with nothing to index: %d", len(digests))
 
     vectordb.set_last_ingestion(
         config.qdrant_collection_metadata, ingestion_started,

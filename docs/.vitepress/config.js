@@ -63,7 +63,6 @@ function getGuidesSidebar () {
     { text: 'Understanding knowledge', link: '/guides/understanding' },
     { text: 'Getting started', link: '/guides/getting-started' },
     { text: 'Semantic code search', link: '/guides/semantic-search' },
-    { text: 'Git intelligence', link: '/guides/git-intelligence' },
     {
       text: 'Agent configuration',
       collapsed: true,

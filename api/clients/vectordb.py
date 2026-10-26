@@ -1,6 +1,5 @@
 """Reads the Kalisio corpus out of Qdrant."""
 
-import uuid
 
 from qdrant_client import QdrantClient
 
@@ -29,15 +28,7 @@ def search(vector, top_k=5):
     hits = client.query_points(
         collection_name=name, query=vector, limit=top_k,
         with_payload=True).points
-    results = [read_payload(hit.payload, hit.score) for hit in hits]
-    # One extra round trip fills in the history of every file quoted, which
-    # is stored once per file rather than on each of its chunks.
-    histories = get_commit_histories(
-        {(result["repo"], result["path"]) for result in results})
-    for result in results:
-        result["commit_history"] = histories.get(
-            (result["repo"], result["path"]), [])
-    return results
+    return [read_payload(hit.payload, hit.score) for hit in hits]
 
 
 # The number of indexed chunks, or 0 when the collection does not exist yet
@@ -50,30 +41,12 @@ def count_chunks():
     return client.count(collection_name=name).count
 
 
-# The commit history of each (repo, path) asked for, in one round trip.
-# Missing files simply do not appear in the result.
-def get_commit_histories(file_keys):
-    file_keys = list(file_keys)
-    if not file_keys:
-        return {}
-    client = _get_client()
-    name = get_config().qdrant_collection_files
-    if not client.collection_exists(name):
-        return {}
-    records = client.retrieve(
-        collection_name=name,
-        ids=[file_entry_id(repo, path) for repo, path in file_keys],
-        with_payload=True, with_vectors=False)
-    return {(record.payload["repo"], record.payload["path"]):
-            record.payload.get("commit_history", [])
-            for record in records}
-
 
 
 # Turn a stored payload and its similarity score into a search result. This
 # is the shape callers see, and the reading half of the contract with the
 # ingestion job: the line range is rendered as "45-78", the way an editor
-# takes it. commit_history starts empty and is filled in by search().
+# takes it.
 def read_payload(payload, score):
     return {
         "path": payload.get("path", ""),
@@ -81,15 +54,10 @@ def read_payload(payload, score):
         "lines": _line_range(payload),
         "score": score,
         "content": payload.get("content", ""),
-        "commit_history": [],
         "breadcrumb": payload.get("breadcrumb", ""),
         "chunk_index": payload.get("chunk_index", 0),
     }
 
-
-# Deterministic id of a file entry, the same one the ingestion job writes.
-def file_entry_id(repository, path):
-    return str(uuid.uuid5(uuid.NAMESPACE_URL, f"file:{repository}:{path}"))
 
 
 # ---------------------------------------------------------------------------

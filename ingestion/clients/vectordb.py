@@ -155,33 +155,22 @@ def set_last_ingestion(collection_name, timestamp, embedding_model, chunking_ver
     )
 
 
-# Store one entry per file: what git knows about it (its commits, its
-# churn, the files that change with it) and its digest. One point per file,
-# keyed on (repo, path), is
-# what makes all of it affordable -- a file cut into twenty chunks used to
-# carry twenty copies of its history -- and what lets the API answer "what
-# do I risk touching this file?" with a retrieve by id rather than a scan.
-#
-# `file_history` is what collect_file_history returns; `file_hashes` maps
-# (repo, path) to the digest of what was just scanned, for the files that
-# yield no chunk.
-def upsert_file_entries(file_history, file_hashes=None, batch_size=64):
-    if not file_history:
+# Store one entry per file that yields no chunk: its digest, and nothing
+# else. Such a file appears in no chunk payload, so this entry is the only
+# record that it was scanned -- keyed on (repo, path), read back by the
+# change detection of the next run.
+def upsert_file_entries(file_hashes, batch_size=64):
+    if not file_hashes:
         return 0
     client = _get_qdrant_client()
     name = get_config().qdrant_collection_files
-    file_hashes = file_hashes or {}
     points = [
         PointStruct(
             id=file_entry_id(repo, path),
             vector=[0.0],
-            payload={"repo": repo, "path": path,
-                     "commit_history": list(history["commit_history"]),
-                     "churn": history.get("churn", 0),
-                     "cochange_partners": history.get("cochange_partners", []),
-                     "file_sha1": file_hashes.get((repo, path), "")},
+            payload={"repo": repo, "path": path, "file_sha1": digest},
         )
-        for (repo, path), history in file_history.items()
+        for (repo, path), digest in file_hashes.items()
     ]
     for start in range(0, len(points), batch_size):
         client.upsert(collection_name=name,

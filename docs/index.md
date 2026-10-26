@@ -16,8 +16,6 @@ hero:
 features:
   - title: Semantic code search
     details: The Kalisio codebase is chunked and embedded into Qdrant
-  - title: Git intelligence
-    details: Commit history is parsed into hotspot scores, co-change patterns & bus-factor risk
 ---
 
 <ClientOnly>

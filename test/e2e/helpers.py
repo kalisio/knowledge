@@ -235,13 +235,6 @@ def points_by_file():
     return grouped
 
 
-# The commit history stored for one workspace-relative file, read the way
-# the API reads it.
-def history_of(source_path):
-    repository, path = file_key(source_path)
-    return api_vectordb.get_commit_histories([(repository, path)]).get(
-        (repository, path), [])
-
 
 # The chunks of one workspace-relative file, ordered by chunk_index.
 def chunks_of(source_path):

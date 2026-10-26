@@ -12,7 +12,7 @@ import ingestion.clients.vectordb as vectordb
 
 from helpers import (CODE_COLLECTION, METADATA_COLLECTION, SAMPLES,
                      VECTOR_SIZE, chunks_of, code_points, file_key,
-                     history_of, points_by_file, read_sample, requires_qdrant,
+                     points_by_file, read_sample, requires_qdrant,
                      sha1)
 
 # Everything a stored chunk carries. The first six are the contract of
@@ -136,15 +136,6 @@ class TestPayloadContract:
                 assert chunk["path"] == relative
                 assert chunk["file_type"] == source_path.rsplit(".", 1)[-1]
                 assert not chunk["path"].startswith(repository + "/")
-
-    # The commit history is stored once per file, not on each of its chunks.
-    @requires_qdrant
-    def test_the_commit_history_is_stored_once_per_file(self, ingested):
-        for source_path in SAMPLES:
-            assert history_of(source_path) == ["feat: import the corpus"]
-            for chunk in chunks_of(source_path):
-                assert "commit_history" not in chunk
-
     # The stored vector has the configured dimension.
     @requires_qdrant
     def test_the_stored_vectors_have_the_configured_dimension(self, ingested):
@@ -253,7 +244,6 @@ class TestServingTheIngestedCorpus:
         for result in results:
             assert result["repo"] in {"kdk", "kano"}
             assert 0.0 <= result["score"] <= 1.0
-            assert result["commit_history"] == ["feat: import the corpus"]
 
     # Retrieval actually ranks: a question about a subject brings back the
     # file that covers it, not just any indexed chunk.
