@@ -48,6 +48,14 @@ class Config:
     llm_model: str = field(default_factory=lambda: require("LLM_MODEL"))
     llm_endpoint: str = field(default_factory=lambda: require("LLM_ENDPOINT"))
 
+    # Translating the query before embedding it, for a corpus written in a
+    # language users do not ask in. Empty disables it. The Helsinki-NLP
+    # models are named opus-mt-<source>-<target>, so the name carries the
+    # direction: opus-mt-fr-en serves an English corpus asked in French,
+    # opus-mt-en-fr the reverse. Nothing else to configure.
+    query_translation_model: str = field(
+        default_factory=lambda: env_str("QUERY_TRANSLATION_MODEL", ""))
+
     # LLM prompts (defaults above). The system instruction is overridable
     # with LLM_PROMPT; prompt_template must contain the {context} and
     # {question} placeholders.

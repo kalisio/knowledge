@@ -23,3 +23,6 @@ dependencies:
       - langchain-text-splitters>=1.1.0
       - sentence-transformers>=5.3.0
       - transformers>=4.51.0,<6.0.0
+      # The Marian tokenizer used for query translation is
+      # SentencePiece-based; transformers raises without it.
+      - sentencepiece>=0.2.0

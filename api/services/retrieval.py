@@ -4,6 +4,7 @@ from fastapi import HTTPException
 
 import api.clients.embeddings as embeddings
 import api.clients.llm as llm
+import api.clients.translation as translation
 import api.clients.vectordb as vectordb
 from api.config import get_config
 from api.logger import get_logger
@@ -40,8 +41,7 @@ def answer_question(question):
 # LLM. The chunks are returned as a bare list -- that is the agent-facing
 # contract of the endpoint.
 def search_chunks(query, top_k):
-    vector = embeddings.encode(query)
-    chunks = vectordb.search(vector, top_k=top_k)
+    chunks = _search_every_phrasing(_phrasings(query), top_k)
     _ensure_indexed(chunks)
     return chunks
 
@@ -49,6 +49,39 @@ def search_chunks(query, top_k):
 # ---------------------------------------------------------------------------
 # UTILITIES
 # ---------------------------------------------------------------------------
+
+
+# The query as typed, plus its translation when the corpus is written in
+# another language. Both are kept: the translation is what usually finds
+# the right page, but the original still carries the technical terms, which
+# are spelled the same in either language and often match on their own.
+def _phrasings(query):
+    way = translation.direction()
+    if way is None:
+        return [query]
+    source, _ = way
+    if not translation.looks_like(query, source):
+        return [query]
+    translated = translation.translate(query)
+    if not translated or translated.strip().lower() == query.strip().lower():
+        return [query]
+    log.info("query translated from %s for retrieval", source)
+    return [query, translated]
+
+
+# Search once per phrasing and merge, keeping the best score each chunk
+# reached. Searching twice costs one more embedding and one more query --
+# milliseconds -- against a search that would otherwise miss its page.
+def _search_every_phrasing(phrasings, top_k):
+    best = {}
+    for phrasing in phrasings:
+        for chunk in vectordb.search(embeddings.encode(phrasing), top_k=top_k):
+            key = (chunk["repo"], chunk["path"], chunk["chunk_index"])
+            if key not in best or best[key]["score"] < chunk["score"]:
+                best[key] = chunk
+    ranked = sorted(best.values(), key=lambda c: c["score"], reverse=True)
+    return ranked[:top_k]
+
 
 
 # Guard against querying before ingestion has run. Empty results plus an

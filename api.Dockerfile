@@ -31,6 +31,16 @@ RUN micromamba run -n base python -c \
     "from sentence_transformers import SentenceTransformer; \
      SentenceTransformer('${EMBEDDING_MODEL}')"
 
+# Same for the translation model, so the first French query does not pay for
+# a download. ~300 MB against the embedding model's 1.2 GB. Swap it for
+# opus-mt-en-fr to serve a French corpus queried in English -- the name
+# carries the direction, and QUERY_TRANSLATION_MODEL must match.
+ARG QUERY_TRANSLATION_MODEL=Helsinki-NLP/opus-mt-fr-en
+RUN micromamba run -n base python -c \
+    "from transformers import MarianMTModel, MarianTokenizer; \
+     MarianTokenizer.from_pretrained('${QUERY_TRANSLATION_MODEL}'); \
+     MarianMTModel.from_pretrained('${QUERY_TRANSLATION_MODEL}')"
+
 EXPOSE 8187
 
 CMD ["micromamba", "run", "-n", "base", "python", "-m", "api.bin"]
