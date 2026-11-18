@@ -18,7 +18,7 @@ experiments/nb05_embedding_eval/nb05_xlingual_data/
 
 # ── Dependencies & lock files
 .venv/
-uv.lock
+# uv.lock is committed: the CI and the images install from it
 node_modules/
 jspm_packages/
 k*/*

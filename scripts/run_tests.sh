@@ -41,7 +41,6 @@ unset INDEXED_REPOSITORIES KLI_ORGANIZATION KLI_WORKSPACE
 unset SUPPORTED_FILE_EXTENSIONS MAX_FILE_SIZE
 unset IGNORED_DIRECTORIES IGNORED_FILENAMES IGNORED_FILE_PATTERN
 unset CHUNK_SIZE CHUNK_OVERLAP CODE_CHUNK_SIZE CODE_CHUNK_OVERLAP
-unset COMMIT_HISTORY_MAX_AGE_DAYS COMMIT_HISTORY_MIN_COMMITS COMMIT_HISTORY_DEPTH
 unset QDRANT_COLLECTION_FILES QDRANT_VECTOR_SIZE_COLLECTION_CODE
 unset QDRANT_VECTOR_COLLECTION_METADATA QDRANT_LAST_INGESTION_KEY
 unset EMBEDDING_BATCH_SIZE LOG_LEVEL
@@ -53,10 +52,16 @@ unset KNOWLEDGE_AUTH_ENABLED APP_SECRET JWT_ALGORITHM JWT_AUDIENCE JWT_ISSUER
 
 "$WORKSPACE_DIR/development/scripts/k-qdrant"
 
-## Setup micromamba env
+## Setup python env
 ##
 
-setup_micromamba_env "knowledge-test" "$ROOT_DIR/environment.yml" true
+# As setup_python_env create a virtual environment with uv and
+# run_python_lib_tests runs the tests without using "uv run"
+# (to keep compatibility with micromamba environments), we need
+# to activate the environment (-a). uv syncs the project in the
+# current directory, hence the cd.
+cd "$ROOT_DIR"
+setup_python_env -a -g "test"
 
 ## Run tests
 ##
