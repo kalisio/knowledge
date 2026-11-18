@@ -29,7 +29,7 @@ experiments/
 logs
 
 # ── Dependencies & lock files
-uv.lock
+# uv.lock is what the image installs from (uv sync --locked)
 
 # ── IDE & tooling
 .claude

@@ -1,9 +1,17 @@
-FROM mambaorg/micromamba
+FROM python:3.11-slim-bookworm
 LABEL maintainer="<contact@kalisio.xyz>"
+
+# uv installs the locked dependencies (uv.lock), as in the CI.
+COPY --from=ghcr.io/astral-sh/uv:0.12.15 /uv /uvx /bin/
 
 ENV HOME=/app
 ENV PYTHONUNBUFFERED=1
 ENV XDG_CACHE_HOME=/tmp/.cache
+# The environment lives next to the code and is on PATH, so `python` is the
+# project's interpreter without `uv run`.
+ENV UV_PROJECT_ENVIRONMENT=/app/.venv
+ENV UV_COMPILE_BYTECODE=1
+ENV UV_LINK_MODE=copy
 
 # The embedding model lives in the image, not in a cache the workspace has to
 # carry: the workspace is wiped between runs so the repositories are always
@@ -33,9 +41,14 @@ ENV AIRBUS_DEVELOPMENT_DIR=/workspace/airbus
 
 # `source .kalisio` inside k-clone resolves through PATH, which is why the
 # scripts directory is on it.
-ENV PATH="${PATH}:/opt/kalisio/development/scripts"
+ENV PATH="/app/.venv/bin:${PATH}:/opt/kalisio/development/scripts"
 
-USER root
+# The charts run the pod as uid 57439 (runAsUser, fsGroup), the uid of the
+# former micromamba base image: the user keeps it so the deployments and the
+# workspace volume need no change.
+RUN groupadd --gid 57439 knowledge \
+    && useradd --uid 57439 --gid 57439 --home-dir /app --no-create-home knowledge
+
 RUN apt-get update \
     && apt-get install -y --no-install-recommends git curl ca-certificates \
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
@@ -52,9 +65,9 @@ RUN git clone --depth 1 https://github.com/kalisio/kli.git ${KALISIO_TOOLING_DIR
     && cd ${KALISIO_TOOLING_DIR}/kli \
     && yarn install --frozen-lockfile \
     && yarn cache clean \
-    && chown -R mambauser:mambauser ${KALISIO_TOOLING_DIR} \
+    && chown -R knowledge:knowledge ${KALISIO_TOOLING_DIR} \
     # yarn ran as root and left XDG_CACHE_HOME behind owned by root, which
-    # micromamba could then no longer write to.
+    # the job user could then no longer write to.
     && rm -rf ${XDG_CACHE_HOME}
 
 # kli is cloned from master, so a change there lands in this image without a
@@ -63,13 +76,13 @@ RUN git clone --depth 1 https://github.com/kalisio/kli.git ${KALISIO_TOOLING_DIR
 # There is nothing to pin to: the v1.6.0 tag and the published package both
 # predate the pnpm support the workspaces now need. So assert the contract
 # instead. k-clone runs `node $KALISIO_DEVELOPMENT_DIR/kli/index.js`, and
-# _install_tooling makes that path a symlink, which is what defeats the
-# main-module test -- so the check has to go through a link too. An entry
+# _install_tooling makes that path a symlink, which defeated the main-module
+# test of 1.6.0 (and defeats the current one under --preserve-symlinks-main)
+# -- so the check has to go through a link too, as the job runs it. An entry
 # point that prints nothing here is a job that clones nothing and reports
 # success, and that is worth failing a build over.
 RUN ln -s ${KALISIO_TOOLING_DIR}/kli /tmp/kli-entrypoint-check \
-    && NODE_OPTIONS=--preserve-symlinks-main \
-       node /tmp/kli-entrypoint-check/index.js --version | grep -q . \
+    && node /tmp/kli-entrypoint-check/index.js --version | grep -q . \
     && rm /tmp/kli-entrypoint-check
 
 # The same environment `development/install.sh` writes into a new recruit's
@@ -103,31 +116,33 @@ RUN printf '%s\n' \
 # apt-get/npm run as root with HOME=/app, which can implicitly create /app
 # owned by root; COPY --chown only chowns what it copies, not a pre-existing
 # parent dir, so force ownership before copying the app code into it.
-RUN mkdir -p ${HOME} && chown mambauser:mambauser ${HOME} \
+RUN mkdir -p ${HOME} && chown knowledge:knowledge ${HOME} \
     && ln -sf /etc/profile.d/kalisio.sh ${HOME}/.bashrc \
-    # /opt belongs to root; the model is fetched as mambauser below.
-    && mkdir -p /opt/models && chown -R mambauser:mambauser /opt/models
+    # /opt belongs to root; the model is fetched as the job user below.
+    && mkdir -p /opt/models && chown -R knowledge:knowledge /opt/models
 
 # Named explicitly rather than `COPY .`: the build context also holds the
 # staged tooling above, which has no business being copied a second time.
-COPY --chown=mambauser:mambauser ingestion ${HOME}/ingestion
-COPY --chown=mambauser:mambauser environment.runtime.yml ${HOME}/environment.runtime.yml
 WORKDIR ${HOME}
-USER mambauser
+USER knowledge
 
 # The repositories are cloned into a volume that belongs to another uid, and
 # git refuses to read those ("detected dubious ownership"): every
 # `git ls-files` would come back empty and the job would index nothing.
 RUN git config --global --add safe.directory '*'
 
-RUN micromamba install -y -n base -f environment.runtime.yml \
-    && micromamba clean --all --yes
+# Dependencies first, in their own layer: a code change does not reinstall
+# torch. --no-dev leaves the test and research groups out.
+COPY --chown=knowledge:knowledge pyproject.toml uv.lock .python-version ${HOME}/
+RUN uv sync --locked --no-dev --no-install-project --no-cache
+
+COPY --chown=knowledge:knowledge ingestion ${HOME}/ingestion
 
 # Must match the EMBEDDING_MODEL the job is configured with, and the one the
 # api queries with; another value still works, it is downloaded at first use.
 ARG EMBEDDING_MODEL=Qwen/Qwen3-Embedding-0.6B
-RUN micromamba run -n base python -c \
+RUN python -c \
     "from sentence_transformers import SentenceTransformer; \
      SentenceTransformer('${EMBEDDING_MODEL}')"
 
-CMD ["micromamba", "run", "-n", "base", "python", "-m", "ingestion.bin"]
+CMD ["python", "-m", "ingestion.bin"]
