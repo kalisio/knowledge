@@ -12,10 +12,10 @@ import ingestion.chunkers as chunkers
 import ingestion.clients.vectordb as vectordb
 
 from conftest import base_env
-from helpers import (CODE_COLLECTION, FILES_COLLECTION, METADATA_COLLECTION,
+from helpers import (CODE_COLLECTION, METADATA_COLLECTION,
                      SAMPLES,
                      VECTOR_SIZE, chunks_of, code_points, file_key,
-                     days_ago, points_by_file, read_sample,
+                     points_by_file, read_sample,
                      requires_qdrant, sha1)
 
 GUIDE = "kdk/docs/catalog/guide.md"

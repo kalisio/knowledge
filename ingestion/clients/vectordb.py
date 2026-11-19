@@ -223,12 +223,10 @@ def payload_id(repository, path, chunk_index, text):
     return str(uuid.uuid5(uuid.NAMESPACE_URL, key))
 
 
-# api/clients/vectordb.py reads this shape back. The end-to-end suite runs
-# both against one Qdrant, ENVso a drift between them fails a test rather than
-# silently returning nothing.
 # Build the payload stored alongside a chunk's vector (everything but the
-# vector). The commit history is NOT part of it: it belongs to the file, not
-# to the chunk, and is stored once per file (see upsert_file_entries).
+# vector). api/clients/vectordb.py reads this shape back; the end-to-end
+# suite runs both against one Qdrant, so a drift between them fails a test
+# rather than silently returning nothing.
 def build_payload(chunk):
     metadata = chunk["metadata"]
     path = metadata["path"]
@@ -304,4 +302,5 @@ def _file_type(path):
 
 # Hex SHA-1 of a text, used in the entry id and for change detection.
 def _sha1(text):
-    return hashlib.sha1(text.encode("utf-8")).hexdigest()
+    # A content fingerprint, not a security measure.
+    return hashlib.sha1(text.encode("utf-8"), usedforsecurity=False).hexdigest()

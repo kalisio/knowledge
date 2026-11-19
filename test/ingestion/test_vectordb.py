@@ -11,9 +11,7 @@ import uuid
 
 import ingestion.clients.vectordb as vectordb
 
-# What issue #6 requires every stored chunk to carry. The commit history is
-# part of the same contract but belongs to the file, so it is stored once per
-# file and joined back on read -- see the file entry tests below.
+# What issue #6 requires every stored chunk to carry.
 REQUIRED_PAYLOAD_FIELDS = {
     "path", "repo", "start_line", "end_line", "content"}
 

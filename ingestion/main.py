@@ -36,7 +36,7 @@ def run():
 
     # Without the vector database there is nothing to ingest into.
     try:
-        _ingest(config, log, started)
+        _ingest(config, log)
     except (vectordb.QdrantUnreachable, IngestionAborted) as exc:
         log.error("ingestion aborted after %s: %s",
                   format_duration(time.perf_counter() - started), exc)
@@ -51,7 +51,7 @@ def run():
 # ---------------------------------------------------------------------------
 
 
-def _ingest(config, log, started):
+def _ingest(config, log):
     _log_settings(config, log)
 
     # Step 1: what is already indexed, and can it be reused?
@@ -63,18 +63,7 @@ def _ingest(config, log, started):
     # contract cannot even be matched for deletion -- so the code collection
     # is recreated rather than updated file by file.
     with step(log, 2, _STEPS, "preparing the collections"):
-        vectordb.ensure_collection(
-            config.qdrant_collection_metadata,
-            config.qdrant_vector_size_collection_metadata)
-        vectordb.ensure_collection(
-            config.qdrant_collection_code,
-            config.qdrant_vector_size_collection_code,
-            recreate=state["config_changed"])
-        # File entries hold one commit history per file; vectors are dummy.
-        vectordb.ensure_collection(
-            config.qdrant_collection_files,
-            config.qdrant_vector_size_collection_metadata,
-            recreate=state["config_changed"])
+        _prepare_collections(config, state["config_changed"])
 
     # The recovery cursor is captured before cloning and persisted only on
     # success: a failed run must not move it forward and skip files.
@@ -84,14 +73,7 @@ def _ingest(config, log, started):
     cloning = " ".join(["k-clone", config.kli_organization,
                         config.kli_workspace])
     with step(log, 3, _STEPS, f"cloning the workspace ({cloning})"):
-        try:
-            clone_workspace(config.kalisio_development_dir,
-                            config.kli_organization, config.kli_workspace)
-        except subprocess.CalledProcessError as exc:
-            log.error("%s failed (exit code %d) -- is the tooling on PATH and "
-                      "the git token set?", cloning, exc.returncode)
-            raise IngestionAborted(
-                f"{cloning} failed with exit code {exc.returncode}") from exc
+        _clone(config, log, cloning)
 
     # Step 4: scan the workspace and compare it with the index
     with step(log, 4, _STEPS, "scanning the workspace"):
@@ -154,20 +136,8 @@ def _ingest(config, log, started):
         if not files_to_index:
             log.info("  nothing changed, nothing to embed")
         else:
-            chunk_vectors = (embeddings.encode_batch(
-                [chunk["text"] for chunk in chunks_to_index])
-                if chunks_to_index else [])
-            # Drop every reindexed file's chunks, including the files that
-            # now yield none, so emptied files leave nothing stale behind. A
-            # recreated collection is already empty.
-            if not state["config_changed"]:
-                for file_path in files_to_index:
-                    repository, path = get_file_key(file_path, workspace_root)
-                    vectordb.delete_file(repository, path)
-            if chunks_to_index:
-                vectordb.upsert(chunks_to_index, chunk_vectors)
-                log.info("  %d chunks written to '%s'", len(chunks_to_index),
-                         config.qdrant_collection_code)
+            _embed_and_store(config, log, files_to_index, chunks_to_index,
+                             workspace_root, state["config_changed"])
 
     # Step 7: record the digest of the files that yield no chunk. They
     # appear in no chunk payload, so this entry is the only trace that they
@@ -186,6 +156,55 @@ def _ingest(config, log, started):
         config.qdrant_collection_metadata, ingestion_started,
         config.embedding_model, chunkers.CHUNKING_VERSION)
     _log_outcome(config, log, len(files_to_index), len(chunks_to_index))
+
+
+# Create the collections. A changed indexing config makes every stored
+# chunk unusable, so the code and file collections are then recreated.
+def _prepare_collections(config, config_changed):
+    vectordb.ensure_collection(
+        config.qdrant_collection_metadata,
+        config.qdrant_vector_size_collection_metadata)
+    vectordb.ensure_collection(
+        config.qdrant_collection_code,
+        config.qdrant_vector_size_collection_code,
+        recreate=config_changed)
+    # File entries hold the digest of the files yielding no chunk; their
+    # vectors are dummies.
+    vectordb.ensure_collection(
+        config.qdrant_collection_files,
+        config.qdrant_vector_size_collection_metadata,
+        recreate=config_changed)
+
+
+# Run k-clone; a failure aborts the run, there is nothing to scan without it.
+def _clone(config, log, cloning):
+    try:
+        clone_workspace(config.kalisio_development_dir,
+                        config.kli_organization, config.kli_workspace)
+    except subprocess.CalledProcessError as exc:
+        log.error("%s failed (exit code %d) -- is the tooling on PATH and "
+                  "the git token set?", cloning, exc.returncode)
+        raise IngestionAborted(
+            f"{cloning} failed with exit code {exc.returncode}") from exc
+
+
+# Embed the chunks and replace the stored chunks of every reindexed file.
+def _embed_and_store(config, log, files_to_index, chunks_to_index,
+                     workspace_root, config_changed):
+    chunk_vectors = (embeddings.encode_batch(
+        [chunk["text"] for chunk in chunks_to_index])
+        if chunks_to_index else [])
+    # Drop every reindexed file's chunks, including the files that now yield
+    # none, so emptied files leave nothing stale behind. A recreated
+    # collection is already empty.
+    if not config_changed:
+        for file_path in files_to_index:
+            repository, path = get_file_key(file_path, workspace_root)
+            vectordb.delete_file(repository, path)
+    if chunks_to_index:
+        vectordb.upsert(chunks_to_index, chunk_vectors)
+        log.info("  %d chunks written to '%s'", len(chunks_to_index),
+                 config.qdrant_collection_code)
 
 
 # What the run is configured with, before it does anything.

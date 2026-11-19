@@ -73,8 +73,9 @@ class Config:
     # first is noise, the second must never reach an index.
     ignored_file_pattern: str = field(default_factory=lambda: env_str("IGNORED_FILE_PATTERN", r"\.(min|bundle|chunk)\.\w+$|-lock\.(json|yaml)$|\.(enc|dec)\.\w+$"))
 
-    # Per-file entries (commit history). Derived from the code collection by
-    # default, so an existing deployment needs no new variable.
+    # Per-file entries: the digest of every file that yields no chunk, so
+    # the next run does not read it again. Derived from the code collection
+    # by default, so an existing deployment needs no new variable.
     @property
     def qdrant_collection_files(self):
         return env_str("QDRANT_COLLECTION_FILES",
