@@ -14,10 +14,10 @@ A RAG runs in two phases: **indexing**, done once and then on every change of th
 
 | Step | What it does | In knowledge |
 | --- | --- | --- |
-| **Ingestion** | Finds the documents, reads them, keeps the ones worth indexing | [Ingestion job](/guides/ingestion-job) |
+| **Ingestion** | Finds the documents, reads them, keeps the ones worth indexing | [Ingestion job](/guides/components/ingestion-job) |
 | **Vectorisation** | Cuts each document into passages (*chunks*) and turns each one into a vector with an *embedding model* | [File formats](/guides/file-formats/) · [Embedding model](/guides/file-formats/#the-embedding-model) |
-| **Semantic search** | Turns the question into a vector with the same model and returns the nearest passage vectors | [`/search`](/guides/api#post-search) · [Qdrant](/guides/qdrant) |
-| **Generation** | Gives an LLM an instruction, the retrieved passages and the question, and returns what it writes | [`/ask`](/guides/api#post-ask) |
+| **Semantic search** | Turns the question into a vector with the same model and returns the nearest passage vectors | [`/search`](/guides/components/api#post-search) · [Qdrant](/guides/components/qdrant) |
+| **Generation** | Gives an LLM an instruction, the retrieved passages and the question, and returns what it writes | [`/ask`](/guides/components/api#post-ask) |
 
 ### Vectors: comparing texts by their meaning
 
@@ -47,6 +47,6 @@ knowledge is that pipeline, cut into three components deployed apart:
 
 ![How knowledge works](/images/how-knowledge-works.svg)
 
-- the **[ingestion job](/guides/ingestion-job)** clones the repositories, cuts every supported file along its structure, embeds the chunks with [Qwen3-Embedding-0.6B](https://huggingface.co/Qwen/Qwen3-Embedding-0.6B) and writes them to Qdrant, only what changed since the last run
-- **[Qdrant](/guides/qdrant)** stores one point per chunk
-- the **[API](/guides/api)** embeds a question, and its translations, with the same model, searches Qdrant, and either returns the passages (`/search`) or has an LLM answer from them (`/ask`).
+- the **[ingestion job](/guides/components/ingestion-job)** clones the repositories, cuts every supported file along its structure, embeds the chunks with [Qwen3-Embedding-0.6B](https://huggingface.co/Qwen/Qwen3-Embedding-0.6B) and writes them to Qdrant, only what changed since the last run
+- **[Qdrant](/guides/components/qdrant)** stores one point per chunk
+- the **[API](/guides/components/api)** embeds a question, and its translations, with the same model, searches Qdrant, and either returns the passages (`/search`) or has an LLM answer from them (`/ask`).

@@ -5,7 +5,7 @@ export default withMermaid(
   defineConfig({
     base: '/knowledge/',
     title: 'knowledge',
-    description: 'AI developer assistant for the Kalisio ecosystem',
+    description: 'A retrieval-augmented generation (RAG) engine specialised in the Kalisio ecosystem',
     ignoreDeadLinks: true,
     // docs/experiments/ holds the Python experiment code, notebooks (.ipynb) and the old
     // project README — none of it is rendered. The write-ups now live under research/.
@@ -20,13 +20,11 @@ export default withMermaid(
       nav: [
         { text: 'About', link: '/about/introduction' },
         { text: 'Guides', link: '/guides/understanding' },
-        { text: 'Architecture', link: '/architecture/introduction' },
         { text: 'Research', link: '/research/introduction' }
       ],
       sidebar: {
         '/about/': getAboutSidebar(),
         '/guides/': getGuidesSidebar(),
-        '/architecture/': getArchitectureSidebar(),
         '/research/': getResearchSidebar()
       },
       footer: {
@@ -61,48 +59,43 @@ function getAboutSidebar () {
 function getGuidesSidebar () {
   return [
     { text: 'Understanding knowledge', link: '/guides/understanding' },
+    { text: 'Architecture', link: '/guides/architecture' },
     { text: 'Getting started', link: '/guides/getting-started' },
-    { text: 'Semantic code search', link: '/guides/semantic-search' },
     {
-      text: 'Agent configuration',
-      collapsed: true,
+      text: 'Components',
+      collapsed: false,
       items: [
-        { text: 'Claude Code', link: '/guides/agent-config/claude-code' },
-        { text: 'Codex', link: '/guides/agent-config/codex' },
-        { text: 'Cursor', link: '/guides/agent-config/cursor' },
-        { text: 'Gemini CLI', link: '/guides/agent-config/geminicli' },
-        { text: 'Vibe', link: '/guides/agent-config/vibe' }
+        { text: 'Ingestion job', link: '/guides/components/ingestion-job' },
+        { text: 'API', link: '/guides/components/api' },
+        { text: 'Qdrant', link: '/guides/components/qdrant' }
       ]
     },
     {
-      text: 'How-to',
-      collapsed: true,
+      text: 'File formats',
+      collapsed: false,
       items: [
-        { text: 'Add an LLM provider', link: '/guides/howto/llm-providers' },
-        { text: 'Add a file extension', link: '/guides/howto/file-types' },
-        { text: 'Change the embedding model', link: '/guides/howto/embedding-model' },
-        { text: 'Manage Qdrant collections', link: '/guides/howto/qdrant' }
+        { text: 'Embedding & chunking', link: '/guides/file-formats/' },
+        { text: 'Markdown', link: '/guides/file-formats/markdown' },
+        { text: 'JavaScript', link: '/guides/file-formats/javascript' },
+        { text: 'Vue', link: '/guides/file-formats/vue' },
+        { text: 'JSON', link: '/guides/file-formats/json' },
+        { text: 'YAML', link: '/guides/file-formats/yaml' },
+        { text: 'Shell', link: '/guides/file-formats/shell' },
+        { text: 'Add a file format', link: '/guides/file-formats/add-a-format' }
       ]
     }
-  ]
-}
-
-function getArchitectureSidebar () {
-  return [
-    { text: 'Overview', link: '/architecture/introduction' },
-    { text: 'Ingestion job', link: '/architecture/ingestion' },
-    { text: 'API', link: '/architecture/api' }
   ]
 }
 
 function getResearchSidebar () {
   return [
     { text: 'Overview', link: '/research/introduction' },
-    { text: 'nb01 · Corpus discovery', link: '/research/corpus-discovery' },
-    { text: 'nb02 · Markdown chunking', link: '/research/markdown-chunking' },
-    { text: 'nb03 · JS & Vue chunking', link: '/research/js-vue-chunking' },
-    { text: 'nb04 · JSON chunking', link: '/research/json-chunking' },
-    { text: 'nb05 · Embedding evaluation', link: '/research/embedding-evaluation' },
-    { text: 'nb06 · Qdrant index & eval', link: '/research/qdrant-index-eval' }
+    { text: 'Corpus discovery', link: '/research/corpus-discovery' },
+    { text: 'Markdown chunking', link: '/research/markdown-chunking' },
+    { text: 'JS & Vue chunking', link: '/research/js-vue-chunking' },
+    { text: 'JSON chunking', link: '/research/json-chunking' },
+    { text: 'Embedding model', link: '/research/embedding-evaluation' },
+    { text: 'Vector store', link: '/research/qdrant-index-eval' },
+    { text: 'Multilingual retrieval', link: '/research/multilingual-retrieval' }
   ]
 }
