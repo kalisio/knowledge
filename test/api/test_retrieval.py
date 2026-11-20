@@ -100,3 +100,130 @@ def test_no_hits_on_an_empty_index_answers_503_naming_ingestion(monkeypatch):
 
     assert excinfo.value.status_code == 503
     assert "ingestion" in excinfo.value.detail
+
+
+# --- _phrasings: the query and its translations ---------------------------
+
+def test_without_translation_the_query_is_searched_as_typed(monkeypatch):
+    monkeypatch.setattr(retrieval.translation, "translations",
+                        lambda query: [])
+
+    assert retrieval._phrasings("how to add a layer") == ["how to add a layer"]
+
+
+# The original comes first and stays: it carries the technical terms, and it
+# is the phrasing that reaches the pages written in the question's language.
+def test_each_translation_is_searched_after_the_original(monkeypatch):
+    monkeypatch.setattr(
+        retrieval.translation, "translations",
+        lambda query: [("en", "how to add a layer"),
+                       ("es", "cómo añadir una capa")])
+
+    assert retrieval._phrasings("comment ajouter une couche") == [
+        "comment ajouter une couche", "how to add a layer",
+        "cómo añadir una capa"]
+
+
+# A translation that only gives the query back -- an identifier, a product
+# name -- would cost a second search for nothing.
+def test_a_translation_identical_to_the_query_is_dropped(monkeypatch):
+    monkeypatch.setattr(retrieval.translation, "translations",
+                        lambda query: [("en", " KDK Planet ")])
+
+    assert retrieval._phrasings("kdk planet") == ["kdk planet"]
+
+
+# --- _search_every_phrasing: one ranking out of several -------------------
+
+def hit(path, score, repo="kdk", chunk_index=0):
+    return {"repo": repo, "path": path, "chunk_index": chunk_index,
+            "score": score, "lines": "1", "breadcrumb": "", "content": ""}
+
+
+def stub_search(monkeypatch, results):
+    monkeypatch.setattr(retrieval.embeddings, "encode", lambda text: text)
+    monkeypatch.setattr(retrieval.vectordb, "search",
+                        lambda vector, top_k: results[vector])
+
+
+# A chunk both phrasings find is returned once, with the best score it
+# reached -- the scores come from one model and one cosine, so they compare.
+def test_a_chunk_found_twice_keeps_its_best_score(monkeypatch):
+    stub_search(monkeypatch, {
+        "fr": [hit("a.md", 0.61), hit("b.md", 0.55)],
+        "en": [hit("a.md", 0.83), hit("c.md", 0.70)],
+    })
+
+    ranked = retrieval._search_every_phrasing(["fr", "en"], top_k=5)
+
+    assert [(c["path"], c["score"]) for c in ranked] == [
+        ("a.md", 0.83), ("c.md", 0.70), ("b.md", 0.55)]
+
+
+def test_the_merged_ranking_is_cut_at_top_k(monkeypatch):
+    stub_search(monkeypatch, {
+        "fr": [hit("a.md", 0.9), hit("b.md", 0.5)],
+        "en": [hit("c.md", 0.8), hit("d.md", 0.4)],
+    })
+
+    ranked = retrieval._search_every_phrasing(["fr", "en"], top_k=2)
+
+    assert [c["path"] for c in ranked] == ["a.md", "c.md"]
+
+
+# Two files may share a path in two repositories, and two chunks a file:
+# neither is the same chunk.
+def test_chunks_are_told_apart_by_repo_path_and_index(monkeypatch):
+    stub_search(monkeypatch, {
+        "q": [hit("README.md", 0.9, repo="kdk"),
+              hit("README.md", 0.8, repo="kano"),
+              hit("README.md", 0.7, repo="kdk", chunk_index=1)],
+    })
+
+    assert len(retrieval._search_every_phrasing(["q"], top_k=5)) == 3
+
+
+# --- answer_question: /ask retrieves the way /search does -----------------
+
+# Before, /ask searched the question as typed while /search also searched
+# its translation: the same French question reached the English page from
+# one endpoint and missed it from the other.
+def test_ask_searches_the_translations_too(monkeypatch):
+    monkeypatch.setattr(retrieval.translation, "translations",
+                        lambda query: [("en", "how to add a layer")])
+    stub_search(monkeypatch, {
+        "comment ajouter une couche": [hit("fr.md", 0.40)],
+        "how to add a layer": [hit("layers.md", 0.82)],
+    })
+    prompts = []
+
+    def ask(prompt):
+        prompts.append(prompt)
+        return retrieval.llm.LLMResponse(answer="ok", provider="local",
+                                         model="test-llm")
+    monkeypatch.setattr(retrieval.llm, "ask", ask)
+
+    response = retrieval.answer_question("comment ajouter une couche")
+
+    assert [c["path"] for c in response["sources"]] == ["layers.md", "fr.md"]
+    assert "Source: layers.md" in prompts[0]
+    # The LLM is asked the question as the user typed it, not its
+    # translation: it answers in the user's language.
+    assert "Question: comment ajouter une couche" in prompts[0]
+
+
+def test_search_and_ask_share_one_retrieval(monkeypatch):
+    seen = []
+
+    def retrieve(query, top_k):
+        seen.append((query, top_k))
+        return [hit("a.md", 0.9)]
+    monkeypatch.setattr(retrieval, "retrieve", retrieve)
+    monkeypatch.setattr(
+        retrieval.llm, "ask",
+        lambda prompt: retrieval.llm.LLMResponse("ok", "local", "test-llm"))
+
+    retrieval.search_chunks("how to add a layer", 3)
+    retrieval.answer_question("how to add a layer")
+
+    assert seen == [("how to add a layer", 3), ("how to add a layer", 6)]

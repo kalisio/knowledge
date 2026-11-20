@@ -36,6 +36,8 @@ async def lifespan(app):
         log.info("qdrant=%s collection=%s",
                  config.qdrant_url, config.qdrant_collection_code)
         log.info("embedding model=%s", config.embedding_model)
+        log.info("query translation=%s",
+                 config.query_translation_model or "disabled")
         log.info("llm model=%s endpoint=%s",
                  config.llm_model, config.llm_endpoint)
         log.info("auth %s | secrets: LLM_API_KEY=%s APP_SECRET=%s",
@@ -54,7 +56,8 @@ def create_app():
     app = FastAPI(
         title="knowledge API",
         version=os.getenv("APP_VERSION", "0.1.0"),
-        description="RAG retrieval over the Kalisio code corpus.",
+        description=("Retrieval-augmented question answering over the "
+                     "Kalisio corpus."),
         contact={
             "name": "Kalisio",
             "url": "https://kalisio.xyz",

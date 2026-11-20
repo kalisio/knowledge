@@ -23,9 +23,9 @@ def health_check():
     response_model=AskResponse,
     summary="Ask a question over the Kalisio corpus",
     description=(
-        "Embed the question, retrieve matching code chunks from Qdrant, "
-        "call the configured LLM, return a natural-language answer "
-        "with its sources."
+        "Embed the question and its translations, retrieve the matching "
+        "chunks from Qdrant, call the configured LLM, return a "
+        "natural-language answer with its sources."
     ),
     dependencies=[Depends(verify_jwt)],
 )
@@ -38,9 +38,9 @@ def ask(request: AskRequest):
     response_model=list[Chunk],
     summary="Retrieve raw chunks from the Kalisio corpus",
     description=(
-        "Embed the query, return the top-k matching code chunks from "
-        "Qdrant without calling the LLM. Intended for agents that "
-        "compose their own prompt."
+        "Embed the query and its translations, return the top-k matching "
+        "chunks from Qdrant without calling the LLM. Intended for callers "
+        "that compose their own prompt."
     ),
     dependencies=[Depends(verify_jwt)],
 )

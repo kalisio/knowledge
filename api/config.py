@@ -5,9 +5,12 @@ from dataclasses import dataclass, field
 
 
 DEFAULT_SYSTEM_PROMPT = (
-    "You are a Kalisio code assistant. Answer the question using only the "
-    "provided context from the Kalisio codebase. If the context is "
-    "insufficient, say so plainly. Reference the source files you used."
+    "You are the Kalisio knowledge assistant. Answer the question using "
+    "only the provided context, drawn from the Kalisio corpus: "
+    "documentation, source code and configuration. If the context is "
+    "insufficient, say so plainly. Reference the source files you used. "
+    "Answer in the language the question is asked in, even when the "
+    "context is written in another one."
 )
 
 DEFAULT_PROMPT_TEMPLATE = """Answer the question based on the context below. \
@@ -32,8 +35,9 @@ class Config:
     environment at import time.
     """
 
-    # Qdrant: read-only. The code collection holds the chunks, the files
-    # collection the commit history of each file.
+    # Qdrant: read-only. The API only ever reads the code collection, the
+    # one holding the chunks; the other collections belong to the ingestion
+    # job's bookkeeping.
     qdrant_url: str = field(default_factory=lambda: require("QDRANT_URL"))
     qdrant_collection_code: str = field(
         default_factory=lambda: require("QDRANT_COLLECTION_CODE"))
@@ -49,10 +53,12 @@ class Config:
     llm_endpoint: str = field(default_factory=lambda: require("LLM_ENDPOINT"))
 
     # Translating the query before embedding it, for a corpus written in a
-    # language users do not ask in. Empty disables it. The Helsinki-NLP
-    # models are named opus-mt-<source>-<target>, so the name carries the
-    # direction: opus-mt-fr-en serves an English corpus asked in French,
-    # opus-mt-en-fr the reverse. Nothing else to configure.
+    # language users do not ask in. One model name or several,
+    # comma-separated; empty disables it. The Helsinki-NLP models are named
+    # opus-mt-<source>-<target>, so the name carries the direction:
+    # opus-mt-fr-en serves English pages asked in French, opus-mt-en-fr
+    # French pages asked in English, and both together a corpus mixing the
+    # two. Nothing else to configure.
     query_translation_model: str = field(
         default_factory=lambda: env_str("QUERY_TRANSLATION_MODEL", ""))
 

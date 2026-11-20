@@ -1,2 +1,2 @@
-"""FastAPI service exposing RAG retrieval over the Kalisio code corpus."""
+"""FastAPI service exposing RAG retrieval over the Kalisio corpus."""
 

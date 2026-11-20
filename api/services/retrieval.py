@@ -12,16 +12,16 @@ from api.logger import get_logger
 log = get_logger("api")
 
 
-# Run /ask end-to-end: embed -> search -> context -> LLM -> answer.
+# Run /ask end-to-end: embed -> search -> context -> LLM -> answer. The
+# retrieval is the very one /search runs, translations included: a French
+# question over an English corpus deserves the same passages whether it asks
+# for an answer or for the passages themselves.
 def answer_question(question):
     config = get_config()
 
-    # 1. Embed the question into a query vector
-    vector = embeddings.encode(question)
-
-    # 2. Retrieve the top-k most relevant chunks from Qdrant
-    chunks = vectordb.search(vector, top_k=config.top_k)
-    _ensure_indexed(chunks)
+    # 1-2. Embed the question -- and its translations -- and retrieve the
+    #      top-k most relevant chunks from Qdrant
+    chunks = retrieve(question, config.top_k)
 
     # 3. Build the LLM context, respecting the character budget
     context = _build_llm_context(chunks, config.max_context_chars)
@@ -38,9 +38,16 @@ def answer_question(question):
 
 
 # Run /search: embed the query, return top-k raw chunks without calling the
-# LLM. The chunks are returned as a bare list -- that is the agent-facing
-# contract of the endpoint.
+# LLM. The chunks are returned as a bare list -- that is the contract of the
+# endpoint, for callers composing their own prompt.
 def search_chunks(query, top_k):
+    return retrieve(query, top_k)
+
+
+# The top-k chunks for `query`, best first: the query as typed and each of
+# its translations are searched, and the results merged. Raises a 503 when
+# the index has never been built.
+def retrieve(query, top_k):
     chunks = _search_every_phrasing(_phrasings(query), top_k)
     _ensure_indexed(chunks)
     return chunks
@@ -51,27 +58,30 @@ def search_chunks(query, top_k):
 # ---------------------------------------------------------------------------
 
 
-# The query as typed, plus its translation when the corpus is written in
-# another language. Both are kept: the translation is what usually finds
-# the right page, but the original still carries the technical terms, which
-# are spelled the same in either language and often match on their own.
+# The query as typed, plus one translation per configured model starting
+# from the language it is written in. All are kept: a translation is what
+# usually finds a page written in its target language, but the original
+# still carries the technical terms, which are spelled the same in every
+# language and often match on their own -- and it is the phrasing that
+# reaches the pages written in the language of the question.
 def _phrasings(query):
-    way = translation.direction()
-    if way is None:
-        return [query]
-    source, _ = way
-    if not translation.looks_like(query, source):
-        return [query]
-    translated = translation.translate(query)
-    if not translated or translated.strip().lower() == query.strip().lower():
-        return [query]
-    log.info("query translated from %s for retrieval", source)
-    return [query, translated]
+    phrasings = [query]
+    seen = {query.strip().lower()}
+    for target, translated in translation.translations(query):
+        key = translated.strip().lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        phrasings.append(translated)
+        log.info("query translated into %s for retrieval", target)
+    return phrasings
 
 
 # Search once per phrasing and merge, keeping the best score each chunk
-# reached. Searching twice costs one more embedding and one more query --
-# milliseconds -- against a search that would otherwise miss its page.
+# reached. The scores are comparable across phrasings -- one model, one
+# cosine -- so the best one is what the chunk deserves. Searching twice
+# costs one more embedding and one more query -- milliseconds -- against a
+# search that would otherwise miss its page.
 def _search_every_phrasing(phrasings, top_k):
     best = {}
     for phrasing in phrasings:
@@ -81,7 +91,6 @@ def _search_every_phrasing(phrasings, top_k):
                 best[key] = chunk
     ranked = sorted(best.values(), key=lambda c: c["score"], reverse=True)
     return ranked[:top_k]
-
 
 
 # Guard against querying before ingestion has run. Empty results plus an
