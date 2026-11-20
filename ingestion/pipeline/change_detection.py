@@ -10,7 +10,8 @@ import ingestion.clients.vectordb as vectordb
 # Hex SHA-1 of a whole file's text. Stamped on every chunk of the file so
 # the indexed state can tell, per file, whether its content changed.
 def compute_file_sha1(text):
-    return hashlib.sha1(text.encode("utf-8")).hexdigest()
+    # A content fingerprint, not a security measure.
+    return hashlib.sha1(text.encode("utf-8"), usedforsecurity=False).hexdigest()
 
 
 # A file's identity everywhere in the index: the repository holding it, and

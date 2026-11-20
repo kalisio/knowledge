@@ -11,8 +11,10 @@ from ingestion.config import get_config
 # `function name() {`. Column zero on purpose, the way the JavaScript
 # chunker anchors its symbols: an indented definition sits inside another
 # one, and the nearest match would pass a helper off as the function.
+# Possessive quantifiers: no part of the line is ever tried against two of
+# them, which keeps a long line from backtracking polynomially.
 _FUNCTION = re.compile(
-    r"^(?:function\s+)?([A-Za-z_][\w-]*)\s*(?:\(\s*\))?\s*\{[ \t]*$",
+    r"^(?:function\s++)?([A-Za-z_][\w-]*+)\s*+(?:\(\s*+\)\s*+)?\{[ \t]*+$",
     re.M)
 
 # What closes a function opened at column zero. Kalisio's shell is written

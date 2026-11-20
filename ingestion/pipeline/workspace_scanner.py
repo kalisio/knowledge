@@ -27,23 +27,20 @@ def scan_indexable_files(root):
     ignored_directories = set(config.ignored_directories.split(","))
     ignored_filenames = config.ignored_filenames.split(",")
     ignored_file_pattern = re.compile(config.ignored_file_pattern)
-    kept = []
-    for repo_dir in find_repositories(root):
-        for tracked in _git_tracked_files(repo_dir):
-            path = repo_dir / tracked
-            if path.suffix.lstrip(".").lower() not in supported_file_extensions:
-                continue
-            if ignored_directories.intersection(path.relative_to(repo_dir).parts[:-1]):
-                continue
-            if path.name in ignored_filenames:
-                continue
-            if ignored_file_pattern.search(path.name):
-                continue
-            # Skips gitlinks and files deleted but still in the index too.
-            if not path.is_file() or path.stat().st_size > config.max_file_size:
-                continue
-            kept.append(path)
-    return kept
+    def indexable(path, repo_dir):
+        return (path.suffix.lstrip(".").lower() in supported_file_extensions
+                and not ignored_directories.intersection(
+                    path.relative_to(repo_dir).parts[:-1])
+                and path.name not in ignored_filenames
+                and not ignored_file_pattern.search(path.name)
+                # Skips gitlinks and files deleted but still in the index too.
+                and path.is_file()
+                and path.stat().st_size <= config.max_file_size)
+
+    return [repo_dir / tracked
+            for repo_dir in find_repositories(root)
+            for tracked in _git_tracked_files(repo_dir)
+            if indexable(repo_dir / tracked, repo_dir)]
 
 
 # Every git repository under `root`, at either depth, in a stable order.

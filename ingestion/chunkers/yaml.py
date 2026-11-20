@@ -13,7 +13,11 @@ from ingestion.config import get_config
 
 # A line that opens a block at a given column: a key, or a list item. The
 # indentation is captured so the same pattern serves every nesting level.
-_BLOCK_OPENER = re.compile(r"^( *)(?:-\s+)?([^\s#{][^:\n]*?)\s*:(?:\s|$)|^( *)-\s")
+# The key ends on its last non-blank character and the quantifiers are
+# possessive, so no whitespace is ever tried by two of them: a long line
+# cannot backtrack polynomially.
+_BLOCK_OPENER = re.compile(
+    r"^( *+)(?:-\s++)?([^\s#{](?:[^:\n]*[^\s:])?)\s*+:(?:\s|$)|^( *+)-\s")
 
 # What separates documents in one file.
 _DOCUMENT_SEPARATOR = re.compile(r"^---\s*$", re.M)
@@ -171,35 +175,7 @@ def _named(leaves):
 # a template describes the file, not its first key, and would otherwise
 # push that key past the size limit and have it cut on characters.
 def _blocks(text, start, end, indent, detach_over):
-    lines = text[start:end].splitlines(keepends=True)
-    openers = []                         # (key, start) -- a None key is a
-    offset = start                       # detached prefix
-    pending = None                       # where the current prefix started
-    in_comment = False                   # inside a {{/* ... */}}
-    for line in lines:
-        stripped = line.strip()
-        if in_comment or stripped.startswith(_TEMPLATE_COMMENT_OPEN):
-            in_comment = _TEMPLATE_COMMENT_CLOSE not in stripped
-            if pending is None:
-                pending = offset
-        elif _PREFIX_LINE.match(line):
-            if pending is None:
-                pending = offset
-        else:
-            match = _BLOCK_OPENER.match(line)
-            column = len(match.group(1) or match.group(3) or "") if match else -1
-            if match and column == indent:
-                key = (match.group(2) or "").strip() or None
-                block_start = offset
-                if pending is not None:
-                    if offset - pending > detach_over:
-                        openers.append((None, pending))
-                    else:
-                        block_start = pending
-                openers.append((key, block_start))
-            pending = None
-        offset += len(line)
-
+    openers = _openers(text, start, end, indent, detach_over)
     if not openers:
         return [(None, start, end)]
     blocks = []
@@ -211,6 +187,53 @@ def _blocks(text, start, end, indent, detach_over):
         block_end = openers[index + 1][1] if index + 1 < len(openers) else end
         blocks.append((key, block_start, block_end))
     return blocks
+
+
+# The openers at `indent` between `start` and `end`, as [(key, start)], each
+# starting where its prefix does. A None key is a detached prefix.
+def _openers(text, start, end, indent, detach_over):
+    openers = []
+    offset = start
+    pending = None                       # where the current prefix started
+    in_comment = False                   # inside a {{/* ... */}}
+    for line in text[start:end].splitlines(keepends=True):
+        stripped = line.strip()
+        if in_comment or stripped.startswith(_TEMPLATE_COMMENT_OPEN):
+            in_comment = _TEMPLATE_COMMENT_CLOSE not in stripped
+            prefix_line = True
+        else:
+            prefix_line = bool(_PREFIX_LINE.match(line))
+        if prefix_line:
+            pending = offset if pending is None else pending
+        else:
+            opened = _opener_key(line, indent)
+            if opened is not None:
+                openers.extend(_with_prefix(opened[0], offset, pending,
+                                            detach_over))
+            pending = None
+        offset += len(line)
+    return openers
+
+
+# (key,) if `line` opens a block at `indent`, None otherwise. The key is
+# wrapped because a list item opens a block without one (key None).
+def _opener_key(line, indent):
+    match = _BLOCK_OPENER.match(line)
+    if not match:
+        return None
+    if len(match.group(1) or match.group(3) or "") != indent:
+        return None
+    return ((match.group(2) or "").strip() or None,)
+
+
+# The opener at `offset`, given the prefix that started at `pending`: the
+# prefix joins the block, or stands alone when longer than `detach_over`.
+def _with_prefix(key, offset, pending, detach_over):
+    if pending is None:
+        return [(key, offset)]
+    if offset - pending > detach_over:
+        return [(None, pending), (key, offset)]
+    return [(key, pending)]
 
 
 # The indentation of the first child line of a block, or -1 if it has none.
