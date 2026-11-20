@@ -1,108 +1,73 @@
-# Getting Started
+# Getting started
+
+![Getting started](/images/getting-started.svg)
 
 ## Prerequisites
 
-- [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/main)
-- A working [Kalisio development stack](https://github.com/kalisio/development)
+### The Kalisio development toolbox
 
-## Install Miniconda
+knowledge relies on [`kalisio/development`](https://github.com/kalisio/development) twice: to run locally (the encrypted environment, `k-qdrant`, the `k-dev` session) and inside the ingestion job itself (`k-clone` fills the workspace it indexes). Install it first, following its [installation guide](https://github.com/kalisio/development#installation)
 
-Install Miniconda with the official installer:
+### Docker
 
-```bash
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda_installer.sh
-bash /tmp/miniconda_installer.sh -b -p ~/miniconda3
-~/miniconda3/bin/conda init bash
-```
+[Qdrant](https://qdrant.tech/documentation/quickstart/) runs in a Docker container, started by
+`k-qdrant`.
 
-Reload your shell:
+### uv
 
-```bash
-source ~/.bashrc
-```
+Both services are Python 3.11, managed with [uv](https://docs.astral.sh/uv/).
 
-Check the installation:
+## Quick Start
+
+![Run with k-dev](/images/k-dev.svg)
 
 ```bash
-conda --version
-```
-
-## Install Project Dependencies
-
-The project uses Python 3.11, managed through `environment.yml`.
-
-Create the conda environment and install all dependencies:
-
-```bash
-conda env create -f environment.yml
-```
-
-Activate the environment:
-
-```bash
-conda activate knowledge
-```
-
-## Environment Variables
-
-### Shared (API + ingestion job)
-
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `QDRANT_URL` | yes | - | URL of the Qdrant instance (`http://localhost:6333`) |
-| `QDRANT_COLLECTION_CODE` | yes | - | Collection for source-code chunks (ingestion) |
-| `QDRANT_COLLECTION_METADATA` | yes | - | Collection for metadata chunks (ingestion) |
-| `EMBEDDING_MODEL` | yes | - | HuggingFace model identifier - see tip below |
-| `EMBEDDING_BATCH_SIZE` | no | `8` | Chunks embedded per batch during ingestion |
-| `LOG_LEVEL` | no | `INFO` | Log verbosity (`DEBUG`, `INFO`, `WARNING`, …) |
-
-### API service
-
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `LLM_API_KEY` | yes | - | API key for the LLM provider |
-| `LLM_MODEL` | yes | - | Chat model identifier (e.g. `gpt-4o-mini`) |
-| `LLM_ENDPOINT` | yes | - | Base URL of any OpenAI-compatible API |
-| `APP_SECRET` | yes* | - | Secret to sign and verify JWT tokens (`*` required when auth is on) |
-| `KNOWLEDGE_AUTH_ENABLED` | no | `true` | Set to `false` to disable JWT auth |
-| `JWT_AUDIENCE` | no | `kalisio` | Expected `aud` claim for incoming tokens |
-| `JWT_ISSUER` | no | `kalisio` | Expected `iss` claim for incoming tokens |
-| `JWT_ALGORITHM` | no | `HS256` | Algorithm used to verify JWT signatures |
-| `TOP_K` | no | `6` | Number of chunks returned per retrieval |
-| `MAX_CONTEXT_CHARS` | no | `14000` | Max characters of context fed to the LLM |
-| `MAX_ANSWER_TOKENS` | no | `1024` | Max tokens the LLM may generate per answer |
-| `HOST` | no | `127.0.0.1` | Host the API binds to |
-| `PORT` | no | `8187` | Port the API listens on |
-
-### Ingestion job
-
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `KALISIO_GITHUB_TOKEN` | yes | — | Token `k-clone` clones the GitHub repositories with. Without it the tooling falls back to ssh, which needs a key in the container |
-| `GITLAB_IRSN_TOKEN` | no | — | Same, for an IRSN workspace hosted on GitLab |
-| `KLI_ORGANIZATION` | no | `kalisio` | Organisation passed to `k-clone` (`kalisio`, `irsn`, `airbus`) |
-| `KLI_WORKSPACE` | no | `apps` | kli workspace to clone and index |
-| `INDEXED_REPOSITORIES` | no | — | Comma-separated repository names to index; empty means all of them |
-
-:::tip Choosing an embedding model
-
-`EMBEDDING_MODEL` accepts any [SentenceTransformers](https://www.sbert.net/) model identifier from HuggingFace(`Qwen/Qwen3-Embedding-0.6B`, `Qwen/Qwen3-Embedding-4B`, `nomic-ai/nomic-embed-text-v1.5`)
-:::
-
-::: info OpenAI models for the LLM
-`LLM_ENDPOINT` follows the [OpenAI API](https://platform.openai.com/docs/models) format, so any OpenAI-compatible provider works without code changes: OpenAI (`gpt-4o`, `gpt-4o-mini`, `gpt-4.1`), [Mistral](https://mistral.ai), [Ollama](https://ollama.com) (local), and others.
-:::
-
-## Run the Project
-
-Start the API:
-
-```bash
+# Get the code
+k-clone kalisio services
+# Create the Python environment
+cd $KALISIO_DEVELOPMENT_DIR/knowledge
+uv sync                          # services + test group (pytest, ruff)
+uv sync --all-groups             # + the research group, for docs/experiments
+source .venv/bin/activate
+# Run with `k-dev`
+k-dev kalisio services
+# Index a corpus
+python -m ingestion.bin
+# Serve the API
 python -m api.bin
+# Run the tests
+pytest test -q                       # everything; e2e tests skip without Qdrant
+pytest test/api test/ingestion -q    # unit tests only, no service needed
+pytest test/e2e -q                   # needs Qdrant at $QDRANT_URL
+pytest test/multilingual -q -s       # retrieval quality, needs the models in the HF cache
+ruff check .                         # lint (rules in pyproject.toml)
 ```
 
-Run the ingestion job:
+::: tip Run without tmux
 
 ```bash
-python -m ingestion
+source $KALISIO_DEVELOPMENT_DIR/development/workspaces/services/services.sh knowledge
+k-qdrant                                   # Qdrant in Docker, data in ./qdrant_data
+cd $KALISIO_DEVELOPMENT_DIR/knowledge && uv sync && source .venv/bin/activate
 ```
+:::
+
+## Configure the environment
+
+```bash
+source $KALISIO_DEVELOPMENT_DIR/development/workspaces/services/services.sh knowledge
+```
+:::tip Configure without the encrypted environment
+```bash
+export QDRANT_URL=http://localhost:6333
+export QDRANT_COLLECTION_CODE=kalisio_code_dev
+export QDRANT_COLLECTION_METADATA=knowledge_metadata_dev
+export EMBEDDING_MODEL=Qwen/Qwen3-Embedding-0.6B
+export DEVELOPMENT_DIR=$(dirname "$KALISIO_DEVELOPMENT_DIR")
+export INDEXED_REPOSITORIES=kdk
+export LLM_ENDPOINT=http://localhost:11434/v1/   # a local Ollama, for instance
+export LLM_MODEL=qwen2.5:7b
+export LLM_API_KEY=unused
+export KNOWLEDGE_AUTH_ENABLED=false
+```
+:::

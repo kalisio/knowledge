@@ -727,7 +727,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="built-examples" name="services">
-    <mxGraphModel dx="2020" dy="1256" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1620" pageHeight="1240" math="0" shadow="0">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="1620" pageHeight="1240" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -890,6 +890,118 @@
       </root>
     </mxGraphModel>
   </diagram>
+  <diagram id="built-graph" name="getting-started">
+    <mxGraphModel dx="1571" dy="977" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="iBf-1pmdkfqR91J6-LqP-1" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" value="&lt;b&gt;1 · Prerequisites&lt;/b&gt;&lt;br/&gt;development · Docker&lt;br/&gt;uv" vertex="1">
+          <mxGeometry height="66" width="163" x="530" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="iBf-1pmdkfqR91J6-LqP-2" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" value="&lt;b&gt;2 · Clone&lt;/b&gt;&lt;br/&gt;k-clone kalisio services" vertex="1">
+          <mxGeometry height="50" width="191" x="733" y="418" as="geometry" />
+        </mxCell>
+        <mxCell id="iBf-1pmdkfqR91J6-LqP-3" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" value="&lt;b&gt;3 · Python env&lt;/b&gt;&lt;br/&gt;uv sync" vertex="1">
+          <mxGeometry height="50" width="135" x="964" y="418" as="geometry" />
+        </mxCell>
+        <mxCell id="iBf-1pmdkfqR91J6-LqP-4" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" value="&lt;b&gt;4 · Environment&lt;/b&gt;&lt;br/&gt;services.sh knowledge" vertex="1">
+          <mxGeometry height="50" width="170" x="1139" y="418" as="geometry" />
+        </mxCell>
+        <mxCell id="iBf-1pmdkfqR91J6-LqP-5" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" value="&lt;b&gt;5 · Run&lt;/b&gt;&lt;br/&gt;k-dev kalisio services" vertex="1">
+          <mxGeometry height="50" width="177" x="1349" y="418" as="geometry" />
+        </mxCell>
+        <mxCell id="iBf-1pmdkfqR91J6-LqP-6" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" value="&lt;b&gt;6 · Index&lt;/b&gt;&lt;br/&gt;python -m ingestion.bin" vertex="1">
+          <mxGeometry height="50" width="184" x="1566" y="418" as="geometry" />
+        </mxCell>
+        <mxCell id="iBf-1pmdkfqR91J6-LqP-7" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" value="&lt;b&gt;7 · Serve&lt;/b&gt;&lt;br/&gt;python -m api.bin" vertex="1">
+          <mxGeometry height="50" width="143" x="1790" y="418" as="geometry" />
+        </mxCell>
+        <mxCell id="iBf-1pmdkfqR91J6-LqP-8" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" value="&lt;b&gt;8 · Check&lt;/b&gt;&lt;br/&gt;/health · /search" vertex="1">
+          <mxGeometry height="50" width="143" x="1973" y="418" as="geometry" />
+        </mxCell>
+        <mxCell id="iBf-1pmdkfqR91J6-LqP-9" edge="1" parent="1" source="iBf-1pmdkfqR91J6-LqP-1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="iBf-1pmdkfqR91J6-LqP-2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="iBf-1pmdkfqR91J6-LqP-10" edge="1" parent="1" source="iBf-1pmdkfqR91J6-LqP-2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="iBf-1pmdkfqR91J6-LqP-3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="iBf-1pmdkfqR91J6-LqP-11" edge="1" parent="1" source="iBf-1pmdkfqR91J6-LqP-3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="iBf-1pmdkfqR91J6-LqP-4" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="iBf-1pmdkfqR91J6-LqP-12" edge="1" parent="1" source="iBf-1pmdkfqR91J6-LqP-4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="iBf-1pmdkfqR91J6-LqP-5" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="iBf-1pmdkfqR91J6-LqP-13" edge="1" parent="1" source="iBf-1pmdkfqR91J6-LqP-5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="iBf-1pmdkfqR91J6-LqP-6" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="iBf-1pmdkfqR91J6-LqP-14" edge="1" parent="1" source="iBf-1pmdkfqR91J6-LqP-6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="iBf-1pmdkfqR91J6-LqP-7" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="iBf-1pmdkfqR91J6-LqP-15" edge="1" parent="1" source="iBf-1pmdkfqR91J6-LqP-7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="iBf-1pmdkfqR91J6-LqP-8" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="k-dev" id="issue-f">
+    <mxGraphModel dx="1724" dy="1072" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="64DI31YQ4_UWnqgafuPn-1" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" value="k-dev kalisio services" vertex="1">
+          <mxGeometry height="35" width="177" x="1445" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="64DI31YQ4_UWnqgafuPn-2" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" value="tmux session &lt;b&gt;services&lt;/b&gt;&lt;br/&gt;before_script: k-mongo" vertex="1">
+          <mxGeometry height="50" width="177" x="1445" y="765" as="geometry" />
+        </mxCell>
+        <mxCell id="64DI31YQ4_UWnqgafuPn-3" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" value="window service-ekosystem" vertex="1">
+          <mxGeometry height="35" width="191" x="1250" y="855" as="geometry" />
+        </mxCell>
+        <mxCell id="64DI31YQ4_UWnqgafuPn-4" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" value="window &lt;b&gt;knowledge&lt;/b&gt;" vertex="1">
+          <mxGeometry height="35" width="135" x="1466" y="855" as="geometry" />
+        </mxCell>
+        <mxCell id="64DI31YQ4_UWnqgafuPn-5" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" value="windows weacast, gateway, ..." vertex="1">
+          <mxGeometry height="35" width="226" x="1626" y="855" as="geometry" />
+        </mxCell>
+        <mxCell id="64DI31YQ4_UWnqgafuPn-6" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" value="for every pane:&lt;br/&gt;1. source services.sh knowledge&lt;br/&gt;2. k-qdrant&lt;br/&gt;3. uv sync --all-groups" vertex="1">
+          <mxGeometry height="83" width="289" x="1389" y="930" as="geometry" />
+        </mxCell>
+        <mxCell id="64DI31YQ4_UWnqgafuPn-7" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" value="pane 1 · API&lt;br/&gt;python -m api.bin" vertex="1">
+          <mxGeometry height="50" width="143" x="1273" y="1061" as="geometry" />
+        </mxCell>
+        <mxCell id="64DI31YQ4_UWnqgafuPn-8" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" value="pane 2 · ingestion&lt;br/&gt;python -m ingestion.bin" vertex="1">
+          <mxGeometry height="50" width="184" x="1441" y="1061" as="geometry" />
+        </mxCell>
+        <mxCell id="64DI31YQ4_UWnqgafuPn-9" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" value="pane 3 · tests&lt;br/&gt;optional settings unset&lt;br/&gt;pytest test -q" vertex="1">
+          <mxGeometry height="66" width="184" x="1650" y="1053" as="geometry" />
+        </mxCell>
+        <mxCell id="64DI31YQ4_UWnqgafuPn-10" edge="1" parent="1" source="64DI31YQ4_UWnqgafuPn-1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="64DI31YQ4_UWnqgafuPn-2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="64DI31YQ4_UWnqgafuPn-11" edge="1" parent="1" source="64DI31YQ4_UWnqgafuPn-2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="64DI31YQ4_UWnqgafuPn-3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="64DI31YQ4_UWnqgafuPn-12" edge="1" parent="1" source="64DI31YQ4_UWnqgafuPn-2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="64DI31YQ4_UWnqgafuPn-4" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="64DI31YQ4_UWnqgafuPn-13" edge="1" parent="1" source="64DI31YQ4_UWnqgafuPn-2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="64DI31YQ4_UWnqgafuPn-5" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="64DI31YQ4_UWnqgafuPn-14" edge="1" parent="1" source="64DI31YQ4_UWnqgafuPn-4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="64DI31YQ4_UWnqgafuPn-6" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="64DI31YQ4_UWnqgafuPn-15" edge="1" parent="1" source="64DI31YQ4_UWnqgafuPn-6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="64DI31YQ4_UWnqgafuPn-7" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="64DI31YQ4_UWnqgafuPn-16" edge="1" parent="1" source="64DI31YQ4_UWnqgafuPn-6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="64DI31YQ4_UWnqgafuPn-8" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="64DI31YQ4_UWnqgafuPn-17" edge="1" parent="1" source="64DI31YQ4_UWnqgafuPn-6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="64DI31YQ4_UWnqgafuPn-9" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
   <diagram name="RAG pipeline" id="issue-a">
     <mxGraphModel dx="1520" dy="945" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -975,155 +1087,6 @@
         </mxCell>
         <mxCell id="e5" edge="1" parent="1" source="ask" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" target="llm">
           <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-      </root>
-    </mxGraphModel>
-  </diagram>
-  <diagram name="Full Architecture" id="issue-f">
-    <mxGraphModel dx="3400" dy="977" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
-      <root>
-        <mxCell id="0" />
-        <mxCell id="1" parent="0" />
-        <mxCell id="ci" parent="1" style="swimlane;startSize=28;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;" value="CI" vertex="1">
-          <mxGeometry height="150" width="200" x="-30" y="165" as="geometry" />
-        </mxCell>
-        <mxCell id="ci1" parent="ci" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="build_api.sh" vertex="1">
-          <mxGeometry height="26" width="170" x="15" y="33" as="geometry" />
-        </mxCell>
-        <mxCell id="ci2" parent="ci" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="build_job.sh" vertex="1">
-          <mxGeometry height="26" width="170" x="15" y="67" as="geometry" />
-        </mxCell>
-        <mxCell id="dh" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;" value="Docker Hub Kalisio" vertex="1">
-          <mxGeometry height="50" width="180" x="250" y="215" as="geometry" />
-        </mxCell>
-        <mxCell id="k8s" parent="1" style="swimlane;startSize=28;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=13;" value="K8S" vertex="1">
-          <mxGeometry height="510" width="930" x="500" y="50" as="geometry" />
-        </mxCell>
-        <mxCell id="jobs" parent="k8s" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="ingestion job · git indexer · graph builder" vertex="1">
-          <mxGeometry height="36" width="860" x="20" y="38" as="geometry" />
-        </mxCell>
-        <mxCell id="qd" parent="k8s" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#ffe6cc;strokeColor=#d6b656;fontStyle=1;" value="Qdrant" vertex="1">
-          <mxGeometry height="65" width="120" x="20" y="100" as="geometry" />
-        </mxCell>
-        <mxCell id="api" parent="k8s" style="swimlane;startSize=26;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" value="API (FastAPI)" vertex="1">
-          <mxGeometry height="285" width="900" x="20" y="200" as="geometry" />
-        </mxCell>
-        <mxCell id="2081xbayIftwP0NmzL2c-5" edge="1" parent="api" source="ask" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;labelPadding=0 4;" target="ch">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="ask" parent="api" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" value="POST /ask - human: embed → Qdrant → LLM → prose" vertex="1">
-          <mxGeometry height="30" width="840" x="10" y="30" as="geometry" />
-        </mxCell>
-        <mxCell id="ch" parent="api" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" value="POST /search - agent: embed → Qdrant → raw chunks (NO LLM)" vertex="1">
-          <mxGeometry height="30" width="840" x="10" y="90" as="geometry" />
-        </mxCell>
-        <mxCell id="mcp" parent="k8s" style="swimlane;startSize=26;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" value="MCP server" vertex="1">
-          <mxGeometry height="80" width="860" x="35" y="390" as="geometry" />
-        </mxCell>
-        <mxCell id="mt1" parent="mcp" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;" value="search_code → POST /search" vertex="1">
-          <mxGeometry height="26" width="840" x="10" y="30" as="geometry" />
-        </mxCell>
-        <mxCell id="e3" edge="1" parent="k8s" source="jobs" style="edgeStyle=orthogonalEdgeStyle;" target="qd">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="2081xbayIftwP0NmzL2c-1" edge="1" parent="k8s" source="mcp" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.518;entryY=1.067;entryDx=0;entryDy=0;entryPerimeter=0;defaultLabelBackgroundColor=page;labelPadding=0 4;" target="ch">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="2081xbayIftwP0NmzL2c-2" edge="1" parent="k8s" source="ch" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;defaultLabelBackgroundColor=page;labelPadding=0 4;" target="qd">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="10" y="305" />
-              <mxPoint x="10" y="132.5" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="e1" edge="1" parent="1" source="ci" style="edgeStyle=orthogonalEdgeStyle;" target="dh">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e2" edge="1" parent="1" source="dh" style="edgeStyle=orthogonalEdgeStyle;">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="500" y="240" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="llm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;" value="LLM (external)&lt;br&gt;only /ask" vertex="1">
-          <mxGeometry height="50" width="130" x="1480" y="270" as="geometry" />
-        </mxCell>
-        <mxCell id="e6" edge="1" parent="1" source="ask" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" target="llm">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="0vj_ST340EbWFNIi1x25-1" edge="1" parent="1" source="9uzOq3-bnu83QkYvK5P4-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="mcp">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="9uzOq3-bnu83QkYvK5P4-1" parent="1" style="swimlane;startSize=28;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=13;" value="Dev machine" vertex="1">
-          <mxGeometry height="110" width="500" x="-70" y="425" as="geometry" />
-        </mxCell>
-        <mxCell id="9uzOq3-bnu83QkYvK5P4-2" parent="9uzOq3-bnu83QkYvK5P4-1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="Agent code (vibe, geminicli, claude code, codex)" vertex="1">
-          <mxGeometry height="50" width="470" x="15" y="35" as="geometry" />
-        </mxCell>
-        <mxCell id="2081xbayIftwP0NmzL2c-4" edge="1" parent="1" source="2081xbayIftwP0NmzL2c-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;labelPadding=0 4;" target="ask">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="2081xbayIftwP0NmzL2c-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;" value="USER" vertex="1">
-          <mxGeometry height="50" width="130" x="260" y="320" as="geometry" />
-        </mxCell>
-      </root>
-    </mxGraphModel>
-  </diagram>
-  <diagram id="built-graph" name="built · dependency graph">
-    <mxGraphModel dx="1400" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
-      <root>
-        <mxCell id="0" />
-        <mxCell id="1" parent="0" />
-        <mxCell id="n1" value="ingestion/pipeline/dependency_graph.py — step 7. Measured on 7 repositories: 2 716 edges, 94% of imports resolved, 0.4 s." style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=10;fontColor=#666666;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
-          <mxGeometry x="40" y="24" width="1520" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="n2" value="1 · extract" style="swimlane;startSize=28;fontStyle=1;fontSize=13;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
-          <mxGeometry x="40" y="80" width="360" height="300" as="geometry" />
-        </mxCell>
-        <mxCell id="n3" value="import x from &quot;./y&quot;&lt;br&gt;import &quot;./side-effect&quot;&lt;br&gt;export * from &quot;./y&quot;&lt;br&gt;require(&quot;./y&quot;)" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontFamily=Courier New;fontSize=10;spacing=6;fillColor=#ffffff;strokeColor=#cccccc;" vertex="1" parent="n2">
-          <mxGeometry x="20" y="40" width="320" height="100" as="geometry" />
-        </mxCell>
-        <mxCell id="n4" value="One regex, not tree-sitter.&lt;br&gt;&lt;br&gt;It misses the imports whose `from` sits on&lt;br&gt;another line: 32 out of 5 623, 0.6%.&lt;br&gt;&lt;br&gt;A missed import is an edge that is absent,&lt;br&gt;never an edge that is wrong." style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=10;fontColor=#666666;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="n2">
-          <mxGeometry x="20" y="156" width="320" height="130" as="geometry" />
-        </mxCell>
-        <mxCell id="n5" value="2 · resolve  (the real work)" style="swimlane;startSize=28;fontStyle=1;fontSize=13;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
-          <mxGeometry x="440" y="80" width="480" height="300" as="geometry" />
-        </mxCell>
-        <mxCell id="n6" value="./store  →  ./store.js  ./store/index.js" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#cccccc;" vertex="1" parent="n5">
-          <mxGeometry x="20" y="40" width="440" height="34" as="geometry" />
-        </mxCell>
-        <mxCell id="n7" value="@kalisio/kdk/core.client  →  kdk/core.client.js" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#cccccc;" vertex="1" parent="n5">
-          <mxGeometry x="20" y="84" width="440" height="34" as="geometry" />
-        </mxCell>
-        <mxCell id="n8" value="vue, lodash  →  ignored (third party)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;" vertex="1" parent="n5">
-          <mxGeometry x="20" y="128" width="440" height="34" as="geometry" />
-        </mxCell>
-        <mxCell id="n9" value="Every Kalisio import is a subpath — never a bare&lt;br&gt;@kalisio/kdk. Resolving only the package name&lt;br&gt;lost 209 of the 216 cross-repository edges.&lt;br&gt;&lt;br&gt;The package name comes from the package.json of&lt;br&gt;each repository, root and packages/* alike." style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=10;fontColor=#666666;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="n5">
-          <mxGeometry x="20" y="176" width="440" height="110" as="geometry" />
-        </mxCell>
-        <mxCell id="n10" value="3 · invert" style="swimlane;startSize=28;fontStyle=1;fontSize=13;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
-          <mxGeometry x="960" y="80" width="300" height="300" as="geometry" />
-        </mxCell>
-        <mxCell id="n11" value="dependents[target]&lt;br&gt;    .append(source)" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontFamily=Courier New;fontSize=10;spacing=6;fillColor=#ffffff;strokeColor=#cccccc;" vertex="1" parent="n10">
-          <mxGeometry x="20" y="40" width="260" height="90" as="geometry" />
-        </mxCell>
-        <mxCell id="n12" value="No NetworkX.&lt;br&gt;&lt;br&gt;It was only there for PageRank and&lt;br&gt;Louvain, and measurement killed both:&lt;br&gt;PageRank ranks the barrels, Louvain&lt;br&gt;returns 91% singletons.&lt;br&gt;&lt;br&gt;One defaultdict does the rest." style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=10;fontColor=#666666;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="n10">
-          <mxGeometry x="20" y="146" width="260" height="140" as="geometry" />
-        </mxCell>
-        <mxCell id="n13" value="Never invented&lt;br&gt;&lt;br&gt;A specifier that resolves to a file&lt;br&gt;nobody scanned yields no edge at all.&lt;br&gt;&lt;br&gt;The prototype did the opposite — it&lt;br&gt;created kdk/index.js, a file that does&lt;br&gt;not exist, and that phantom node then&lt;br&gt;topped the PageRank ranking.&lt;br&gt;&lt;br&gt;A test pins this." style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=10;fontColor=#666666;strokeColor=none;fillColor=none;spacing=2;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
-          <mxGeometry x="1300" y="80" width="260" height="300" as="geometry" />
-        </mxCell>
-        <mxCell id="n14" value="&lt;b&gt;test/data/graph — the four shapes an edge takes&lt;/b&gt;&lt;br&gt;// kdk/core/client/api.js&lt;br&gt;import { Store } from &quot;./store.js&quot;&lt;br&gt;&lt;br&gt;// kdk/core.client.js   (a barrel)&lt;br&gt;export * from &quot;./core/client/store.js&quot;&lt;br&gt;&lt;br&gt;// kano/client/components/KLayerList.vue&lt;br&gt;import { Store } from &quot;@kalisio/kdk/core.client&quot;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontFamily=Courier New;fontSize=10;spacing=6;fillColor=#ffffff;strokeColor=#cccccc;" vertex="1" parent="1">
-          <mxGeometry x="40" y="420" width="620" height="230" as="geometry" />
-        </mxCell>
-        <mxCell id="n15" value="&lt;b&gt;test/data/expected/graph.json&lt;/b&gt;&lt;br&gt;&quot;kdk/core/client/store.js&quot;: {&lt;br&gt;  &quot;dependents&quot;: [ &quot;kdk/core.client.js&quot;,&lt;br&gt;                  &quot;kdk/core/client/api.js&quot; ],&lt;br&gt;  &quot;dependencies&quot;: []&lt;br&gt;},&lt;br&gt;&quot;kano/client/components/KLayerList.vue&quot;: {&lt;br&gt;  &quot;dependents&quot;: [],&lt;br&gt;  &quot;dependencies&quot;: [ &quot;kdk/core.client.js&quot; ]&lt;br&gt;}" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontFamily=Courier New;fontSize=10;spacing=6;fillColor=#ffffff;strokeColor=#cccccc;" vertex="1" parent="1">
-          <mxGeometry x="700" y="420" width="560" height="230" as="geometry" />
-        </mxCell>
-        <mxCell id="n16" value="Stored on the file entry,&lt;br&gt;not in a fourth collection.&lt;br&gt;&lt;br&gt;That point already exists, is&lt;br&gt;already keyed on (repo, path),&lt;br&gt;already written at step 8 and&lt;br&gt;already deleted when the file&lt;br&gt;goes away.&lt;br&gt;&lt;br&gt;Cost: ~700 Ko over the corpus." style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=10;fontColor=#666666;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
-          <mxGeometry x="1300" y="420" width="260" height="230" as="geometry" />
-        </mxCell>
-        <mxCell id="n17" value="Rebuilt whole on every run — it cannot be incremental&lt;br&gt;&lt;br&gt;If B is renamed, the edges of every A that imports it change. Those A did not change, so no incremental&lt;br&gt;selection would ever revisit them. One minute for 62 repositories against the 5 minutes of a nightly run, and an&lt;br&gt;e2e test checks that a removed import really disappears from the graph." style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontSize=10;fontColor=#666666;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
-          <mxGeometry x="40" y="690" width="1220" height="120" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

@@ -59,8 +59,8 @@ function getAboutSidebar () {
 function getGuidesSidebar () {
   return [
     { text: 'Understanding knowledge', link: '/guides/understanding' },
-    { text: 'Architecture', link: '/guides/architecture' },
     { text: 'Getting started', link: '/guides/getting-started' },
+    { text: 'Architecture', link: '/guides/architecture' },
     {
       text: 'Components',
       collapsed: false,
