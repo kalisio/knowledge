@@ -12,7 +12,7 @@ against it:
 
 Regenerate the references after an intentional chunking change:
 
-    UPDATE_CHUNK_REFERENCES=1 pytest test/unit/test_chunk_references.py
+    UPDATE_CHUNK_REFERENCES=1 pytest test/ingestion/test_chunk_references.py
 """
 
 import json
