@@ -7,7 +7,7 @@
 [![Coverage](https://sonar.portal.kalisio.com/api/project_badges/measure?project=kalisio-knowledge&metric=coverage&token=sqb_34e142203b01ef86476be23f08b776aa79fcd82a)](https://sonar.portal.kalisio.com/dashboard?id=kalisio-knowledge)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-_AI developer assistant for the Kalisio ecosystem_
+_A Retrieval-Augmented Generation (RAG) solution specialised in the Kalisio ecosystem._
 
 ## Documentation
 

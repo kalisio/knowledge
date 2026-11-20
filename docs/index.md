@@ -2,20 +2,20 @@
 layout: home
 hero:
   name: knowledge
-  tagline: AI developer assistant for the Kalisio ecosystem
+  tagline: A retrieval-augmented generation (RAG) engine specialised in the Kalisio ecosystem
   image:
     src: /images/landing-knowledge.png
     alt: kalisio-knowledge
   actions:
     - theme: brand
-      text: Show me more →
+      text: What is a RAG? →
       link: /about/introduction
     - theme: alt
-      text: Architecture
-      link: /architecture/introduction
-features:
-  - title: Semantic code search
-    details: The Kalisio codebase is chunked and embedded into Qdrant
+      text: Understand knowledge
+      link: /guides/understanding
+    - theme: alt
+      text: Get started
+      link: /guides/getting-started
 ---
 
 <ClientOnly>
