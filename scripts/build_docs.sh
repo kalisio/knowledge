@@ -9,7 +9,11 @@ WORKSPACE_DIR="$(dirname "$ROOT_DIR")"
 
 . "$THIS_DIR/kash/kash.sh"
 
-get_node_package_manager() { echo "yarn"; }
+# kash's build_docs detects the package manager from the repository root and,
+# for pnpm, runs `pnpm install && pnpm docs:build` in the current directory.
+# knowledge is a Python project: its only Node package is the documentation,
+# so the build runs from docs/, whose package.json defines docs:build.
+get_node_package_manager() { echo "pnpm"; }
 
 ## Parse options
 ##
@@ -34,4 +38,5 @@ done
 ## Build docs
 ##
 
+cd "$ROOT_DIR/docs"
 build_docs "$ROOT_DIR" "kalisio/knowledge" "$PUBLISH"
