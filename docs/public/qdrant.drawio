@@ -1,0 +1,120 @@
+<mxfile host="app.diagrams.net" agent="knowledge docs" pages="2">
+  <diagram id="d1" name="overwiew">
+    <mxGraphModel dx="1814" dy="791" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c3" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Helvetica;fontSize=12;" value="Ingestion job&lt;br/&gt;ingestion/clients/vectordb.py" vertex="1">
+          <mxGeometry height="50" width="226" x="-90" as="geometry" />
+        </mxCell>
+        <mxCell id="c4" parent="1" style="shape=cylinder3;boundedLbl=1;size=10;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Helvetica;fontSize=12;" value="Qdrant&lt;br/&gt;REST :6333" vertex="1">
+          <mxGeometry height="71" width="94" x="266" y="65" as="geometry" />
+        </mxCell>
+        <mxCell id="c5" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Helvetica;fontSize=12;" value="API&lt;br/&gt;api/clients/vectordb.py" vertex="1">
+          <mxGeometry height="50" width="184" x="-90" y="75" as="geometry" />
+        </mxCell>
+        <mxCell id="c6" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" value="you&lt;br/&gt;dashboard · curl · python" vertex="1">
+          <mxGeometry height="50" width="198" x="-90" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="c7" edge="1" parent="1" source="c3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="c4" value="create · upsert · delete">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c8" edge="1" parent="1" source="c5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="c4" value="query_points · count">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c9" edge="1" parent="1" source="c6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="c4" value="inspect">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="d4" name="sequence-diagram">
+    <mxGraphModel dx="1414" dy="791" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Helvetica;fontSize=12;" value="Ingestion job" vertex="1">
+          <mxGeometry height="50" width="114" x="48" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="c4" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="105" y="70" as="sourcePoint" />
+            <mxPoint x="105" y="688" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Helvetica;fontSize=12;" value="Qdrant" vertex="1">
+          <mxGeometry height="50" width="110" x="250" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="c6" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="305" y="70" as="sourcePoint" />
+            <mxPoint x="305" y="688" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#9673a6;verticalAlign=top;align=left;spacingLeft=6;fontFamily=Helvetica;fontSize=12;" value="&lt;b&gt;alt missing, wrong size, or indexing config changed&lt;/b&gt;" vertex="1">
+          <mxGeometry height="102" width="360" x="25" y="138" as="geometry" />
+        </mxCell>
+        <mxCell id="c8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#9673a6;verticalAlign=top;align=left;spacingLeft=6;fontFamily=Helvetica;fontSize=12;" value="&lt;b&gt;loop each deleted file&lt;/b&gt;" vertex="1">
+          <mxGeometry height="148" width="360" x="25" y="276" as="geometry" />
+        </mxCell>
+        <mxCell id="c9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#9673a6;verticalAlign=top;align=left;spacingLeft=6;fontFamily=Helvetica;fontSize=12;" value="&lt;b&gt;loop each reindexed file&lt;/b&gt;" vertex="1">
+          <mxGeometry height="102" width="360" x="25" y="414" as="geometry" />
+        </mxCell>
+        <mxCell id="c10" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" value="collection_exists · get_collection (vector size)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="105" y="110" as="sourcePoint" />
+            <mxPoint x="305" y="110" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c11" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" value="delete_collection · create_collection(size, COSINE)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="105" y="202" as="sourcePoint" />
+            <mxPoint x="305" y="202" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c12" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" value="scroll(repo, path, file_sha1), 256 per page">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="105" y="248" as="sourcePoint" />
+            <mxPoint x="305" y="248" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c13" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" value="delete(filter repo = R AND path = P)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="105" y="340" as="sourcePoint" />
+            <mxPoint x="305" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c14" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" value="delete(file entry id)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="105" y="386" as="sourcePoint" />
+            <mxPoint x="305" y="386" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c15" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" value="delete(filter repo = R AND path = P)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="105" y="478" as="sourcePoint" />
+            <mxPoint x="305" y="478" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c16" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" value="upsert(points), 64 per batch">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="105" y="524" as="sourcePoint" />
+            <mxPoint x="305" y="524" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c17" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" value="upsert(file entries)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="105" y="570" as="sourcePoint" />
+            <mxPoint x="305" y="570" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c18" edge="1" parent="1" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" value="upsert(run record)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="105" y="616" as="sourcePoint" />
+            <mxPoint x="305" y="616" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
