@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="806" height="582" viewBox="-10 -10 806 582" style="background-color:#ffffff">
+<text x="0" y="16" font-family="Helvetica" font-size="12" font-weight="bold">docs/catalog/guide.md</text>
+<rect x="0" y="30" width="426.0" height="526" fill="#ffffff" stroke="#666666"/>
+<text x="20.0" y="44.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">1</text>
+<text x="26" y="44.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000"># Layer catalog</text>
+<text x="20.0" y="58.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">2</text>
+<text x="20.0" y="72.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">3</text>
+<text x="26" y="72.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">The catalog service stores the layer descriptors an application…</text>
+<text x="20.0" y="86.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">4</text>
+<text x="26" y="86.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">its users. Each descriptor is a GeoJSON-friendly document descr…</text>
+<text x="20.0" y="100.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">5</text>
+<text x="26" y="100.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">the data comes from and how it must be rendered on the map.</text>
+<text x="20.0" y="114.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">6</text>
+<text x="20.0" y="128.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">7</text>
+<text x="26" y="128.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">## Installation</text>
+<text x="20.0" y="142.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">8</text>
+<text x="20.0" y="156.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">9</text>
+<text x="26" y="156.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">Install the module and register the service in your application:</text>
+<text x="20.0" y="170.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">10</text>
+<text x="20.0" y="184.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">11</text>
+<text x="26" y="184.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">```js</text>
+<text x="20.0" y="198.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">12</text>
+<text x="26" y="198.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">import { catalog } from &#x27;@kalisio/kdk/map.api.js&#x27;</text>
+<text x="20.0" y="212.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">13</text>
+<text x="20.0" y="226.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">14</text>
+<text x="26" y="226.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">export default function () {</text>
+<text x="20.0" y="240.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">15</text>
+<text x="26" y="240.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  const app = this</text>
+<text x="20.0" y="254.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">16</text>
+<text x="26" y="254.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  app.configure(catalog)</text>
+<text x="20.0" y="268.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">17</text>
+<text x="26" y="268.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">}</text>
+<text x="20.0" y="282.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">18</text>
+<text x="26" y="282.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">```</text>
+<text x="20.0" y="296.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">19</text>
+<text x="20.0" y="310.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">20</text>
+<text x="26" y="310.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">## Configuration</text>
+<text x="20.0" y="324.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">21</text>
+<text x="20.0" y="338.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">22</text>
+<text x="26" y="338.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">A descriptor is made of a `name`, a `type` and a rendering sect…</text>
+<text x="20.0" y="352.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">23</text>
+<text x="26" y="352.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">renderer is picked from the `leaflet` or `cesium` key, so the v…</text>
+<text x="20.0" y="366.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">24</text>
+<text x="26" y="366.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">descriptor drives both the 2D map and the 3D globe without any …</text>
+<text x="20.0" y="380.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">25</text>
+<text x="26" y="380.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">the application side. Descriptors are validated against the cat…</text>
+<text x="20.0" y="394.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">26</text>
+<text x="26" y="394.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">before they are stored, which means a malformed renderer is rej…</text>
+<text x="20.0" y="408.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">27</text>
+<text x="26" y="408.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">creation time rather than failing silently when the layer is di…</text>
+<text x="20.0" y="422.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">28</text>
+<text x="20.0" y="436.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">29</text>
+<text x="26" y="436.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">### Zoom levels</text>
+<text x="20.0" y="450.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">30</text>
+<text x="20.0" y="464.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">31</text>
+<text x="26" y="464.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">Set `minZoom` and `maxZoom` to restrict the zoom range a layer …</text>
+<text x="20.0" y="478.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">32</text>
+<text x="26" y="478.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">at. Outside of that range the layer stays in the catalog but is…</text>
+<text x="20.0" y="492.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">33</text>
+<text x="20.0" y="506.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">34</text>
+<text x="26" y="506.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">## Troubleshooting</text>
+<text x="20.0" y="520.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">35</text>
+<text x="20.0" y="534.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">36</text>
+<text x="26" y="534.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">When a layer never shows up, check the browser console first: a…</text>
+<text x="20.0" y="548.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">37</text>
+<text x="26" y="548.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">`type` is the most common mistake.</text>
+<rect x="434.0" y="34" width="5" height="70" fill="#6c8ebf"/>
+<line x1="439.0" y1="69.0" x2="482.0" y2="69.0" stroke="#6c8ebf"/>
+<rect x="482.0" y="46.0" width="300" height="46" rx="5" fill="#dae8fc" stroke="#6c8ebf"/>
+<text x="490.0" y="64.0" font-family="Helvetica" font-size="11"><tspan font-weight="bold">#0</tspan> · lines 1–5</text>
+<text x="490.0" y="80.0" font-family="Courier New" font-size="10">Layer catalog</text>
+<rect x="434.0" y="118" width="5" height="168" fill="#82b366"/>
+<line x1="439.0" y1="202.0" x2="482.0" y2="202.0" stroke="#82b366"/>
+<rect x="482.0" y="179.0" width="300" height="46" rx="5" fill="#d5e8d4" stroke="#82b366"/>
+<text x="490.0" y="197.0" font-family="Helvetica" font-size="11"><tspan font-weight="bold">#1</tspan> · lines 7–18</text>
+<text x="490.0" y="213.0" font-family="Courier New" font-size="10">Layer catalog &gt; Installation</text>
+<rect x="434.0" y="300" width="5" height="112" fill="#d79b00"/>
+<line x1="439.0" y1="356.0" x2="482.0" y2="356.0" stroke="#d79b00"/>
+<rect x="482.0" y="333.0" width="300" height="46" rx="5" fill="#ffe6cc" stroke="#d79b00"/>
+<text x="490.0" y="351.0" font-family="Helvetica" font-size="11"><tspan font-weight="bold">#2</tspan> · lines 20–27</text>
+<text x="490.0" y="367.0" font-family="Courier New" font-size="10">Layer catalog &gt; Configuration</text>
+<rect x="434.0" y="426" width="5" height="56" fill="#9673a6"/>
+<line x1="439.0" y1="454.0" x2="482.0" y2="454.0" stroke="#9673a6"/>
+<rect x="482.0" y="431.0" width="300" height="46" rx="5" fill="#e1d5e7" stroke="#9673a6"/>
+<text x="490.0" y="449.0" font-family="Helvetica" font-size="11"><tspan font-weight="bold">#3</tspan> · lines 29–32</text>
+<text x="490.0" y="465.0" font-family="Courier New" font-size="10">Layer catalog &gt; Configuration &gt; Zoom levels</text>
+<rect x="434.0" y="496" width="5" height="56" fill="#d6b656"/>
+<line x1="439.0" y1="524.0" x2="482.0" y2="524.0" stroke="#d6b656"/>
+<rect x="482.0" y="501.0" width="300" height="46" rx="5" fill="#fff2cc" stroke="#d6b656"/>
+<text x="490.0" y="519.0" font-family="Helvetica" font-size="11"><tspan font-weight="bold">#4</tspan> · lines 34–37</text>
+<text x="490.0" y="535.0" font-family="Courier New" font-size="10">Layer catalog &gt; Troubleshooting</text>
+</svg>

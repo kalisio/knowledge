@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="686" height="260" viewBox="-10 -10 686 260" style="background-color:#ffffff">
+<text x="0" y="16" font-family="Helvetica" font-size="12" font-weight="bold">client/i18n/en.json</text>
+<rect x="0" y="30" width="306.0" height="204" fill="#ffffff" stroke="#666666"/>
+<text x="20.0" y="44.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">1</text>
+<text x="26" y="44.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">{</text>
+<text x="20.0" y="58.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">2</text>
+<text x="26" y="58.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  &quot;APPLICATION_NAME&quot;: &quot;Kano&quot;,</text>
+<text x="20.0" y="72.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">3</text>
+<text x="26" y="72.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  &quot;CANCEL&quot;: &quot;Cancel&quot;,</text>
+<text x="20.0" y="86.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">4</text>
+<text x="26" y="86.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  &quot;KLayerList&quot;: {</text>
+<text x="20.0" y="100.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">5</text>
+<text x="26" y="100.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">    &quot;TITLE&quot;: &quot;Layers&quot;,</text>
+<text x="20.0" y="114.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">6</text>
+<text x="26" y="114.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">    &quot;EMPTY&quot;: &quot;No layer available&quot;,</text>
+<text x="20.0" y="128.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">7</text>
+<text x="26" y="128.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">    &quot;TOOLTIP&quot;: &quot;Toggle the layer visibility&quot;</text>
+<text x="20.0" y="142.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">8</text>
+<text x="26" y="142.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  },</text>
+<text x="20.0" y="156.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">9</text>
+<text x="26" y="156.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  &quot;KCatalogPanel&quot;: {</text>
+<text x="20.0" y="170.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">10</text>
+<text x="26" y="170.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">    &quot;TITLE&quot;: &quot;Catalog&quot;,</text>
+<text x="20.0" y="184.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">11</text>
+<text x="26" y="184.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">    &quot;ADD_LAYER&quot;: &quot;Add a layer&quot;,</text>
+<text x="20.0" y="198.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">12</text>
+<text x="26" y="198.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">    &quot;REMOVE_LAYER&quot;: &quot;Remove the layer&quot;</text>
+<text x="20.0" y="212.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">13</text>
+<text x="26" y="212.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  }</text>
+<text x="20.0" y="226.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">14</text>
+<text x="26" y="226.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">}</text>
+<rect x="314.0" y="48" width="5" height="28" fill="#6c8ebf"/>
+<line x1="319.0" y1="62.0" x2="362.0" y2="62.0" stroke="#6c8ebf"/>
+<rect x="362.0" y="39.0" width="300" height="46" rx="5" fill="#dae8fc" stroke="#6c8ebf"/>
+<text x="370.0" y="57.0" font-family="Helvetica" font-size="11"><tspan font-weight="bold">#0</tspan> · lines 2–3</text>
+<text x="370.0" y="73.0" font-family="Courier New" font-size="10">(top-level labels)</text>
+<rect x="314.0" y="76" width="5" height="70" fill="#82b366"/>
+<line x1="319.0" y1="111.0" x2="362.0" y2="118.0" stroke="#82b366"/>
+<rect x="362.0" y="95.0" width="300" height="46" rx="5" fill="#d5e8d4" stroke="#82b366"/>
+<text x="370.0" y="113.0" font-family="Helvetica" font-size="11"><tspan font-weight="bold">#1</tspan> · lines 4–8</text>
+<text x="370.0" y="129.0" font-family="Courier New" font-size="10">KLayerList</text>
+<rect x="314.0" y="146" width="5" height="70" fill="#d79b00"/>
+<line x1="319.0" y1="181.0" x2="362.0" y2="181.0" stroke="#d79b00"/>
+<rect x="362.0" y="158.0" width="300" height="46" rx="5" fill="#ffe6cc" stroke="#d79b00"/>
+<text x="370.0" y="176.0" font-family="Helvetica" font-size="11"><tspan font-weight="bold">#2</tspan> · lines 9–13</text>
+<text x="370.0" y="192.0" font-family="Courier New" font-size="10">KCatalogPanel</text>
+</svg>
