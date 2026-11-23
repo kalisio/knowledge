@@ -27,7 +27,6 @@ k-clone kalisio services
 # Create the Python environment
 cd $KALISIO_DEVELOPMENT_DIR/knowledge
 uv sync                          # services + test group (pytest, ruff)
-uv sync --all-groups             # + the research group, for docs/experiments
 source .venv/bin/activate
 # Run with `k-dev`
 k-dev kalisio services

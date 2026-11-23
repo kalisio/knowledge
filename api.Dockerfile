@@ -32,7 +32,7 @@ WORKDIR ${HOME}
 USER knowledge
 
 # Dependencies first, in their own layer: a code change does not reinstall
-# torch. --no-dev leaves the test and research groups out.
+# torch. --no-dev leaves the test group out.
 COPY --chown=knowledge:knowledge pyproject.toml uv.lock .python-version ${HOME}/
 RUN uv sync --locked --no-dev --no-install-project --no-cache
 

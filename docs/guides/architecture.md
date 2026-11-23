@@ -59,13 +59,9 @@ knowledge/
 │   ├── multilingual/           cross-lingual retrieval quality (needs the model)
 │   └── data/                   chunker fixtures · multilingual corpus
 ├── docs/                     this site (VitePress)
-│   ├── about/ guides/ research/
-│   ├── experiments/            research code and notebooks (not rendered)
-│   ├── drawio/                 the diagram sources (draw.io)
-│   └── public/                 images exported from them
-├── scripts/                  CI: tests, image builds, docs (kash) · export_diagrams.sh
+├── scripts/                  CI: tests, image builds, docs (kash)
 ├── api.Dockerfile · ingestion.Dockerfile
-├── pyproject.toml            dependencies (CPU torch) + test and research groups
+├── pyproject.toml            dependencies (CPU torch) + test group
 └── uv.lock                   the pinned versions the CI and the images install
 ```
 

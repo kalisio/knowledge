@@ -24,7 +24,7 @@ Every passage knowledge returns has made the same journey:
 
 ### 1. Clone & scan
 
-The job fills a workspace with the repositories of a [kli](https://github.com/kalisio/kli) workspace by running `k-clone` from [`kalisio/development`](https://github.com/kalisio/development). It then lists the files and keeps those with a supported extension. See [Ingestion job › Scanning](/guides/components/ingestion-job#step-4-scanning-the-workspace).
+The job fills a workspace with the repositories of a [kli](https://github.com/kalisio/kli) workspace by running `k-clone` from [`kalisio/development`](https://github.com/kalisio/development). It then lists the files and keeps those with a supported extension. See [Ingestion job › Scanning](/guides/components/ingestion-job#pipeline-d-ingestion).
 
 ### 2. Parse & chunk
 
@@ -52,4 +52,4 @@ The API embeds the question with the same model and asks Qdrant for the nearest 
 
 ### 6. Generate
 
-`/search` stops there and returns the passages. `/ask` goes on: it packs the passages into a context (up to 14 000 characters), adds an instruction and the question, and sends them to an LLM through any [OpenAI-compatible](https://platform.openai.com/docs/api-reference/chat) endpoint, Anthropic, OpenAI, Mistral, a local Ollama... The answer comes back in the language of the question, with the passages it was written from. See [API › POST /ask](/guides/components/api#post-ask).
+`/search` stops there and returns the passages. `/ask` goes on: it packs the passages into a context (up to 14 000 characters), adds an instruction and the question, and sends them to an LLM through any [OpenAI-compatible](https://platform.openai.com/docs/api-reference/chat) endpoint, Anthropic, OpenAI, Mistral, a local Ollama... The answer comes back in the language of the question, with the passages it was written from. See [API › POST /ask](/guides/components/api#post-ask-retrieval-augmented-answer).

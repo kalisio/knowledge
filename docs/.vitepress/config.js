@@ -5,9 +5,6 @@ export default defineConfig({
   title: 'knowledge',
   description: 'A retrieval-augmented generation (RAG) engine specialised in the Kalisio ecosystem',
   ignoreDeadLinks: true,
-  // docs/experiments/ holds the Python experiment code, notebooks (.ipynb) and the old
-  // project README: none of it is rendered. The write-ups now live under research/.
-  srcExclude: ['**/experiments/**'],
   head: [
     ['link', { href: 'https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css', rel: 'stylesheet' }],
     ['link', { rel: 'icon', href: `/images/favicon.ico` }]
@@ -17,13 +14,11 @@ export default defineConfig({
     socialLinks: [{ icon: 'github', link: 'https://github.com/kalisio/knowledge' }],
     nav: [
       { text: 'About', link: '/about/introduction' },
-      { text: 'Guides', link: '/guides/understanding' },
-      { text: 'Research', link: '/research/introduction' }
+      { text: 'Guides', link: '/guides/understanding' }
     ],
     sidebar: {
       '/about/': getAboutSidebar(),
-      '/guides/': getGuidesSidebar(),
-      '/research/': getResearchSidebar()
+      '/guides/': getGuidesSidebar()
     },
     footer: {
       copyright: 'MIT Licensed | Copyright © 2017-20xx Kalisio'
@@ -56,7 +51,8 @@ function getGuidesSidebar () {
       items: [
         { text: 'Ingestion job', link: '/guides/components/ingestion-job' },
         { text: 'API', link: '/guides/components/api' },
-        { text: 'Qdrant', link: '/guides/components/qdrant' }
+        { text: 'Qdrant', link: '/guides/components/qdrant' },
+        { text: 'Multilingual retrieval', link: '/guides/components/multilingual-retrieval' }
       ]
     },
     {
@@ -75,15 +71,3 @@ function getGuidesSidebar () {
   ]
 }
 
-function getResearchSidebar () {
-  return [
-    { text: 'Overview', link: '/research/introduction' },
-    { text: 'Corpus discovery', link: '/research/corpus-discovery' },
-    { text: 'Markdown chunking', link: '/research/markdown-chunking' },
-    { text: 'JS & Vue chunking', link: '/research/js-vue-chunking' },
-    { text: 'JSON chunking', link: '/research/json-chunking' },
-    { text: 'Embedding model', link: '/research/embedding-evaluation' },
-    { text: 'Vector store', link: '/research/qdrant-index-eval' },
-    { text: 'Multilingual retrieval', link: '/research/multilingual-retrieval' }
-  ]
-}

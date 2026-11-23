@@ -32,18 +32,6 @@ test = [
   # FastAPI's TestClient.
   "httpx>=0.27.0",
 ]
-# The research scripts under docs/experiments: the other vector stores and
-# the lexical baseline they were compared with.
-research = [
-  "chromadb>=1.0.0",
-  "lancedb>=0.17.0",
-  "rank-bm25>=0.2.2",
-  "pandas>=2.2.0",
-  "python-dotenv>=1.1.0",
-  "requests>=2.32.5",
-  "einops>=0.8.0",
-  "accelerate>=1.0.0",
-]
 
 [tool.uv]
 # A developer gets the tests and the linter with a plain `uv sync`.
@@ -74,9 +62,6 @@ markers = [
   "Contract: End-to-end tests for the /search response contract",
   "Multilingual: Cross-lingual retrieval quality, measured with the real embedding model",
 ]
-
-[tool.ruff]
-exclude = ["docs/experiments"]
 
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F"]
