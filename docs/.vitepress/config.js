@@ -63,14 +63,13 @@ function getGuidesSidebar () {
       text: 'File formats',
       collapsed: false,
       items: [
-        { text: 'Embedding & chunking', link: '/guides/file-formats/' },
+        { text: 'Overview', link: '/guides/file-formats/' },
         { text: 'Markdown', link: '/guides/file-formats/markdown' },
         { text: 'JavaScript', link: '/guides/file-formats/javascript' },
         { text: 'Vue', link: '/guides/file-formats/vue' },
         { text: 'JSON', link: '/guides/file-formats/json' },
         { text: 'YAML', link: '/guides/file-formats/yaml' },
-        { text: 'Shell', link: '/guides/file-formats/shell' },
-        { text: 'Add a file format', link: '/guides/file-formats/add-a-format' }
+        { text: 'Shell', link: '/guides/file-formats/shell' }
       ]
     }
   ]
