@@ -1,0 +1,594 @@
+<mxfile host="app.diagrams.net" agent="knowledge docs" pages="9">
+  <diagram id="d1" name="01 · Ingestion job">
+    <mxGraphModel grid="1" page="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c3" parent="1" style="shape=cylinder3;boundedLbl=1;size=10;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Helvetica;fontSize=12;" value="git hosts" vertex="1">
+          <mxGeometry height="54" width="86" x="-40" as="geometry" />
+        </mxCell>
+        <mxCell id="c4" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" value="workspace&lt;br/&gt;$DEVELOPMENT_DIR" vertex="1">
+          <mxGeometry height="50" width="135" x="126" y="2" as="geometry" />
+        </mxCell>
+        <mxCell id="c5" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Helvetica;fontSize=12;" value="&lt;b&gt;ingestion job&lt;/b&gt;&lt;br/&gt;python -m ingestion.bin" vertex="1">
+          <mxGeometry height="50" width="184" x="301" y="2" as="geometry" />
+        </mxCell>
+        <mxCell id="c6" parent="1" style="shape=cylinder3;boundedLbl=1;size=10;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontFamily=Helvetica;fontSize=12;" value="Qdrant" vertex="1">
+          <mxGeometry height="54" width="66" x="620" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="c7" edge="1" parent="1" source="c3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="c4" value="k-clone">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c8" edge="1" parent="1" source="c4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="c5" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c9" edge="1" parent="1" source="c5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="c6" value="upsert new chunks&lt;br/&gt;delete stale ones">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c10" edge="1" parent="1" source="c6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="c5" value="digests of what is indexed">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="d2" name="02 · Built on kalisio/development">
+    <mxGraphModel dx="1814" dy="1191" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c3" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" value="ingestion job&lt;br/&gt;step 3" vertex="1">
+          <mxGeometry height="50" width="114" x="-130" y="38" as="geometry" />
+        </mxCell>
+        <mxCell id="c4" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" value="k-clone&lt;br/&gt;development/scripts" vertex="1">
+          <mxGeometry height="50" width="156" x="154" y="38" as="geometry" />
+        </mxCell>
+        <mxCell id="c5" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" value="workspaces/apps/apps.js&lt;br/&gt;the repositories of the workspace" vertex="1">
+          <mxGeometry height="50" width="253" x="410" y="-12" as="geometry" />
+        </mxCell>
+        <mxCell id="c6" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" value="kli&lt;br/&gt;(node)" vertex="1">
+          <mxGeometry height="50" width="66" x="443" y="75" as="geometry" />
+        </mxCell>
+        <mxCell id="c7" parent="1" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" value="$KALISIO_DEVELOPMENT_DIR/&lt;br/&gt;kdk · kano · crisis · ..." vertex="1">
+          <mxGeometry height="50" width="198" x="643" y="75" as="geometry" />
+        </mxCell>
+        <mxCell id="c8" edge="1" parent="1" source="c3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="c4" value="bash k-clone kalisio apps">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c9" edge="1" parent="1" source="c4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="c5" value="reads">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c10" edge="1" parent="1" source="c4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="c6" value="runs">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c11" edge="1" parent="1" source="c6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" target="c7" value="git clone">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="d3" name="03 · A run, step by step">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c3" value="&lt;b&gt;1 · Inspect the index&lt;/b&gt;&lt;br/&gt;which model, which chunking version,&lt;br/&gt;how many points?" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="28" y="-0" width="274" height="66" as="geometry" />
+        </mxCell>
+        <mxCell id="c4" value="&lt;b&gt;2 · Prepare the collections&lt;/b&gt;&lt;br/&gt;create, or recreate if the config changed" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="10" y="106" width="310" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c5" value="&lt;b&gt;3 · Clone the workspace&lt;/b&gt;&lt;br/&gt;k-clone $KLI_ORGANIZATION $KLI_WORKSPACE" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="14" y="196" width="302" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c6" value="&lt;b&gt;4 · Scan&lt;/b&gt;&lt;br/&gt;git ls-files · filters · SHA-1 of every file&lt;br/&gt;drop the files that disappeared" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="0" y="286" width="330" height="66" as="geometry" />
+        </mxCell>
+        <mxCell id="c7" value="&lt;b&gt;5 · Chunk what changed&lt;/b&gt;&lt;br/&gt;new or edited files only" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="69" y="392" width="191" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c8" value="&lt;b&gt;6 · Embed and store&lt;/b&gt;&lt;br/&gt;delete the old chunks of each file,&lt;br/&gt;upsert the new ones" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="31" y="482" width="268" height="66" as="geometry" />
+        </mxCell>
+        <mxCell id="c9" value="&lt;b&gt;7 · Record the files with nothing to index&lt;/b&gt;" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="7" y="588" width="316" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="c10" value="record the run&lt;br/&gt;(timestamp, model, chunking version)" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="28" y="663" width="274" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c3" target="c4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c12" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c4" target="c5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c13" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c5" target="c6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c14" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c6" target="c7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c15" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c7" target="c8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c16" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c8" target="c9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c17" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c9" target="c10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="d4" name="04 · A run, step by step">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c3" value="bin.py" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="50" y="20" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c4" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="105" y="70" as="sourcePoint" />
+            <mxPoint x="105" y="964" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c5" value="main.py" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="250" y="20" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c6" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="305" y="70" as="sourcePoint" />
+            <mxPoint x="305" y="964" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c7" value="clients/vectordb" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="437" y="20" width="135" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c8" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="505" y="70" as="sourcePoint" />
+            <mxPoint x="505" y="964" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c9" value="Qdrant" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="650" y="20" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c10" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="705" y="70" as="sourcePoint" />
+            <mxPoint x="705" y="964" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c11" value="k-clone" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="850" y="20" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c12" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="905" y="70" as="sourcePoint" />
+            <mxPoint x="905" y="964" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c13" value="chunkers" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="20" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c14" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1105" y="70" as="sourcePoint" />
+            <mxPoint x="1105" y="964" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c15" value="clients/embeddings" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1230" y="20" width="149" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c16" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1305" y="70" as="sourcePoint" />
+            <mxPoint x="1305" y="964" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c17" value="1. run()" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="105" y="110" as="sourcePoint" />
+            <mxPoint x="305" y="110" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c18" value="2. collections exist? indexed config?" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="305" y="156" as="sourcePoint" />
+            <mxPoint x="505" y="156" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c19" value="3. collection_exists · scroll metadata" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="505" y="202" as="sourcePoint" />
+            <mxPoint x="705" y="202" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c20" value="4. ensure_collection × 3" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="305" y="248" as="sourcePoint" />
+            <mxPoint x="505" y="248" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c21" value="5. bash k-clone kalisio apps" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="305" y="294" as="sourcePoint" />
+            <mxPoint x="905" y="294" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c22" value="6. exit 0" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;dashed=1;endFill=0;endArrow=open;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="905" y="340" as="sourcePoint" />
+            <mxPoint x="305" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c23" value="7. find_repositories · git ls-files · hash_files" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;align=left;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="305" y="378" as="sourcePoint" />
+            <mxPoint x="305" y="396" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="345" y="378" />
+              <mxPoint x="345" y="396" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c24" value="8. chunk payloads + file entries (repo, path, file_sha1)" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="305" y="432" as="sourcePoint" />
+            <mxPoint x="505" y="432" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c25" value="9. scroll (3 fields only)" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="505" y="478" as="sourcePoint" />
+            <mxPoint x="705" y="478" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c26" value="10. delete_file · delete_file_entry (files gone)" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="305" y="524" as="sourcePoint" />
+            <mxPoint x="505" y="524" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c27" value="11. chunk_files(changed files)" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="305" y="570" as="sourcePoint" />
+            <mxPoint x="1105" y="570" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c28" value="12. chunks" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;dashed=1;endFill=0;endArrow=open;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1105" y="616" as="sourcePoint" />
+            <mxPoint x="305" y="616" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c29" value="13. encode_batch(chunk texts)" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="305" y="662" as="sourcePoint" />
+            <mxPoint x="1305" y="662" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c30" value="14. vectors" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;dashed=1;endFill=0;endArrow=open;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1305" y="708" as="sourcePoint" />
+            <mxPoint x="305" y="708" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c31" value="15. delete_file (each reindexed file) · upsert(chunks, vectors)" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="305" y="754" as="sourcePoint" />
+            <mxPoint x="505" y="754" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c32" value="16. upsert_file_entries (files without chunk)" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="305" y="800" as="sourcePoint" />
+            <mxPoint x="505" y="800" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c33" value="17. set_last_ingestion(timestamp, model, version)" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="305" y="846" as="sourcePoint" />
+            <mxPoint x="505" y="846" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c34" value="18. 0" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;dashed=1;endFill=0;endArrow=open;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="305" y="892" as="sourcePoint" />
+            <mxPoint x="105" y="892" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="d5" name="05 · Step 3: Cloning the workspace">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c3" value="$KALISIO_DEVELOPMENT_DIR/development&lt;br/&gt;exists?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="0" y="0" width="412" height="81" as="geometry" />
+        </mxCell>
+        <mxCell id="c4" value="left as it is" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="46" y="129" width="114" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="c5" value="symlink development/ and kli/&lt;br/&gt;from /opt/kalisio (in the image)" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="185" y="121" width="247" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c6" value="environment given to k-clone:&lt;br/&gt;KALISIO_GITHUB_URL = https://oauth2:TOKEN@github.com&lt;br/&gt;GITLAB_IRSN_URL = https://oauth2:TOKEN@gitlab.asnr.fr&lt;br/&gt;NODE_OPTIONS += --preserve-symlinks-main" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="10" y="211" width="393" height="83" as="geometry" />
+        </mxCell>
+        <mxCell id="c7" value="bash k-clone org workspace" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="104" y="334" width="205" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="c8" value="yes · a developer&#39;s own checkout" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c3" target="c4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c9" value="no · an empty volume" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c3" target="c5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c10" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c4" target="c6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c5" target="c6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c12" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c6" target="c7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="d6" name="06 · Step 4: Scanning the workspace">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c3" value="tracked file" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="0" y="66" width="107" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="c4" value="extension in&lt;br/&gt;SUPPORTED_FILE_EXTENSIONS?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="147" y="42" width="307" height="81" as="geometry" />
+        </mxCell>
+        <mxCell id="c5" value="skip" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="583" y="-0" width="66" height="66" as="geometry" />
+        </mxCell>
+        <mxCell id="c6" value="inside one of&lt;br/&gt;IGNORED_DIRECTORIES?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="494" y="92" width="245" height="81" as="geometry" />
+        </mxCell>
+        <mxCell id="c7" value="skip" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="858" y="49" width="66" height="66" as="geometry" />
+        </mxCell>
+        <mxCell id="c8" value="name in&lt;br/&gt;IGNORED_FILENAMES?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="779" y="140" width="224" height="81" as="geometry" />
+        </mxCell>
+        <mxCell id="c9" value="skip" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1179" y="92" width="66" height="66" as="geometry" />
+        </mxCell>
+        <mxCell id="c10" value="matches&lt;br/&gt;IGNORED_FILE_PATTERN?&lt;br/&gt;.min. · -lock · .enc. · .dec." style="rhombus;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1043" y="184" width="339" height="107" as="geometry" />
+        </mxCell>
+        <mxCell id="c11" value="skip" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1490" y="154" width="66" height="66" as="geometry" />
+        </mxCell>
+        <mxCell id="c12" value="a regular file&lt;br/&gt;≤ MAX_FILE_SIZE?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1422" y="246" width="203" height="81" as="geometry" />
+        </mxCell>
+        <mxCell id="c13" value="skip" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1665" y="207" width="66" height="66" as="geometry" />
+        </mxCell>
+        <mxCell id="c14" value="index" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1665" y="298" width="66" height="66" as="geometry" />
+        </mxCell>
+        <mxCell id="c15" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c3" target="c4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c16" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c4" target="c5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c17" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c4" target="c6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c18" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c6" target="c7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c19" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c6" target="c8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c20" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c8" target="c9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c21" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c8" target="c10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c22" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c10" target="c11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c23" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c10" target="c12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c24" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c12" target="c13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c25" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c12" target="c14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="d7" name="07 · Step 5: Chunking the files that changed">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c3" value="scanned file&lt;br/&gt;(key, sha1)" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="28" y="75" width="107" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c4" value="key indexed?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="222" y="72" width="161" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="c5" value="&lt;b&gt;new&lt;/b&gt; → chunk" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="460" y="48" width="101" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="c6" value="same sha1?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="441" y="107" width="140" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="c7" value="&lt;b&gt;unchanged&lt;/b&gt; → nothing" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="621" y="88" width="156" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="c8" value="&lt;b&gt;edited&lt;/b&gt; → chunk" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="638" y="148" width="122" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="c9" value="indexed key&lt;br/&gt;not scanned any more" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="-0" y="0" width="163" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c10" value="&lt;b&gt;deleted&lt;/b&gt; → drop its chunks" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="203" y="8" width="198" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="c11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c3" target="c4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c12" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c4" target="c5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c13" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c4" target="c6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c14" value="yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c6" target="c7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c15" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c6" target="c8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c16" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c9" target="c10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="d8" name="08 · Errors and recovery">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c3" value="run()" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="216" y="0" width="60" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="c4" value="outcome" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="191" y="75" width="109" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="c5" value="exit 0&lt;br/&gt;run recorded" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="0" y="170" width="107" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c6" value="exit 1&lt;br/&gt;&#39;ingestion aborted after ...&#39;" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="132" y="170" width="226" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c7" value="exit 1&lt;br/&gt;stack trace logged" style="rounded=1;arcSize=12;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="384" y="170" width="149" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c8" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c3" target="c4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c9" value="success" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c4" target="c5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c10" value="Qdrant unreachable&lt;br/&gt;QdrantUnreachable" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c4" target="c6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c11" value="k-clone failed&lt;br/&gt;IngestionAborted" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c4" target="c6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c12" value="anything else&lt;br/&gt;(caught in bin.py)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#555555;fontSize=11;labelBackgroundColor=#ffffff;endArrow=classic;startArrow=none;" edge="1" parent="1" source="c4" target="c7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="d9" name="09 · Deployment as a CronJob">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c3" value="CronJob&lt;br/&gt;0 3 * * *" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="50" y="20" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c4" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="105" y="70" as="sourcePoint" />
+            <mxPoint x="105" y="412" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c5" value="Pod" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="250" y="20" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c6" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="305" y="70" as="sourcePoint" />
+            <mxPoint x="305" y="412" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c7" value="emptyDir /workspace" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="427" y="20" width="156" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c8" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="505" y="70" as="sourcePoint" />
+            <mxPoint x="505" y="412" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c9" value="GitHub" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="650" y="20" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c10" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="705" y="70" as="sourcePoint" />
+            <mxPoint x="705" y="412" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c11" value="Qdrant" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="850" y="20" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c12" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="905" y="70" as="sourcePoint" />
+            <mxPoint x="905" y="412" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c13" value="the volume is discarded with the pod" style="shape=note;size=10;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="235" y="324" width="340" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="c14" value="create a Job, then a pod&lt;br/&gt;(never two at once)" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="105" y="110" as="sourcePoint" />
+            <mxPoint x="305" y="110" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c15" value="empty volume, 8 Gi max" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="305" y="156" as="sourcePoint" />
+            <mxPoint x="505" y="156" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c16" value="k-clone (token from the secret)" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="305" y="202" as="sourcePoint" />
+            <mxPoint x="705" y="202" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c17" value="incremental run" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="305" y="248" as="sourcePoint" />
+            <mxPoint x="905" y="248" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c18" value="exit 0 · pod completed" style="html=1;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;verticalAlign=bottom;dashed=1;endFill=0;endArrow=open;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="305" y="294" as="sourcePoint" />
+            <mxPoint x="105" y="294" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
