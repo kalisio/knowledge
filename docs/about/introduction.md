@@ -16,8 +16,8 @@ A RAG runs in two phases: **indexing**, done once and then on every change of th
 | --- | --- | --- |
 | **Ingestion** | Finds the documents, reads them, keeps the ones worth indexing | [Ingestion job](/guides/components/ingestion-job) |
 | **Vectorisation** | Cuts each document into passages (*chunks*) and turns each one into a vector with an *embedding model* | [File formats](/guides/file-formats/) · [Embedding model](/guides/file-formats/#the-embedding-model) |
-| **Semantic search** | Turns the question into a vector with the same model and returns the nearest passage vectors | [`/search`](/guides/components/api#post-search) · [Qdrant](/guides/components/qdrant) |
-| **Generation** | Gives an LLM an instruction, the retrieved passages and the question, and returns what it writes | [`/ask`](/guides/components/api#post-ask) |
+| **Semantic search** | Turns the question into a vector with the same model and returns the nearest passage vectors | [`/search`](/guides/components/api#post-search-semantic-search-only) · [Qdrant](/guides/components/qdrant) |
+| **Generation** | Gives an LLM an instruction, the retrieved passages and the question, and returns what it writes | [`/ask`](/guides/components/api#post-ask-retrieval-augmented-answer) |
 
 ### Vectors: comparing texts by their meaning
 
