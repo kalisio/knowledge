@@ -36,6 +36,7 @@ done
 ## component the image runs.
 NAME="$(get_toml_value "$ROOT_DIR/pyproject.toml" 'project.name')-ingestion"
 VERSION=$(get_toml_value "$ROOT_DIR/pyproject.toml" 'project.version')
+GIT_TAG=$(get_git_tag "$ROOT_DIR")
 
 echo "About to build $NAME v$VERSION ..."
 
@@ -69,6 +70,12 @@ end_group "Staging the dev tooling from $WORKSPACE_DIR/development ..."
 
 IMAGE_NAME="$KALISIO_DOCKERHUB_URL/kalisio/$NAME"
 IMAGE_TAG=latest
+
+# A tagged commit publishes the release version, as the api image does: the
+# charts default to their appVersion, so the tag must exist on Docker Hub.
+if [[ -n "$GIT_TAG" ]]; then
+    IMAGE_TAG=$VERSION
+fi
 
 begin_group "Building container $IMAGE_NAME:$IMAGE_TAG ..."
 
