@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="806" height="764" viewBox="-10 -10 806 764" style="background-color:#ffffff">
+<text x="0" y="16" font-family="Helvetica" font-size="12" font-weight="bold">charts/kargo/templates/_krestarter-cronjob.yaml</text>
+<rect x="0" y="30" width="426.0" height="708" fill="#ffffff" stroke="#666666"/>
+<text x="20.0" y="44.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">1</text>
+<text x="26" y="44.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">{{/*</text>
+<text x="20.0" y="58.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">2</text>
+<text x="26" y="58.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">Builds a cronjob to restart specified workloads (deployments, s…</text>
+<text x="20.0" y="72.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">3</text>
+<text x="26" y="72.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">Useful for services that silently lose their database connectio…</text>
+<text x="20.0" y="86.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">4</text>
+<text x="26" y="86.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">in Running state while being unusable.</text>
+<text x="20.0" y="100.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">5</text>
+<text x="26" y="100.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">A dedicated ServiceAccount with a namespaced Role (get/patch on…</text>
+<text x="20.0" y="114.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">6</text>
+<text x="26" y="114.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">is created alongside the cronjob (least privilege, no kubeconfi…</text>
+<text x="20.0" y="128.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">7</text>
+<text x="26" y="128.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">@param .context   The caller&#x27;s context</text>
+<text x="20.0" y="142.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">8</text>
+<text x="26" y="142.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">@param .args      The parameters for the restarter cronjob:</text>
+<text x="20.0" y="156.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">9</text>
+<text x="26" y="156.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  - name            The name to give to the cronjob</text>
+<text x="20.0" y="170.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">10</text>
+<text x="26" y="170.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  - cron            The schedule expression &quot;0 6 * * *&quot;</text>
+<text x="20.0" y="184.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">11</text>
+<text x="26" y="184.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  - targets         The workloads to restart, eg &quot;deployment/ka…</text>
+<text x="20.0" y="198.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">12</text>
+<text x="26" y="198.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">*/}}</text>
+<text x="20.0" y="212.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">13</text>
+<text x="26" y="212.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">{{- define &quot;kargo.krestarter-cronjob&quot; -}}</text>
+<text x="20.0" y="226.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">14</text>
+<text x="26" y="226.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">apiVersion: v1</text>
+<text x="20.0" y="240.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">15</text>
+<text x="26" y="240.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">kind: ServiceAccount</text>
+<text x="20.0" y="254.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">16</text>
+<text x="26" y="254.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">metadata:</text>
+<text x="20.0" y="268.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">17</text>
+<text x="26" y="268.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  name: {{ .args.name }}</text>
+<text x="20.0" y="282.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">18</text>
+<text x="26" y="282.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  namespace: {{ .context.Release.Namespace | quote }}</text>
+<text x="20.0" y="296.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">19</text>
+<text x="26" y="296.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">---</text>
+<text x="20.0" y="310.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">20</text>
+<text x="26" y="310.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">apiVersion: rbac.authorization.k8s.io/v1</text>
+<text x="20.0" y="324.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">21</text>
+<text x="26" y="324.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">kind: Role</text>
+<text x="20.0" y="338.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">22</text>
+<text x="26" y="338.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">metadata:</text>
+<text x="20.0" y="352.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">23</text>
+<text x="26" y="352.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  name: {{ .args.name }}</text>
+<text x="20.0" y="366.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">24</text>
+<text x="26" y="366.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  namespace: {{ .context.Release.Namespace | quote }}</text>
+<text x="20.0" y="380.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">25</text>
+<text x="26" y="380.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">rules:</text>
+<text x="20.0" y="394.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">26</text>
+<text x="26" y="394.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  - apiGroups: [&quot;apps&quot;]</text>
+<text x="20.0" y="408.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">27</text>
+<text x="26" y="408.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">    resources: [&quot;deployments&quot;, &quot;statefulsets&quot;]</text>
+<text x="20.0" y="422.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">28</text>
+<text x="26" y="422.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">    verbs: [&quot;get&quot;, &quot;patch&quot;]</text>
+<text x="20.0" y="436.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">29</text>
+<text x="26" y="436.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">---</text>
+<text x="20.0" y="450.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">30</text>
+<text x="26" y="450.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">apiVersion: batch/v1</text>
+<text x="20.0" y="464.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">31</text>
+<text x="26" y="464.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">kind: CronJob</text>
+<text x="20.0" y="478.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">32</text>
+<text x="26" y="478.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">metadata:</text>
+<text x="20.0" y="492.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">33</text>
+<text x="26" y="492.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  name: {{ .args.name }}</text>
+<text x="20.0" y="506.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">34</text>
+<text x="26" y="506.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">spec:</text>
+<text x="20.0" y="520.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">35</text>
+<text x="26" y="520.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  schedule: {{ .args.cron | quote }}</text>
+<text x="20.0" y="534.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">36</text>
+<text x="26" y="534.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  # A restart that overlaps the previous one would double the r…</text>
+<text x="20.0" y="548.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">37</text>
+<text x="26" y="548.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  concurrencyPolicy: Forbid</text>
+<text x="20.0" y="562.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">38</text>
+<text x="26" y="562.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  jobTemplate:</text>
+<text x="20.0" y="576.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">39</text>
+<text x="26" y="576.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">    spec:</text>
+<text x="20.0" y="590.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">40</text>
+<text x="26" y="590.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">      template:</text>
+<text x="20.0" y="604.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">41</text>
+<text x="26" y="604.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">        spec:</text>
+<text x="20.0" y="618.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">42</text>
+<text x="26" y="618.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">          serviceAccountName: {{ .args.name }}</text>
+<text x="20.0" y="632.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">43</text>
+<text x="26" y="632.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">          restartPolicy: Never</text>
+<text x="20.0" y="646.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">44</text>
+<text x="26" y="646.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">          containers:</text>
+<text x="20.0" y="660.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">45</text>
+<text x="26" y="660.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">            - name: restarter</text>
+<text x="20.0" y="674.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">46</text>
+<text x="26" y="674.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">              image: bitnami/kubectl:latest</text>
+<text x="20.0" y="688.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">47</text>
+<text x="26" y="688.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">              command: [&quot;/bin/sh&quot;, &quot;-c&quot;]</text>
+<text x="20.0" y="702.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">48</text>
+<text x="26" y="702.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">              args:</text>
+<text x="20.0" y="716.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">49</text>
+<text x="26" y="716.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">                - kubectl rollout restart {{ .args.targets }}</text>
+<text x="20.0" y="730.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">50</text>
+<text x="26" y="730.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">{{- end }}</text>
+<rect x="434.0" y="34" width="5" height="182" fill="#6c8ebf"/>
+<line x1="439.0" y1="125.0" x2="482.0" y2="125.0" stroke="#6c8ebf"/>
+<rect x="482.0" y="102.0" width="300" height="46" rx="5" fill="#dae8fc" stroke="#6c8ebf"/>
+<text x="490.0" y="120.0" font-family="Helvetica" font-size="11"><tspan font-weight="bold">#0</tspan> · lines 1–13</text>
+<text x="490.0" y="136.0" font-family="Courier New" font-size="10">ServiceAccount</text>
+<rect x="434.0" y="216" width="5" height="70" fill="#82b366"/>
+<line x1="439.0" y1="251.0" x2="482.0" y2="251.0" stroke="#82b366"/>
+<rect x="482.0" y="228.0" width="300" height="46" rx="5" fill="#d5e8d4" stroke="#82b366"/>
+<text x="490.0" y="246.0" font-family="Helvetica" font-size="11"><tspan font-weight="bold">#1</tspan> · lines 14–18</text>
+<text x="490.0" y="262.0" font-family="Courier New" font-size="10">ServiceAccount &gt; apiVersion, kind, metadata</text>
+<rect x="434.0" y="300" width="5" height="126" fill="#d79b00"/>
+<line x1="439.0" y1="363.0" x2="482.0" y2="363.0" stroke="#d79b00"/>
+<rect x="482.0" y="340.0" width="300" height="46" rx="5" fill="#ffe6cc" stroke="#d79b00"/>
+<text x="490.0" y="358.0" font-family="Helvetica" font-size="11"><tspan font-weight="bold">#2</tspan> · lines 20–28</text>
+<text x="490.0" y="374.0" font-family="Courier New" font-size="10">Role &gt; apiVersion, kind, metadata, rules</text>
+<rect x="434.0" y="440" width="5" height="56" fill="#9673a6"/>
+<line x1="439.0" y1="468.0" x2="482.0" y2="468.0" stroke="#9673a6"/>
+<rect x="482.0" y="445.0" width="300" height="46" rx="5" fill="#e1d5e7" stroke="#9673a6"/>
+<text x="490.0" y="463.0" font-family="Helvetica" font-size="11"><tspan font-weight="bold">#3</tspan> · lines 30–33</text>
+<text x="490.0" y="479.0" font-family="Courier New" font-size="10">CronJob &gt; apiVersion, kind, metadata</text>
+<rect x="434.0" y="496" width="5" height="238" fill="#d6b656"/>
+<line x1="439.0" y1="615.0" x2="482.0" y2="615.0" stroke="#d6b656"/>
+<rect x="482.0" y="592.0" width="300" height="46" rx="5" fill="#fff2cc" stroke="#d6b656"/>
+<text x="490.0" y="610.0" font-family="Helvetica" font-size="11"><tspan font-weight="bold">#4</tspan> · lines 34–50</text>
+<text x="490.0" y="626.0" font-family="Courier New" font-size="10">CronJob &gt; spec</text>
+</svg>

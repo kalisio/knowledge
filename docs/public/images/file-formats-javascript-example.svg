@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="814" height="652" viewBox="-10 -10 814 652" style="background-color:#ffffff">
+<text x="0" y="16" font-family="Helvetica" font-size="12" font-weight="bold">core/client/geolocation.js</text>
+<rect x="0" y="30" width="426.0" height="596" fill="#ffffff" stroke="#666666"/>
+<text x="20.0" y="44.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">1</text>
+<text x="26" y="44.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">import _ from &#x27;lodash&#x27;</text>
+<text x="20.0" y="58.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">2</text>
+<text x="26" y="58.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">import logger from &#x27;loglevel&#x27;</text>
+<text x="20.0" y="72.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">3</text>
+<text x="20.0" y="86.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">4</text>
+<text x="26" y="86.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">export const GEOLOCATION_TIMEOUT = 30000</text>
+<text x="20.0" y="100.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">5</text>
+<text x="20.0" y="114.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">6</text>
+<text x="26" y="114.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">// Read the current position from the browser geolocation API.</text>
+<text x="20.0" y="128.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">7</text>
+<text x="26" y="128.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">export async function getCurrentPosition (options = {}) {</text>
+<text x="20.0" y="142.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">8</text>
+<text x="26" y="142.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  const timeout = _.get(options, &#x27;timeout&#x27;, GEOLOCATION_TIMEOUT)</text>
+<text x="20.0" y="156.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">9</text>
+<text x="26" y="156.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  return new Promise((resolve, reject) =&gt; {</text>
+<text x="20.0" y="170.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">10</text>
+<text x="26" y="170.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">    navigator.geolocation.getCurrentPosition(resolve, reject, {…</text>
+<text x="20.0" y="184.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">11</text>
+<text x="26" y="184.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  })</text>
+<text x="20.0" y="198.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">12</text>
+<text x="26" y="198.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">}</text>
+<text x="20.0" y="212.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">13</text>
+<text x="20.0" y="226.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">14</text>
+<text x="26" y="226.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">// Convert a browser position into the longitude/latitude pair …</text>
+<text x="20.0" y="240.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">15</text>
+<text x="26" y="240.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">export function toLongitudeLatitude (position) {</text>
+<text x="20.0" y="254.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">16</text>
+<text x="26" y="254.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  const { longitude, latitude } = position.coords</text>
+<text x="20.0" y="268.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">17</text>
+<text x="26" y="268.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  return [longitude, latitude]</text>
+<text x="20.0" y="282.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">18</text>
+<text x="26" y="282.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">}</text>
+<text x="20.0" y="296.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">19</text>
+<text x="20.0" y="310.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">20</text>
+<text x="26" y="310.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">export class GeolocationTracker {</text>
+<text x="20.0" y="324.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">21</text>
+<text x="26" y="324.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  constructor (map) {</text>
+<text x="20.0" y="338.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">22</text>
+<text x="26" y="338.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">    this.map = map</text>
+<text x="20.0" y="352.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">23</text>
+<text x="26" y="352.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">    this.watchId = null</text>
+<text x="20.0" y="366.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">24</text>
+<text x="26" y="366.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  }</text>
+<text x="20.0" y="380.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">25</text>
+<text x="20.0" y="394.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">26</text>
+<text x="26" y="394.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  start () {</text>
+<text x="20.0" y="408.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">27</text>
+<text x="26" y="408.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">    if (this.watchId !== null) return</text>
+<text x="20.0" y="422.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">28</text>
+<text x="26" y="422.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">    this.watchId = navigator.geolocation.watchPosition((positio…</text>
+<text x="20.0" y="436.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">29</text>
+<text x="26" y="436.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">      this.map.setCenter(toLongitudeLatitude(position))</text>
+<text x="20.0" y="450.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">30</text>
+<text x="26" y="450.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">    }, (error) =&gt; {</text>
+<text x="20.0" y="464.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">31</text>
+<text x="26" y="464.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">      logger.error(&#x27;geolocation failed&#x27;, error)</text>
+<text x="20.0" y="478.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">32</text>
+<text x="26" y="478.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">    })</text>
+<text x="20.0" y="492.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">33</text>
+<text x="26" y="492.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  }</text>
+<text x="20.0" y="506.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">34</text>
+<text x="20.0" y="520.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">35</text>
+<text x="26" y="520.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  stop () {</text>
+<text x="20.0" y="534.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">36</text>
+<text x="26" y="534.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">    if (this.watchId === null) return</text>
+<text x="20.0" y="548.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">37</text>
+<text x="26" y="548.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">    navigator.geolocation.clearWatch(this.watchId)</text>
+<text x="20.0" y="562.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">38</text>
+<text x="26" y="562.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">    this.watchId = null</text>
+<text x="20.0" y="576.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">39</text>
+<text x="26" y="576.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">  }</text>
+<text x="20.0" y="590.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">40</text>
+<text x="26" y="590.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">}</text>
+<text x="20.0" y="604.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">41</text>
+<text x="20.0" y="618.1" text-anchor="end" font-family="Courier New" font-size="10" fill="#999999">42</text>
+<text x="26" y="618.1" font-family="Courier New" font-size="10" xml:space="preserve" fill="#000000">export default GeolocationTracker</text>
+<rect x="434.0" y="34" width="5" height="336" fill="#6c8ebf"/>
+<line x1="439.0" y1="202.0" x2="490.0" y2="202.0" stroke="#6c8ebf"/>
+<rect x="490.0" y="179.0" width="300" height="46" rx="5" fill="#dae8fc" stroke="#6c8ebf"/>
+<text x="498.0" y="197.0" font-family="Helvetica" font-size="11"><tspan font-weight="bold">#0</tspan> · lines 1–24</text>
+<text x="498.0" y="213.0" font-family="Courier New" font-size="10">(no symbol)</text>
+<rect x="442.0" y="300" width="5" height="322" fill="#82b366"/>
+<line x1="447.0" y1="461.0" x2="490.0" y2="461.0" stroke="#82b366"/>
+<rect x="490.0" y="438.0" width="300" height="46" rx="5" fill="#d5e8d4" stroke="#82b366"/>
+<text x="498.0" y="456.0" font-family="Helvetica" font-size="11"><tspan font-weight="bold">#1</tspan> · lines 20–42</text>
+<text x="498.0" y="472.0" font-family="Courier New" font-size="10">GeolocationTracker</text>
+</svg>
